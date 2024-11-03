@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { NavBar } from "@/components/navbar";
+import { SidebarProvider } from "@/components/ui/sidebar";
+
+import { AppSidebar } from "@/components/app-sidebar";
+import { Footer } from "@/components/footer";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -27,10 +31,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased max-h-screen overflow-hidden`}
       >
         <NavBar />
-        {children}
+        <SidebarProvider defaultOpen={false}>
+          <main>{children}</main>
+          <AppSidebar />
+          <Footer />
+        </SidebarProvider>
       </body>
     </html>
   );
