@@ -35,7 +35,7 @@ export default function RootLayout({
       >
         <NavBar />
         <SidebarProvider defaultOpen={false}>
-          <main>{children}</main>
+          <main className="w-full">{children}</main>
           <AppSidebar />
           <Footer />
         </SidebarProvider>
