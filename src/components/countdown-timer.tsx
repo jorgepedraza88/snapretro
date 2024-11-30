@@ -3,8 +3,8 @@ import { HiClock as TimerIcon } from "react-icons/hi2";
 
 import { useState, useEffect } from "react";
 
-const CountdownTimer = ({ initialSeconds = 300 }) => {
-  const [timeLeft, setTimeLeft] = useState(initialSeconds);
+const CountdownTimer = ({ defaultSeconds = 300 }) => {
+  const [timeLeft, setTimeLeft] = useState(defaultSeconds);
 
   useEffect(() => {
     if (timeLeft <= 0) {

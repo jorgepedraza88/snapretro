@@ -1,15 +1,16 @@
 "use client";
 import { useState } from "react";
-import { RetrospectiveSection } from "./retro-card-group";
 import { Card, CardTitle, CardDescription } from "./ui/card";
 import {
   HiOutlineChatBubbleOvalLeftEllipsis as WritingIcon,
   HiXMark as RemoveIcon,
 } from "react-icons/hi2";
 
-import { createPost, destroyPost } from "@/app/actions";
+import { createPost, destroyPost } from "@/app/postActions";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { RetrospectiveSection } from "@/types/Retro";
+import { useParams } from "next/navigation";
 
 interface RetroCardProps {
   title: string;
@@ -24,6 +25,9 @@ export function RetroCard({
   section,
   isWriting,
 }: RetroCardProps) {
+  const params = useParams<{ id: string }>();
+
+  const retrospectiveId = params.id;
   const [newPost, setNewPost] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -36,7 +40,7 @@ export function RetroCard({
     setIsLoading(true);
 
     try {
-      await createPost({ section, content: newPost });
+      await createPost({ section, content: newPost, retrospectiveId });
       setNewPost("");
     } catch (error) {
       console.error("Error creating post:", error);
@@ -48,7 +52,7 @@ export function RetroCard({
   const handleDestroyPost = async (postId: string) => {
     setIsLoading(true);
     try {
-      await destroyPost({ section, postId });
+      await destroyPost({ section, postId, retrospectiveId });
     } catch (error) {
       console.error("Error deleting post:", error);
     } finally {
@@ -66,12 +70,12 @@ export function RetroCard({
         <div className="h-full">
           {section.posts.length > 0 ? (
             section.posts.map((post) => (
-              <Card key={post.id} className="mx-2 my-2">
+              <Card key={post.id} className="mx-2 my-2 group">
                 <div className="p-2 text-sm flex justify-between items-center gap-2">
-                  {post.content}
+                  <p>{post.content}</p>
                   <Button
                     variant="ghost"
-                    className="p-1.5 h-auto"
+                    className="p-1.5 h-auto invisible group-hover:visible"
                     onClick={() => handleDestroyPost(post.id)}
                   >
                     <RemoveIcon className="shrink-0" />

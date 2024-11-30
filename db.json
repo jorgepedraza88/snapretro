@@ -1,56 +1,58 @@
 {
-  "retrospective": [
+  "retrospectives": [
     {
-      "id": "section_1",
-      "title": "🤓 Start doing",
-      "posts": [
+      "id": "1",
+      "timer": 300,
+      "sections": [
         {
-          "id": "1",
-          "content": "Implementar revisiones semanales para mejorar el seguimiento de proyectos."
+          "id": "section_1",
+          "title": "🤓 Start doing",
+          "posts": [
+            {
+              "id": "1",
+              "content": "Implementar revisiones semanales para mejorar el seguimiento de proyectos."
+            },
+            {
+              "id": "2",
+              "content": "Iniciar reuniones diarias de 10 minutos para alinear al equipo."
+            },
+            {
+              "id": "3",
+              "content": "Usar herramientas de automatización para reducir tareas repetitivas."
+            }
+          ]
         },
         {
-          "id": "2",
-          "content": "Iniciar reuniones diarias de 10 minutos para alinear al equipo."
+          "id": "section_2",
+          "title": "❌ Stop doing",
+          "posts": [
+            {
+              "id": 4,
+              "content": "Dejar de hacer reuniones largas y poco productivas."
+            },
+            {
+              "id": 5,
+              "content": "Evitar la multitarea para mejorar la concentración."
+            },
+            {
+              "id": 6,
+              "content": "Dejar de usar herramientas que no aportan valor al proyecto."
+            }
+          ]
         },
         {
-          "id": "3",
-          "content": "Usar herramientas de automatización para reducir tareas repetitivas."
-        }
-      ]
-    },
-    {
-      "id": "section_2",
-      "title": "❌ Stop doing",
-      "posts": [
-        {
-          "id": 4,
-          "content": "Dejar de hacer reuniones largas y poco productivas."
-        },
-        {
-          "id": 5,
-          "content": "Evitar la multitarea para mejorar la concentración."
-        },
-        {
-          "id": 6,
-          "content": "Dejar de usar herramientas que no aportan valor al proyecto."
-        }
-      ]
-    },
-    {
-      "id": "section_3",
-      "title": "👏🏼 Keep doing",
-      "posts": [
-        {
-          "id": "7",
-          "content": "Seguir con la comunicación constante para mantener al equipo informado."
-        },
-        {
-          "id": "8",
-          "content": "Continuar con la planificación de sprints para mejorar la organización."
-        },
-        {
-          "id": "9",
-          "content": "Seguir con la retroalimentación constante para mejorar la calidad del trabajo."
+          "id": "section_3",
+          "title": "👏🏼 Keep doing",
+          "posts": [
+            {
+              "id": "7",
+              "content": "Seguir con la comunicación constante para mantener al equipo informado."
+            },
+            {
+              "id": "8",
+              "content": "Continuar con la planificación de sprints para mejorar la organización."
+            }
+          ]
         }
       ]
     }
