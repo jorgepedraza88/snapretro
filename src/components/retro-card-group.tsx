@@ -1,28 +1,32 @@
 import { RetroCard } from "./retro-card";
 
-interface ProvisionalData {
-  startDoing: ProvisionalDataItem[];
-  whatToImprove: ProvisionalDataItem[];
-  shoutouts: ProvisionalDataItem[];
+// Representa un post individual dentro de una sección
+export interface RetrospectivePost {
+  id: string; // ID del post
+  content: string; // Contenido del post
 }
 
-export interface ProvisionalDataItem {
-  id: string;
-  content: string;
+// Representa una sección (Start Doing, Stop Doing, Keep Doing)
+export interface RetrospectiveSection {
+  id: string; // ID único de la sección
+  title: string; // Título de la sección (Start Doing, Stop Doing, etc.)
+  posts: RetrospectivePost[]; // Lista de posts dentro de la sección
 }
 
-export function RetroCardGroup() {
-  const data: ProvisionalData = {
-    startDoing: [{ id: "1", content: "Start doing this, because is the best for the company and it's going to improve the productivity" }],
-    whatToImprove: [],
-    shoutouts: [],
-  };
+// Representa el JSON completo de la retrospectiva
+export interface RetrospectiveData {
+  retrospective: RetrospectiveSection[]; // Array de secciones de la retrospectiva
+}
+
+export async function RetroCardGroup() {
+  const response = await fetch("http://localhost:3005/retrospective");
+  const data: RetrospectiveSection[] = await response.json();
 
   return (
     <div className="grid grid-cols-3 gap-4">
-      <RetroCard title="👍🏼 Start doing" data={data.startDoing} />
-      <RetroCard title="🚨 What to improve" data={data.whatToImprove} />
-      <RetroCard title="👏🏼 Shoutouts" data={data.shoutouts} />
+      {data.map((section) => (
+        <RetroCard key={section.id} section={section} title={section.title} />
+      ))}
     </div>
   );
 }
