@@ -1,12 +1,13 @@
 "use client";
-import { useState } from "react";
-import { Card, CardTitle, CardDescription } from "./ui/card";
+import { useEffect, useState } from "react";
+import { Card, CardTitle, CardDescription, CardContent } from "./ui/card";
 import {
   HiOutlineChatBubbleOvalLeftEllipsis as WritingIcon,
   HiXMark as RemoveIcon,
 } from "react-icons/hi2";
+import { socket } from "@/socket";
 
-import { createPost, destroyPost } from "@/app/postActions";
+import { createPost, destroyPost, revalidate } from "@/app/postActions";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { RetrospectiveSection } from "@/types/Retro";
@@ -16,23 +17,54 @@ interface RetroCardProps {
   title: string;
   description?: string;
   section: RetrospectiveSection;
-  isWriting?: boolean;
 }
 
-export function RetroCard({
-  title,
-  description,
-  section,
-  isWriting,
-}: RetroCardProps) {
+export function RetroCard({ title, description, section }: RetroCardProps) {
   const params = useParams<{ id: string }>();
 
   const retrospectiveId = params.id;
   const [newPost, setNewPost] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [socketId, setSocketId] = useState<string | null>(null);
+  const [isWriting, setIsWriting] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (socket.connected) {
+      if (socket.id) {
+        setSocketId(socket.id);
+      }
+    }
+    socket.on("posts", () => {
+      revalidate();
+    });
+
+    socket.on("writing", (id: string) => {
+      if (section.id === id) {
+        setIsWriting(true);
+      }
+    });
+
+    socket.on("stop-writing", (id: string) => {
+      if (section.id === id) {
+        setIsWriting(false);
+      }
+    });
+
+    return () => {
+      socket.off("connect");
+      socket.off("disconnect");
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleNewPostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    socket.emit("writing", section.id);
     setNewPost(e.target.value);
+    if (e.target.value === "") {
+      debugger;
+      socket.emit("stop-writing", section.id);
+      return;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -41,6 +73,7 @@ export function RetroCard({
 
     try {
       await createPost({ section, content: newPost, retrospectiveId });
+      socket.emit("posts", newPost);
       setNewPost("");
     } catch (error) {
       console.error("Error creating post:", error);
@@ -61,42 +94,45 @@ export function RetroCard({
   };
 
   return (
-    <div className="min-h-40">
-      <Card className="w-72 h-full flex flex-col justify-between bg-gray-100">
-        <div className="p-4 bg-gray-200 rounded-t-lg mb-2">
-          <CardTitle>{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
+    <div>
+      <Card className="w-72 bg-gray-100 flex flex-col justify-between h-full pb-4">
+        <div>
+          <div className="p-4 bg-gray-200 rounded-t-lg mb-2">
+            <CardTitle>{title}</CardTitle>
+            <CardDescription>{description}</CardDescription>
+          </div>
+          <div>
+            {section.posts.length > 0 ? (
+              section.posts.map((post) => (
+                <Card key={post.id} className="mx-2 my-2 group">
+                  <div className="p-2 text-sm flex justify-between items-center gap-2">
+                    <p>{post.content}</p>
+                    <Button
+                      variant="ghost"
+                      className="p-1.5 h-auto invisible group-hover:visible"
+                      onClick={() => handleDestroyPost(post.id)}
+                    >
+                      <RemoveIcon className="shrink-0" />
+                    </Button>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <div className="p-2 text-sm text-gray-400">Write anything</div>
+            )}
+          </div>
         </div>
-        <div className="h-full">
-          {section.posts.length > 0 ? (
-            section.posts.map((post) => (
-              <Card key={post.id} className="mx-2 my-2 group">
-                <div className="p-2 text-sm flex justify-between items-center gap-2">
-                  <p>{post.content}</p>
-                  <Button
-                    variant="ghost"
-                    className="p-1.5 h-auto invisible group-hover:visible"
-                    onClick={() => handleDestroyPost(post.id)}
-                  >
-                    <RemoveIcon className="shrink-0" />
-                  </Button>
-                </div>
-              </Card>
-            ))
-          ) : (
-            <div className="p-2 text-sm text-gray-400">Write anything</div>
-          )}
-        </div>
-        <div className="mx-2 pt-10 pb-4">
-          <form onSubmit={handleSubmit}>
-            <Input
-              disabled={isLoading}
-              className="p-2 text-sm"
-              value={newPost}
-              onChange={handleNewPostChange}
-            />
-          </form>
-        </div>
+        <form
+          onSubmit={handleSubmit}
+          className="mx-2 mt-10 flex flex-col justify-end"
+        >
+          <Input
+            disabled={isLoading}
+            className="p-2 text-sm"
+            value={newPost}
+            onChange={handleNewPostChange}
+          />
+        </form>
       </Card>
       {isWriting && (
         <div className="mt-2 flex gap-1 mb-2">

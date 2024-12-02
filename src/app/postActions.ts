@@ -61,6 +61,10 @@ export async function createPost({
   revalidatePath("/retro/[id]", "page");
 }
 
+export async function revalidate() {
+  revalidatePath("/retro/[id]", "page");
+}
+
 export async function destroyPost({
   section,
   postId,
