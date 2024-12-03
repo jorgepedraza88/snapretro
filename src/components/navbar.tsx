@@ -8,7 +8,9 @@ export function NavBar() {
           OpenRetros
         </Link>
       </div>
-      <div>Buy me a coffee!</div>
+      <div>
+        <p className="text-sm font-semibold">Buy me a coffee!</p>
+      </div>
     </div>
   );
 }

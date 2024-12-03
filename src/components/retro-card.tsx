@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Card, CardTitle, CardDescription, CardContent } from "./ui/card";
+import { Card, CardTitle, CardDescription } from "./ui/card";
 import {
   HiOutlineChatBubbleOvalLeftEllipsis as WritingIcon,
-  HiXMark as RemoveIcon,
+  HiTrash as RemoveIcon,
 } from "react-icons/hi2";
 import { socket } from "@/socket";
 
@@ -61,7 +61,6 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
     socket.emit("writing", section.id);
     setNewPost(e.target.value);
     if (e.target.value === "") {
-      debugger;
       socket.emit("stop-writing", section.id);
       return;
     }
@@ -69,6 +68,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    socket.emit("stop-writing", section.id);
     setIsLoading(true);
 
     try {
