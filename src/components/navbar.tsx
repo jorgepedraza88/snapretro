@@ -1,14 +1,14 @@
-import { UserDropdown } from "./user-dropdown";
+import Link from "next/link";
 
 export function NavBar() {
   return (
     <div className="flex justify-between px-4 py-2 shadow items-center">
       <div>
-        <span className="font-bold">OpenRetros</span>
+        <Link className="font-bold" href="/">
+          OpenRetros
+        </Link>
       </div>
-      <div>
-        <UserDropdown />
-      </div>
+      <div>Buy me a coffee!</div>
     </div>
   );
 }
