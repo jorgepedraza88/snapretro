@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import CountdownTimer from "@/components/countdown-timer";
 import { RetroCardGroup } from "@/components/retro-card-group";
 import { RetrospectiveData } from "@/types/Retro";
+import { Footer } from "@/components/footer";
 
 export default async function Page({
   params,
@@ -24,6 +25,7 @@ export default async function Page({
     <div className="max-w-5xl mx-auto flex flex-col  items-center w-full p-16 h-full">
       <CountdownTimer defaultSeconds={retroSpectiveData.timer} />
       <RetroCardGroup retroSpectiveData={retroSpectiveData} />
+      {retroSpectiveData.enableChat && <Footer />}
     </div>
   );
 }

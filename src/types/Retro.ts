@@ -12,5 +12,6 @@ export interface RetrospectiveSection {
 export interface RetrospectiveData {
   id: string;
   timer: number;
+  enableChat: boolean;
   sections: RetrospectiveSection[];
 }

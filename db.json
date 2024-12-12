@@ -2,6 +2,12 @@
   "retrospectives": [
     {
       "id": "1",
+      "adminId": "jahjs",
+      "date": "2021-06-01",
+      "allowVotes": false,
+      "enablePassword": false,
+      "password": null,
+      "enableChat": true,
       "timer": 300,
       "sections": [
         {
