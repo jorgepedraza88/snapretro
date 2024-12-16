@@ -25,10 +25,6 @@
             {
               "id": "3",
               "content": "Usar herramientas de automatización para reducir tareas repetitivas."
-            },
-            {
-              "id": "yFtgk",
-              "content": "Cosas nuevas"
             }
           ]
         },
@@ -43,10 +39,6 @@
             {
               "id": 5,
               "content": "Evitar la multitarea para mejorar la concentración."
-            },
-            {
-              "id": "4DdoI",
-              "content": "Funciona perfecto"
             }
           ]
         },
@@ -61,12 +53,46 @@
             {
               "id": "8",
               "content": "Continuar con la planificación de sprints para mejorar la organización."
-            },
-            {
-              "id": "U9Jh1",
-              "content": "Probando"
             }
           ]
+        }
+      ]
+    },
+    {
+      "id": "hSxgW4sSttJMxW9",
+      "adminId": "admin-nyjF2",
+      "avatarUrl": "",
+      "adminName": "Jorge Pedraza",
+      "date": "2024-12-16T14:48:12.006Z",
+      "timer": 300,
+      "allowVotes": false,
+      "enableChat": true,
+      "enablePassword": true,
+      "password": "12345678",
+      "sections": [
+        {
+          "id": "section_tGn6w",
+          "title": "🤓 Start doing",
+          "posts": [
+            {
+              "id": "e4uVv",
+              "content": "Testing"
+            },
+            {
+              "id": "Ffc10",
+              "content": "Test"
+            }
+          ]
+        },
+        {
+          "id": "section_yAmNH",
+          "title": "❌ Stop doing",
+          "posts": []
+        },
+        {
+          "id": "section_76krL",
+          "title": "👏🏼 Keep doing",
+          "posts": []
         }
       ]
     }

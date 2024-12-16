@@ -50,6 +50,12 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
       }
     });
 
+    socket.on("delete-post", async (sectionId, postId) => {
+      if (section.id === sectionId) {
+        await destroyPost({ section, postId, retrospectiveId });
+      }
+    });
+
     return () => {
       socket.off("connect");
       socket.off("disconnect");
@@ -89,6 +95,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
     } catch (error) {
       console.error("Error deleting post:", error);
     } finally {
+      socket.emit("delete-post", section.id, postId);
       setIsLoading(false);
     }
   };

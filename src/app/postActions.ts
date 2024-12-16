@@ -2,6 +2,7 @@
 import { RetrospectiveSection } from "@/types/Retro";
 import { nanoid } from "nanoid";
 import { revalidatePath } from "next/cache";
+import { generateDefaultSections } from "./utils";
 
 interface CreatePostParams {
   section: RetrospectiveSection;
@@ -13,6 +14,19 @@ interface DestroyPostParams {
   section: RetrospectiveSection;
   postId: string;
   retrospectiveId: string;
+}
+
+interface CreateRetroSpectiveData {
+  id: string;
+  adminId: `admin-${string}`;
+  avatarUrl: string;
+  adminName: string;
+  date: string; // TODO: Isotimestamp
+  timer: 300;
+  allowVotes: boolean;
+  enableChat: boolean;
+  enablePassword: boolean;
+  password: string | null;
 }
 
 // TODO: Improve with better database
@@ -107,4 +121,25 @@ export async function destroyPost({
   }
 
   revalidatePath("/retro/[id]", "page");
+}
+
+export async function createRetro(data: CreateRetroSpectiveData) {
+  const res = await fetch(`http://localhost:3005/retrospectives`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      ...data,
+      sections: generateDefaultSections(),
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Error creating retrospective");
+  }
+
+  const response = await res.json();
+
+  return response;
 }

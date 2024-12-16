@@ -11,8 +11,10 @@ export function CreateRetroSecond() {
 
   return (
     <div className="mb-8">
-      <h3 className="text-2xl mb-8">Choose your configuration</h3>
-      <div className="w-full text-sm space-y-1">
+      <h3 className="mb-4 font-medium">
+        Configure your retrospective meeting:
+      </h3>
+      <div className="w-full space-y-1">
         <div className="flex items-center gap-1">
           <Controller
             name="enableChat"
@@ -24,9 +26,7 @@ export function CreateRetroSecond() {
               />
             )}
           />
-          <label className="text-lg" htmlFor="enable-chat">
-            Enable chat
-          </label>
+          <label htmlFor="enable-chat">Enable chat</label>
         </div>
         <div className="flex items-center gap-1">
           <Controller
@@ -45,11 +45,9 @@ export function CreateRetroSecond() {
               />
             )}
           />
-          <label className="text-lg" htmlFor="enable-timer">
-            Enable timer ( 5 minutes )
-          </label>
+          <label htmlFor="enable-timer">Enable timer ( 5 minutes )</label>
         </div>
-        <div className="flex items-center gap-1">
+        {/* <div className="flex items-center gap-1">
           <Controller
             name="allowVotes"
             render={({ field }) => (
@@ -61,10 +59,10 @@ export function CreateRetroSecond() {
               />
             )}
           />
-          <label className="text-lg text-gray-500" htmlFor="allow-votes">
+          <label className="text-gray-500" htmlFor="allow-votes">
             Allow votes (coming soon)
           </label>
-        </div>
+        </div> */}
         <div className="flex items-center gap-1">
           <Controller
             name="enablePassword"
@@ -76,14 +74,13 @@ export function CreateRetroSecond() {
               />
             )}
           />
-          <label className="text-lg" htmlFor="enable-password">
-            Set a password
-          </label>
+          <label htmlFor="enable-password">Set a password</label>
         </div>
         {enablePassword && (
-          <div className="pt-2">
+          <div className="pt-2 ml-4">
             <label>Choose your password</label>
             <Input
+              type="password"
               {...register("password", {
                 required: true,
                 minLength: 8,

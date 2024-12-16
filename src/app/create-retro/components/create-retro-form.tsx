@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { HiArrowRight as ArrowRightIcon } from "react-icons/hi2";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 
@@ -9,16 +10,19 @@ import { FormProvider, useForm } from "react-hook-form";
 import { nanoid } from "nanoid";
 import { CreateRetroFirst } from "./create-retro-first";
 import { CreateRetroSecond } from "./create-retro-second";
+import { createRetro } from "@/app/postActions";
 
 export function CreateRetroForm() {
+  const router = useRouter();
   const [step, setStep] = useState(1);
 
   const form = useForm({
     defaultValues: {
+      id: nanoid(15),
       adminId: `admin-${nanoid(5)}`,
       avatarUrl: "",
       adminName: "",
-      date: new Date(),
+      date: new Date(), // TODO: Isotimestamp
       timer: 300,
       allowVotes: false,
       enableChat: true,
@@ -29,10 +33,14 @@ export function CreateRetroForm() {
 
   const progressPercentage = (step / 3) * 100;
 
-  const onSubmit = (data: any) => {
-    setStep(step + 1);
-
-    console.log(data);
+  const onSubmit = async (data: any) => {
+    try {
+      await createRetro(data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      router.push(`/retro/${data.id}`);
+    }
   };
 
   return (
@@ -47,10 +55,17 @@ export function CreateRetroForm() {
         </div>
         <div className="mt-4 flex w-full justify-end gap-4">
           {step > 1 && <Button onClick={() => setStep(step - 1)}>Back</Button>}
-          <Button type="submit">
-            {step < 3 ? "Next" : "Create"}
-            <ArrowRightIcon size={24} />
-          </Button>
+          {step !== 3 && (
+            <Button type="button" onClick={() => setStep(step + 1)}>
+              Next
+            </Button>
+          )}
+          {step === 3 && (
+            <Button type="submit">
+              Let's begin
+              <ArrowRightIcon size={24} />
+            </Button>
+          )}
         </div>
       </form>
     </FormProvider>

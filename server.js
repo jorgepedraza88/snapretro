@@ -37,6 +37,16 @@ app.prepare().then(() => {
       socket.broadcast.emit("stop-writing", sectionId);
     });
 
+    socket.on("delete-post", (sectionId, postId) => {
+      console.log("Someone deleted post:", postId);
+      socket.broadcast.emit("delete-post", sectionId, postId);
+    });
+
+    socket.on("timer-state", (timerState) => {
+      console.log("timer state", timerState);
+      socket.broadcast.emit("timer-state", timerState);
+    });
+
     socket.on("disconnect", () => {
       console.log("A user disconnected:", socket.id);
     });

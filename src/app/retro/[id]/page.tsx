@@ -21,9 +21,17 @@ export default async function Page({
 
   const retroSpectiveData: RetrospectiveData = await response.json();
 
+  const isCurrentUserAdmin = true;
+
+  // guardar en el localStorage el user id creado para la sesión del creador del retro. Al entrar en la retro, checkeamos
+  // el localStorage. Si el user id coíncide con el adminID del retro, entonces es admin.
+
   return (
     <div className="max-w-5xl mx-auto flex flex-col  items-center w-full p-16 h-full">
-      <CountdownTimer defaultSeconds={retroSpectiveData.timer} />
+      <CountdownTimer
+        defaultSeconds={retroSpectiveData.timer}
+        isCurrentUserAdmin={isCurrentUserAdmin}
+      />
       <RetroCardGroup retroSpectiveData={retroSpectiveData} />
       {retroSpectiveData.enableChat && <Footer />}
     </div>
