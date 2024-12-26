@@ -2,18 +2,17 @@
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
-
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useUserSession } from "@/hooks/user-session-context";
-import { AlertDialogHeader } from "@/components/ui/alert-dialog";
 import {
+  AlertDialogHeader,
   AlertDialog,
   AlertDialogContent,
   AlertDialogTitle,
   AlertDialogDescription,
-} from "@radix-ui/react-alert-dialog";
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 interface RetroProtectedWrapperProps {
   passwordEnabled: boolean;
@@ -49,7 +48,7 @@ export function RetroProtectedWrapper({
 
   return (
     <AlertDialog open>
-      <AlertDialogContent>
+      <AlertDialogContent className="transition-none">
         <AlertDialogHeader>
           <AlertDialogTitle>Protected Access</AlertDialogTitle>
           <AlertDialogDescription>
@@ -66,9 +65,9 @@ export function RetroProtectedWrapper({
             />
           </Label>
           <div className="flex justify-end">
-            <Button type="submit" className="mt-2">
+            <AlertDialogAction type="submit" className="mt-2">
               Submit
-            </Button>
+            </AlertDialogAction>
           </div>
         </form>
       </AlertDialogContent>

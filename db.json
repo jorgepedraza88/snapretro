@@ -554,6 +554,35 @@
           "posts": []
         }
       ]
+    },
+    {
+      "id": "ASunoTnI6ialbT-",
+      "adminId": "Y5kG1",
+      "avatarUrl": "",
+      "adminName": "Test",
+      "date": "2024-12-26T15:21:59.865Z",
+      "timer": 300,
+      "allowVotes": false,
+      "enableChat": true,
+      "enablePassword": true,
+      "password": "papa",
+      "sections": [
+        {
+          "id": "section_zBrU_",
+          "title": "🤓 Start doing",
+          "posts": []
+        },
+        {
+          "id": "section_FnXq5",
+          "title": "❌ Stop doing",
+          "posts": []
+        },
+        {
+          "id": "section_ie3ab",
+          "title": "👏🏼 Keep doing",
+          "posts": []
+        }
+      ]
     }
   ]
 }
