@@ -4,12 +4,13 @@ import { HiArrowRight as ArrowRightIcon } from "react-icons/hi2";
 import { FormProvider, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { nanoid } from "nanoid";
+import { DateTime } from "luxon";
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { CreateRetroFirst } from "./create-retro-first";
 import { CreateRetroSecond } from "./create-retro-second";
-import { createRetro } from "@/app/postActions";
+import { createRetro, CreateRetroSpectiveData } from "@/app/postActions";
 import { useUserSession } from "@/hooks/user-session-context";
 
 export function CreateRetroForm() {
@@ -19,13 +20,13 @@ export function CreateRetroForm() {
   const [step, setStep] = useState(1);
   const progressPercentage = (step / 3) * 100;
 
-  const form = useForm({
+  const form = useForm<CreateRetroSpectiveData>({
     defaultValues: {
       id: nanoid(15),
       adminId: nanoid(5),
       avatarUrl: "",
       adminName: "",
-      date: new Date(), // TODO: Isotimestamp
+      date: DateTime.now().toISO(),
       timer: 300,
       allowVotes: false,
       enableChat: true,
@@ -34,7 +35,7 @@ export function CreateRetroForm() {
     },
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: CreateRetroSpectiveData) => {
     try {
       await createRetro(data);
     } catch (error) {
@@ -46,9 +47,8 @@ export function CreateRetroForm() {
 
   // Create user in session storage and go to next step
   const handleChangeStep = () => {
+    const retroData = form.getValues();
     if (step === 1) {
-      const retroData = form.getValues();
-
       setUserSession({
         id: retroData.adminId,
         name: retroData.adminName,
@@ -57,6 +57,14 @@ export function CreateRetroForm() {
 
       setStep(2);
 
+      return;
+    }
+    // Validate if the password is empty
+    if (retroData.enablePassword && !retroData.password) {
+      form.setError("password", {
+        type: "required",
+        message: "Secret word is required",
+      });
       return;
     }
 
@@ -86,7 +94,13 @@ export function CreateRetroForm() {
         </div>
         <div className="mt-4 flex w-full justify-end gap-4">
           {step > 1 && (
-            <Button type="button" onClick={() => setStep(step - 1)}>
+            <Button
+              type="button"
+              onClick={() => {
+                form.clearErrors();
+                setStep(step - 1);
+              }}
+            >
               Back
             </Button>
           )}

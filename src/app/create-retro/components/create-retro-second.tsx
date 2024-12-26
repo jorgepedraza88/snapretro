@@ -3,9 +3,14 @@ import { Controller, useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { ErrorMessage } from "@hookform/error-message";
 
 export function CreateRetroSecond() {
-  const { register, watch } = useFormContext();
+  const {
+    register,
+    watch,
+    formState: { errors },
+  } = useFormContext();
 
   const enablePassword = watch("enablePassword");
 
@@ -80,6 +85,9 @@ export function CreateRetroSecond() {
           <div className="pt-2 ml-12">
             <Label htmlFor="password">Choose your secret word</Label>
             <Input id="password" {...register("password")} />
+            <div className="text-xs text-red-500 mt-1">
+              <ErrorMessage name="password" errors={errors} />
+            </div>
           </div>
         )}
       </div>

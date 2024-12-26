@@ -11,6 +11,7 @@
     "server": "json-server --watch db.json --port 3005"
   },
   "dependencies": {
+    "@hookform/error-message": "^2.0.1",
     "@radix-ui/react-alert-dialog": "^1.1.4",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-checkbox": "^1.1.2",
@@ -26,6 +27,7 @@
     "clsx": "^2.1.1",
     "json-server": "^1.0.0-beta.3",
     "lucide-react": "^0.454.0",
+    "luxon": "^3.5.0",
     "nanoid": "^5.0.9",
     "next": "15.0.2",
     "react": "19.0.0-rc-02c0e824-20241028",
@@ -38,6 +40,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@types/luxon": "^3.4.2",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

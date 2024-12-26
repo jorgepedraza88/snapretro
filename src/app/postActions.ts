@@ -19,9 +19,9 @@ interface DestroyPostParams {
   retrospectiveId: string;
 }
 
-interface CreateRetroSpectiveData {
+export interface CreateRetroSpectiveData {
   id: string;
-  adminId: `admin-${string}`;
+  adminId: string;
   avatarUrl: string;
   adminName: string;
   date: string; // TODO: Isotimestamp
