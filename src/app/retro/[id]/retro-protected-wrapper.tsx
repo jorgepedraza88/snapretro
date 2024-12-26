@@ -3,16 +3,17 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  DialogHeader,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useUserSession } from "@/hooks/user-session-context";
+import { AlertDialogHeader } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+} from "@radix-ui/react-alert-dialog";
 
 interface RetroProtectedWrapperProps {
   passwordEnabled: boolean;
@@ -47,14 +48,14 @@ export function RetroProtectedWrapper({
   }
 
   return (
-    <Dialog open>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Protected Access</DialogTitle>
-          <DialogDescription>
+    <AlertDialog open>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Protected Access</AlertDialogTitle>
+          <AlertDialogDescription>
             You need to enter the secret word to access this retrospective
-          </DialogDescription>
-        </DialogHeader>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
         <form onSubmit={handleSubmit}>
           <Label>
             Secret word
@@ -70,7 +71,7 @@ export function RetroProtectedWrapper({
             </Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

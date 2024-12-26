@@ -58,6 +58,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
         await destroyPost({ section, postId, retrospectiveId });
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleNewPostChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -45,7 +45,7 @@ export function CreateRetroForm() {
   };
 
   // Create user in session storage and go to next step
-  const handleFirstStep = () => {
+  const handleChangeStep = () => {
     if (step === 1) {
       const retroData = form.getValues();
 
@@ -54,7 +54,9 @@ export function CreateRetroForm() {
         name: retroData.adminName,
         avatarUrl: retroData.avatarUrl,
       });
+
       setStep(2);
+
       return;
     }
 
@@ -63,7 +65,18 @@ export function CreateRetroForm() {
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            if (step !== 3) {
+              e.preventDefault();
+              handleChangeStep();
+            }
+          }
+        }}
+        className="w-full"
+      >
         <div className="mt-4">
           <Progress value={progressPercentage} className="h-2" />
         </div>
@@ -72,9 +85,13 @@ export function CreateRetroForm() {
           {step === 2 && <CreateRetroSecond />}
         </div>
         <div className="mt-4 flex w-full justify-end gap-4">
-          {step > 1 && <Button onClick={() => setStep(step - 1)}>Back</Button>}
+          {step > 1 && (
+            <Button type="button" onClick={() => setStep(step - 1)}>
+              Back
+            </Button>
+          )}
           {step !== 3 && (
-            <Button type="button" onClick={handleFirstStep}>
+            <Button type="button" onClick={handleChangeStep}>
               Next
             </Button>
           )}

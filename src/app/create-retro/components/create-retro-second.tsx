@@ -1,7 +1,8 @@
 import { Controller, useFormContext } from "react-hook-form";
 
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 export function CreateRetroSecond() {
   const { register, watch } = useFormContext();
@@ -14,24 +15,24 @@ export function CreateRetroSecond() {
         Configure your retrospective meeting:
       </h3>
       <div className="w-full space-y-1">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <Controller
             name="enableChat"
             render={({ field }) => (
-              <Checkbox
+              <Switch
                 id="enable-chat"
                 checked={field.value}
                 onCheckedChange={field.onChange}
               />
             )}
           />
-          <label htmlFor="enable-chat">Enable chat</label>
+          <Label htmlFor="enable-chat">Enable chat</Label>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <Controller
             name="timer"
             render={({ field }) => (
-              <Checkbox
+              <Switch
                 id="enable-timer"
                 checked={!!field.value}
                 onCheckedChange={() => {
@@ -44,13 +45,13 @@ export function CreateRetroSecond() {
               />
             )}
           />
-          <label htmlFor="enable-timer">Enable timer ( 5 minutes )</label>
+          <Label htmlFor="enable-timer">Enable timer</Label>
         </div>
         {/* <div className="flex items-center gap-1">
           <Controller
             name="allowVotes"
             render={({ field }) => (
-              <Checkbox
+              <Switch
                 id="allow-votes"
                 disabled
                 checked={field.value}
@@ -58,27 +59,27 @@ export function CreateRetroSecond() {
               />
             )}
           />
-          <label className="text-gray-500" htmlFor="allow-votes">
+          <Label className="text-gray-500" htmlFor="allow-votes">
             Allow votes (coming soon)
-          </label>
+          </Label>
         </div> */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <Controller
             name="enablePassword"
             render={({ field }) => (
-              <Checkbox
+              <Switch
                 id="enable-password"
                 checked={field.value}
                 onCheckedChange={field.onChange}
               />
             )}
           />
-          <label htmlFor="enable-password">Protect with a secret word</label>
+          <Label htmlFor="enable-password">Protect with a secret word</Label>
         </div>
         {enablePassword && (
-          <div className="pt-2 ml-4">
-            <label>Choose your secret word</label>
-            <Input type="password" {...register("password")} />
+          <div className="pt-2 ml-12">
+            <Label htmlFor="password">Choose your secret word</Label>
+            <Input id="password" {...register("password")} />
           </div>
         )}
       </div>

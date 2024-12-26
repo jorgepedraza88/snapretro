@@ -9,17 +9,17 @@ import {
 import { socket } from "@/socket";
 import { nanoid } from "nanoid";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useParams, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface UserSession {
   id: string;
@@ -80,14 +80,14 @@ export function UserSessionContextProvider({
   return (
     <UserSessionContext.Provider value={{ userSession, setUserSession }}>
       {!userSession && shouldLoadUserDialog && (
-        <Dialog open>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Welcome!</DialogTitle>
-              <DialogDescription>
+        <AlertDialog open>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Welcome!</AlertDialogTitle>
+              <AlertDialogDescription>
                 Select your name to join the session
-              </DialogDescription>
-            </DialogHeader>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -102,11 +102,13 @@ export function UserSessionContextProvider({
                 />
               </Label>
               <div className="flex justify-end mt-4">
-                <Button type="submit">Join session</Button>
+                <AlertDialogAction type="submit">
+                  Join session
+                </AlertDialogAction>
               </div>
             </form>
-          </DialogContent>
-        </Dialog>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
       {(userSession || (!userSession && !shouldLoadUserDialog)) && children}
     </UserSessionContext.Provider>
