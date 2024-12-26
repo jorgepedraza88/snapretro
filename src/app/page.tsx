@@ -1,7 +1,8 @@
-import { JoinRetroButton } from "@/components/join-retro-button";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { HiOutlineUserGroup as CreateRetroIcon } from "react-icons/hi2";
+
+import { JoinRetroButton } from "@/components/join-retro-button";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (

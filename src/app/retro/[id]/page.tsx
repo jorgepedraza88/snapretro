@@ -4,6 +4,7 @@ import CountdownTimer from "@/components/countdown-timer";
 import { RetroCardGroup } from "@/components/retro-card-group";
 import { RetrospectiveData } from "@/types/Retro";
 import { Footer } from "@/components/footer";
+import { RetroProtectedWrapper } from "./retro-protected-wrapper";
 
 export default async function Page({
   params,
@@ -21,19 +22,20 @@ export default async function Page({
 
   const retroSpectiveData: RetrospectiveData = await response.json();
 
-  const isCurrentUserAdmin = true;
-
-  // guardar en el localStorage el user id creado para la sesión del creador del retro. Al entrar en la retro, checkeamos
-  // el localStorage. Si el user id coíncide con el adminID del retro, entonces es admin.
-
   return (
-    <div className="max-w-5xl mx-auto flex flex-col  items-center w-full p-16 h-full">
-      <CountdownTimer
-        defaultSeconds={retroSpectiveData.timer}
-        isCurrentUserAdmin={isCurrentUserAdmin}
-      />
-      <RetroCardGroup retroSpectiveData={retroSpectiveData} />
-      {retroSpectiveData.enableChat && <Footer />}
-    </div>
+    <RetroProtectedWrapper
+      adminId={retroSpectiveData.adminId}
+      passwordEnabled={retroSpectiveData.enablePassword}
+      retroPassword={retroSpectiveData.password}
+    >
+      <div className="max-w-5xl mx-auto flex flex-col items-center w-full p-16 h-full">
+        <CountdownTimer
+          defaultSeconds={retroSpectiveData.timer}
+          adminId={retroSpectiveData.adminId}
+        />
+        <RetroCardGroup retroSpectiveData={retroSpectiveData} />
+        {retroSpectiveData.enableChat && <Footer />}
+      </div>
+    </RetroProtectedWrapper>
   );
 }

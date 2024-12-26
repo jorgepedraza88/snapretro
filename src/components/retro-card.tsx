@@ -12,6 +12,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { RetrospectiveSection } from "@/types/Retro";
 import { useParams } from "next/navigation";
+import { useUserSession } from "@/hooks/user-session-context";
 
 interface RetroCardProps {
   title: string;
@@ -19,21 +20,23 @@ interface RetroCardProps {
   section: RetrospectiveSection;
 }
 
-export function RetroCard({ title, description, section }: RetroCardProps) {
-  const params = useParams<{ id: string }>();
+interface NewPost {
+  content: string;
+  userId: string;
+}
 
+export function RetroCard({ title, description, section }: RetroCardProps) {
+  const { userSession } = useUserSession();
+  const params = useParams<{ id: string }>();
   const retrospectiveId = params.id;
-  const [newPost, setNewPost] = useState("");
+
+  const defaultPostState = { userId: userSession?.id || "", content: "" };
+
+  const [newPost, setNewPost] = useState<NewPost>(defaultPostState);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [socketId, setSocketId] = useState<string | null>(null);
   const [isWriting, setIsWriting] = useState<boolean>(false);
 
   useEffect(() => {
-    if (socket.connected) {
-      if (socket.id) {
-        setSocketId(socket.id);
-      }
-    }
     socket.on("posts", () => {
       revalidate();
     });
@@ -55,17 +58,13 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
         await destroyPost({ section, postId, retrospectiveId });
       }
     });
-
-    return () => {
-      socket.off("connect");
-      socket.off("disconnect");
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleNewPostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     socket.emit("writing", section.id);
-    setNewPost(e.target.value);
+
+    setNewPost((prev) => ({ ...prev, content: e.target.value }));
+
     if (e.target.value === "") {
       socket.emit("stop-writing", section.id);
       return;
@@ -77,10 +76,16 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
     socket.emit("stop-writing", section.id);
     setIsLoading(true);
 
+    if (!newPost.userId) {
+      console.error("User not found");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      await createPost({ section, content: newPost, retrospectiveId });
+      await createPost({ section, newPost, retrospectiveId });
       socket.emit("posts", newPost);
-      setNewPost("");
+      setNewPost(defaultPostState);
     } catch (error) {
       console.error("Error creating post:", error);
     } finally {
@@ -114,13 +119,15 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
                 <Card key={post.id} className="mx-2 my-2 group">
                   <div className="p-2 text-sm flex justify-between items-center gap-2">
                     <p>{post.content}</p>
-                    <Button
-                      variant="ghost"
-                      className="p-1.5 h-auto invisible group-hover:visible"
-                      onClick={() => handleDestroyPost(post.id)}
-                    >
-                      <RemoveIcon className="shrink-0" />
-                    </Button>
+                    {userSession?.id === post.userId && (
+                      <Button
+                        variant="ghost"
+                        className="p-1.5 h-auto invisible group-hover:visible"
+                        onClick={() => handleDestroyPost(post.id)}
+                      >
+                        <RemoveIcon className="shrink-0" />
+                      </Button>
+                    )}
                   </div>
                 </Card>
               ))
@@ -136,7 +143,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
           <Input
             disabled={isLoading}
             className="p-2 text-sm"
-            value={newPost}
+            value={newPost.content}
             onChange={handleNewPostChange}
           />
         </form>

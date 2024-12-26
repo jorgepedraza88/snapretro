@@ -1,25 +1,28 @@
 "use client";
 import { useState } from "react";
 import { HiArrowRight as ArrowRightIcon } from "react-icons/hi2";
+import { FormProvider, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { nanoid } from "nanoid";
 
 import { Button } from "@/components/ui/button";
-
 import { Progress } from "@/components/ui/progress";
-import { FormProvider, useForm } from "react-hook-form";
-import { nanoid } from "nanoid";
 import { CreateRetroFirst } from "./create-retro-first";
 import { CreateRetroSecond } from "./create-retro-second";
 import { createRetro } from "@/app/postActions";
+import { useUserSession } from "@/hooks/user-session-context";
 
 export function CreateRetroForm() {
   const router = useRouter();
+  const { setUserSession } = useUserSession();
+
   const [step, setStep] = useState(1);
+  const progressPercentage = (step / 3) * 100;
 
   const form = useForm({
     defaultValues: {
       id: nanoid(15),
-      adminId: `admin-${nanoid(5)}`,
+      adminId: nanoid(5),
       avatarUrl: "",
       adminName: "",
       date: new Date(), // TODO: Isotimestamp
@@ -31,8 +34,6 @@ export function CreateRetroForm() {
     },
   });
 
-  const progressPercentage = (step / 3) * 100;
-
   const onSubmit = async (data: any) => {
     try {
       await createRetro(data);
@@ -41,6 +42,23 @@ export function CreateRetroForm() {
     } finally {
       router.push(`/retro/${data.id}`);
     }
+  };
+
+  // Create user in session storage and go to next step
+  const handleFirstStep = () => {
+    if (step === 1) {
+      const retroData = form.getValues();
+
+      setUserSession({
+        id: retroData.adminId,
+        name: retroData.adminName,
+        avatarUrl: retroData.avatarUrl,
+      });
+      setStep(2);
+      return;
+    }
+
+    setStep(3);
   };
 
   return (
@@ -56,13 +74,13 @@ export function CreateRetroForm() {
         <div className="mt-4 flex w-full justify-end gap-4">
           {step > 1 && <Button onClick={() => setStep(step - 1)}>Back</Button>}
           {step !== 3 && (
-            <Button type="button" onClick={() => setStep(step + 1)}>
+            <Button type="button" onClick={handleFirstStep}>
               Next
             </Button>
           )}
           {step === 3 && (
             <Button type="submit">
-              Let's begin
+              Let&apos;s begin
               <ArrowRightIcon size={24} />
             </Button>
           )}

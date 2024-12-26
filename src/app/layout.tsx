@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { UserSessionContextProvider } from "@/hooks/user-session-context";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -28,7 +29,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased max-h-screen overflow-hidden`}
       >
-        {children}
+        <UserSessionContextProvider>{children}</UserSessionContextProvider>
       </body>
     </html>
   );

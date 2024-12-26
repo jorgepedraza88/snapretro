@@ -1,15 +1,32 @@
 "use client";
 import { HiClock as TimerIcon } from "react-icons/hi2";
 import { useState, useEffect } from "react";
+import {
+  HiMiniPlay as PlayIcon,
+  HiMiniPause as PauseIcon,
+} from "react-icons/hi2";
 
 import { socket } from "@/socket";
 import { Button } from "./ui/button";
+import { useUserSession } from "@/hooks/user-session-context";
 
-const CountdownTimer = ({ isCurrentUserAdmin, defaultSeconds = 300 }) => {
+interface CountdownTimerProps {
+  adminId: string;
+  defaultSeconds?: number;
+}
+
+const CountdownTimer = ({
+  adminId,
+  defaultSeconds = 300,
+}: CountdownTimerProps) => {
+  const { userSession } = useUserSession();
+
   const [timeLeft, setTimeLeft] = useState(defaultSeconds);
   const [timerState, setTimerState] = useState<
     "running" | "paused" | "finished"
   >("paused");
+
+  const isCurrentUserAdmin = adminId === userSession?.id;
 
   // TODO: Mejorar este useEffect
   useEffect(() => {
@@ -46,13 +63,13 @@ const CountdownTimer = ({ isCurrentUserAdmin, defaultSeconds = 300 }) => {
     <div className="flex gap-2 items-center mb-2">
       {isCurrentUserAdmin && (
         <div>
-          {timerState !== "running" && (
+          {timerState !== "running" && isCurrentUserAdmin && (
             <Button
               size="sm"
               variant="outline"
               onClick={() => setTimerState("running")}
             >
-              Start timer
+              <PlayIcon size={16} />
             </Button>
           )}
           {timerState === "running" && (
@@ -61,7 +78,7 @@ const CountdownTimer = ({ isCurrentUserAdmin, defaultSeconds = 300 }) => {
               variant="outline"
               onClick={() => setTimerState("paused")}
             >
-              Pause
+              <PauseIcon size={16} />
             </Button>
           )}
         </div>

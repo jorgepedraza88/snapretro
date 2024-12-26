@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { io, Socket } from "socket.io-client";
+import { nanoid } from "nanoid";
+import { socket } from "@/socket";
 
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -10,40 +11,41 @@ import {
   SidebarFooter,
   useSidebar,
 } from "./ui/sidebar";
+import { useUserSession } from "@/hooks/user-session-context";
 
-let socket: Socket;
+interface UserMessage {
+  id: string | null;
+  name: string;
+  text: string;
+}
 
 export function AppSidebar() {
-  const [messages, setMessages] = useState<
-    { id: string | null; text: string }[]
-  >([]);
+  const { userSession } = useUserSession();
+  const [messages, setMessages] = useState<UserMessage[]>([]);
   const [message, setMessage] = useState("");
-  const [socketId, setSocketId] = useState<string | null>(null);
 
   useEffect(() => {
-    socket = io();
-
-    socket.on("connect", () => {
-      console.log("Connected to server in chat");
-      // TODO: Podriamos tener un context para esto
-      if (socket.id) {
-        setSocketId(socket.id);
-      }
-    });
-
-    socket.on("message", (msg: { id: string; text: string }) => {
+    socket.on("message", (msg: { id: string; name: string; text: string }) => {
       setMessages((prev) => [...prev, msg]);
     });
 
     return () => {
-      socket.disconnect();
+      socket.off("message");
     };
   }, []);
 
   const sendMessage = () => {
-    if (message.trim()) {
-      socket.emit("message", { id: socket.id, text: message });
-      setMessages((prev) => [...prev, { id: socketId, text: message }]);
+    if (message.trim() && userSession) {
+      const messageId = nanoid(5);
+      socket.emit("message", {
+        id: messageId,
+        name: userSession.name,
+        text: message,
+      });
+      setMessages((prev) => [
+        ...prev,
+        { id: messageId, name: userSession.name, text: message },
+      ]);
       setMessage("");
     }
   };
@@ -55,25 +57,36 @@ export function AppSidebar() {
     sendMessage();
   };
 
+  if (!userSession) {
+    return null;
+  }
+
   return (
     <Sidebar side="right">
       <SidebarContent>
         <div className="p-2 text-sm">
-          {messages.map((msg, idx) => (
+          {messages.map((msg) => (
             <p
-              key={idx}
+              key={msg.id}
               style={{
-                textAlign: msg.id === socketId ? "right" : "left",
+                textAlign: msg.name === userSession.name ? "right" : "left",
               }}
               className="bg-white my-2 p-2 rounded-lg border"
             >
-              {msg.id === socketId ? msg.text : `${msg.id}: ${msg.text}`}
+              {msg.name === userSession.name ? (
+                msg.text
+              ) : (
+                <span>
+                  <strong>{msg.name}: </strong>
+                  {msg.text}
+                </span>
+              )}
             </p>
           ))}
         </div>
       </SidebarContent>
       <SidebarFooter>
-        <form onSubmit={handleSubmit} style={{ display: "flex", gap: "10px" }}>
+        <form onSubmit={handleSubmit} className="flex gap-2">
           <Input
             placeholder="Type a message"
             value={message}

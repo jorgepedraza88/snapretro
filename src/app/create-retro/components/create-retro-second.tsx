@@ -1,13 +1,12 @@
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 import { Controller, useFormContext } from "react-hook-form";
 
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+
 export function CreateRetroSecond() {
-  const { register, watch, getFieldState } = useFormContext();
+  const { register, watch } = useFormContext();
 
   const enablePassword = watch("enablePassword");
-
-  const errors = getFieldState("password")?.error;
 
   return (
     <div className="mb-8">
@@ -74,19 +73,12 @@ export function CreateRetroSecond() {
               />
             )}
           />
-          <label htmlFor="enable-password">Set a password</label>
+          <label htmlFor="enable-password">Protect with a secret word</label>
         </div>
         {enablePassword && (
           <div className="pt-2 ml-4">
-            <label>Choose your password</label>
-            <Input
-              type="password"
-              {...register("password", {
-                required: true,
-                minLength: 8,
-              })}
-            />
-            <p className="mt-2 text-xs text-red-500">{errors && errors.type}</p>
+            <label>Choose your secret word</label>
+            <Input type="password" {...register("password")} />
           </div>
         )}
       </div>

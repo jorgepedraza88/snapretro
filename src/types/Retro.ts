@@ -1,5 +1,6 @@
 export interface RetrospectivePost {
   id: string;
+  userId: string;
   content: string;
 }
 
@@ -11,6 +12,11 @@ export interface RetrospectiveSection {
 
 export interface RetrospectiveData {
   id: string;
+  adminId: string;
+  date: string;
+  allowVotes: boolean;
+  enablePassword: boolean;
+  password: string | null;
   timer: number;
   enableChat: boolean;
   sections: RetrospectiveSection[];

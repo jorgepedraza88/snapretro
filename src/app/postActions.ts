@@ -6,7 +6,10 @@ import { generateDefaultSections } from "./utils";
 
 interface CreatePostParams {
   section: RetrospectiveSection;
-  content: string;
+  newPost: {
+    userId: string;
+    content: string;
+  };
   retrospectiveId: string;
 }
 
@@ -33,10 +36,11 @@ interface CreateRetroSpectiveData {
 
 export async function createPost({
   section,
-  content,
+  newPost,
   retrospectiveId,
 }: CreatePostParams) {
-  // Obtain the retrospective
+  const { userId, content } = newPost;
+
   const response = await fetch(
     `http://localhost:3005/retrospectives/${retrospectiveId}`,
   );
@@ -51,7 +55,10 @@ export async function createPost({
   const updatedSections = retrospective.sections.map(
     (sect: RetrospectiveSection) =>
       sect.id === section.id
-        ? { ...sect, posts: [...sect.posts, { id: nanoid(5), content }] } // Añadir el nuevo post
+        ? {
+            ...sect,
+            posts: [...sect.posts, { id: nanoid(5), userId, content }],
+          }
         : sect,
   );
 

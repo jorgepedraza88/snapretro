@@ -9,12 +9,12 @@ export default async function RetroLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div>
+    <>
       <NavBar />
       <SidebarProvider defaultOpen={false}>
         <main className="w-full">{children}</main>
         <AppSidebar />
       </SidebarProvider>
-    </div>
+    </>
   );
 }
