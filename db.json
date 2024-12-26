@@ -583,6 +583,35 @@
           "posts": []
         }
       ]
+    },
+    {
+      "id": "zU4rYIk312Exm0r",
+      "adminId": "CNGOe",
+      "avatarUrl": "",
+      "adminName": "j",
+      "date": "2024-12-26T17:14:46.948+01:00",
+      "timer": null,
+      "allowVotes": false,
+      "enableChat": true,
+      "enablePassword": false,
+      "password": null,
+      "sections": [
+        {
+          "id": "section_-Hq_n",
+          "title": "🤓 Start doing",
+          "posts": []
+        },
+        {
+          "id": "section_sccx3",
+          "title": "❌ Stop doing",
+          "posts": []
+        },
+        {
+          "id": "section_gCwsV",
+          "title": "👏🏼 Keep doing",
+          "posts": []
+        }
+      ]
     }
   ]
 }

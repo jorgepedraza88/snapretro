@@ -1,9 +1,11 @@
 import { Controller, useFormContext } from "react-hook-form";
+import { Duration } from "luxon";
 
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ErrorMessage } from "@hookform/error-message";
+import { Slider } from "@/components/ui/slider";
 
 export function CreateRetroSecond() {
   const {
@@ -13,6 +15,14 @@ export function CreateRetroSecond() {
   } = useFormContext();
 
   const enablePassword = watch("enablePassword");
+
+  const formatTimer = (value: number) => {
+    const milliseconds = value * 1000;
+    const duration = Duration.fromObject({ milliseconds });
+    const minutes = duration.toFormat("mm:ss");
+
+    return minutes;
+  };
 
   return (
     <div className="mb-8">
@@ -37,20 +47,40 @@ export function CreateRetroSecond() {
           <Controller
             name="timer"
             render={({ field }) => (
-              <Switch
-                id="enable-timer"
-                checked={!!field.value}
-                onCheckedChange={() => {
-                  if (field.value) {
-                    field.onChange(null);
-                  } else {
-                    field.onChange(300);
-                  }
-                }}
-              />
+              <div className="w-full">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="enable-timer"
+                    checked={!!field.value}
+                    onCheckedChange={() => {
+                      if (field.value) {
+                        field.onChange(null);
+                      } else {
+                        field.onChange(300);
+                      }
+                    }}
+                  />
+                  <Label htmlFor="enable-timer">Enable timer</Label>
+                </div>
+                {!!field.value && (
+                  <div className="my-2 ml-12">
+                    <p className="text-sm text-center w-full">
+                      {formatTimer(field.value)} minutes
+                    </p>
+                    <Slider
+                      defaultValue={[300]}
+                      max={300}
+                      min={60}
+                      step={30}
+                      value={[field.value]}
+                      className="mt-1"
+                      onValueChange={(val) => field.onChange(val[0])}
+                    />
+                  </div>
+                )}
+              </div>
             )}
           />
-          <Label htmlFor="enable-timer">Enable timer</Label>
         </div>
         {/* <div className="flex items-center gap-1">
           <Controller

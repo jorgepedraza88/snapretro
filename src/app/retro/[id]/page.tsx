@@ -29,10 +29,12 @@ export default async function Page({
       retroPassword={retroSpectiveData.password}
     >
       <div className="max-w-5xl mx-auto flex flex-col items-center w-full p-16 h-full">
-        <CountdownTimer
-          defaultSeconds={retroSpectiveData.timer}
-          adminId={retroSpectiveData.adminId}
-        />
+        {retroSpectiveData.timer && (
+          <CountdownTimer
+            defaultSeconds={retroSpectiveData.timer}
+            adminId={retroSpectiveData.adminId}
+          />
+        )}
         <RetroCardGroup retroSpectiveData={retroSpectiveData} />
         {retroSpectiveData.enableChat && <Footer />}
       </div>
