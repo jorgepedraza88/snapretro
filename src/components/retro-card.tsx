@@ -108,7 +108,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
 
   return (
     <div>
-      <Card className="w-72 bg-gray-100 flex flex-col justify-between h-full pb-4">
+      <Card className="bg-gray-100 flex flex-col justify-between h-full pb-4">
         <div>
           <div className="p-4 bg-gray-200 rounded-t-lg mb-2">
             <CardTitle>{title}</CardTitle>

@@ -30,6 +30,7 @@ export interface CreateRetroSpectiveData {
   enableChat: boolean;
   enablePassword: boolean;
   password: string | null;
+  sectionsNumber: number;
 }
 
 // TODO: Improve with better database
@@ -131,14 +132,15 @@ export async function destroyPost({
 }
 
 export async function createRetro(data: CreateRetroSpectiveData) {
+  const { sectionsNumber, ...restData } = data;
   const res = await fetch(`http://localhost:3005/retrospectives`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      ...data,
-      sections: generateDefaultSections(),
+      ...restData,
+      sections: generateDefaultSections(sectionsNumber),
     }),
   });
 

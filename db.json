@@ -612,6 +612,40 @@
           "posts": []
         }
       ]
+    },
+    {
+      "id": "0VX7f07KNXDYdgD",
+      "adminId": "PA3z5",
+      "avatarUrl": "",
+      "adminName": "J",
+      "date": "2024-12-27T16:36:24.081+01:00",
+      "timer": 300,
+      "allowVotes": false,
+      "enableChat": true,
+      "enablePassword": false,
+      "password": null,
+      "sections": [
+        {
+          "id": "section_mY89N",
+          "title": "🤓 Start doing",
+          "posts": []
+        },
+        {
+          "id": "section_lgi9Z",
+          "title": "❌ Stop doing",
+          "posts": []
+        },
+        {
+          "id": "section_xhg8e",
+          "title": "👏🏼 Keep doing",
+          "posts": []
+        },
+        {
+          "id": "section_FGHDI",
+          "title": "🎉 Shout outs",
+          "posts": []
+        }
+      ]
     }
   ]
 }

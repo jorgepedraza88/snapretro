@@ -12,6 +12,7 @@ import { CreateRetroFirst } from "./create-retro-first";
 import { CreateRetroSecond } from "./create-retro-second";
 import { createRetro, CreateRetroSpectiveData } from "@/app/postActions";
 import { useUserSession } from "@/hooks/user-session-context";
+import { CreateRetroThird } from "./create-retro-third";
 
 export function CreateRetroForm() {
   const router = useRouter();
@@ -32,6 +33,7 @@ export function CreateRetroForm() {
       enableChat: true,
       enablePassword: false,
       password: null,
+      sectionsNumber: 3,
     },
   });
 
@@ -91,6 +93,7 @@ export function CreateRetroForm() {
         <div className="mt-16">
           {step === 1 && <CreateRetroFirst />}
           {step === 2 && <CreateRetroSecond />}
+          {step === 3 && <CreateRetroThird />}
         </div>
         <div className="mt-4 flex w-full justify-end gap-4">
           {step > 1 && (

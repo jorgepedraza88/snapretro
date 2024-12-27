@@ -12,9 +12,11 @@ export function CreateRetroSecond() {
     register,
     watch,
     formState: { errors },
+    setValue,
   } = useFormContext();
 
   const enablePassword = watch("enablePassword");
+  const timer = watch("timer");
 
   const formatTimer = (value: number) => {
     const milliseconds = value * 1000;
@@ -62,22 +64,6 @@ export function CreateRetroSecond() {
                   />
                   <Label htmlFor="enable-timer">Enable timer</Label>
                 </div>
-                {!!field.value && (
-                  <div className="my-2 ml-12">
-                    <p className="text-sm text-center w-full">
-                      {formatTimer(field.value)} minutes
-                    </p>
-                    <Slider
-                      defaultValue={[300]}
-                      max={300}
-                      min={60}
-                      step={30}
-                      value={[field.value]}
-                      className="mt-1"
-                      onValueChange={(val) => field.onChange(val[0])}
-                    />
-                  </div>
-                )}
               </div>
             )}
           />
@@ -121,6 +107,23 @@ export function CreateRetroSecond() {
           </div>
         )}
       </div>
+      {!!timer && (
+        <div className="my-4 ml-12">
+          <Label>Select time:</Label>
+          <p className="text-sm text-center w-full">
+            {formatTimer(timer)} minutes
+          </p>
+          <Slider
+            defaultValue={[300]}
+            max={300}
+            min={60}
+            step={30}
+            value={[timer]}
+            className="mt-1"
+            onValueChange={(val) => setValue("timer", val[0])}
+          />
+        </div>
+      )}
     </div>
   );
 }

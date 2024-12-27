@@ -6,7 +6,7 @@ export function Footer() {
   const { toggleSidebar } = useSidebar();
 
   return (
-    <div className="w-full absolute bottom-0 flex justify-center p-4">
+    <div className="w-full absolute bottom-0 hidden justify-center p-4 lg:flex">
       <Button onClick={toggleSidebar} variant="secondary">
         Open Chat
       </Button>

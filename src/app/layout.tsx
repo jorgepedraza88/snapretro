@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased max-h-screen overflow-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased max-h-screen lg:overflow-hidden`}
       >
         <UserSessionContextProvider>{children}</UserSessionContextProvider>
       </body>

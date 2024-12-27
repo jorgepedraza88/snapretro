@@ -28,7 +28,7 @@ export default async function Page({
       passwordEnabled={retroSpectiveData.enablePassword}
       retroPassword={retroSpectiveData.password}
     >
-      <div className="max-w-5xl mx-auto flex flex-col items-center w-full p-16 h-full">
+      <div className="max-w-6xl mx-auto flex flex-col items-center w-full p-8 h-full">
         {retroSpectiveData.timer && (
           <CountdownTimer
             defaultSeconds={retroSpectiveData.timer}
