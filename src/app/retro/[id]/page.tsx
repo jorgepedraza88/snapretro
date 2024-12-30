@@ -5,6 +5,8 @@ import { RetroCardGroup } from "@/components/retro-card-group";
 import { RetrospectiveData } from "@/types/Retro";
 import { Footer } from "@/components/footer";
 import { RetroProtectedWrapper } from "./retro-protected-wrapper";
+import { EndRetroDialog } from "./components/end-retro-dialog";
+import { Participants } from "./components/participants";
 
 export default async function Page({
   params,
@@ -28,15 +30,21 @@ export default async function Page({
       passwordEnabled={retroSpectiveData.enablePassword}
       retroPassword={retroSpectiveData.password}
     >
-      <div className="max-w-6xl mx-auto flex flex-col items-center w-full p-8 h-full">
-        {retroSpectiveData.timer && (
-          <CountdownTimer
-            defaultSeconds={retroSpectiveData.timer}
-            adminId={retroSpectiveData.adminId}
-          />
-        )}
-        <RetroCardGroup retroSpectiveData={retroSpectiveData} />
-        {retroSpectiveData.enableChat && <Footer />}
+      <div className="flex gap-2">
+        <div className="min-w-60">
+          <Participants adminId={retroSpectiveData.adminId} />
+        </div>
+        <div className="max-w-6xl mx-auto flex flex-col items-center w-full p-8 h-full">
+          {retroSpectiveData.timer && (
+            <CountdownTimer
+              defaultSeconds={retroSpectiveData.timer}
+              adminId={retroSpectiveData.adminId}
+            />
+          )}
+          <RetroCardGroup retroSpectiveData={retroSpectiveData} />
+          {retroSpectiveData.enableChat && <Footer />}
+          <EndRetroDialog adminId={retroSpectiveData.adminId} />
+        </div>
       </div>
     </RetroProtectedWrapper>
   );

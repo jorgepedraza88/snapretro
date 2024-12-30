@@ -11,7 +11,7 @@ import { nanoid } from "nanoid";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { usePathname } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,8 +43,8 @@ interface UserSessionContextProviderProps {
 export function UserSessionContextProvider({
   children,
 }: UserSessionContextProviderProps) {
-  const pathname = usePathname();
-  const shouldLoadUserDialog = pathname.includes("/retro/");
+  const { id: retrospectiveId } = useParams<{ id: string }>();
+  const shouldLoadUserDialog = !!retrospectiveId;
 
   const [userSession, setUserSession] = useState<UserSession | null>(null);
   const [userName, setUserName] = useState("");
@@ -53,14 +53,6 @@ export function UserSessionContextProvider({
     if (!socket.connected) {
       socket.connect();
     }
-
-    socket.on("connect", () => {
-      console.log("Socket connected:", socket.id);
-    });
-
-    socket.on("disconnect", (reason) => {
-      console.log("Socket disconnected:", reason);
-    });
 
     return () => {
       socket.off();
@@ -75,6 +67,7 @@ export function UserSessionContextProvider({
       avatarUrl: "",
     };
     setUserSession(newUser);
+    socket.emit("join-retrospective", retrospectiveId, newUser.name);
   }
 
   return (
@@ -102,7 +95,10 @@ export function UserSessionContextProvider({
                 />
               </Label>
               <div className="flex justify-end mt-4">
-                <AlertDialogAction type="submit">
+                <AlertDialogAction
+                  type="submit"
+                  disabled={userName.trim() === ""}
+                >
                   Join session
                 </AlertDialogAction>
               </div>

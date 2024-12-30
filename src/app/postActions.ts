@@ -24,16 +24,20 @@ export interface CreateRetroSpectiveData {
   adminId: string;
   avatarUrl: string;
   adminName: string;
-  date: string; // TODO: Isotimestamp
+  date: string;
   timer: 300;
   allowVotes: boolean;
   enableChat: boolean;
   enablePassword: boolean;
   password: string | null;
   sectionsNumber: number;
+  participants: Participant[];
 }
 
-// TODO: Improve with better database
+export type Participant = {
+  id: string;
+  username: string;
+};
 
 export async function createPost({
   section,
@@ -92,7 +96,6 @@ export async function destroyPost({
   postId,
   retrospectiveId,
 }: DestroyPostParams) {
-  // Obtain the retrospective
   const response = await fetch(
     `http://localhost:3005/retrospectives/${retrospectiveId}`,
   );
@@ -151,4 +154,81 @@ export async function createRetro(data: CreateRetroSpectiveData) {
   const response = await res.json();
 
   return response;
+}
+
+export async function editRetroTitle(data: {
+  retrospectiveId: string;
+  sectionId: string;
+  title: string;
+}) {
+  const { retrospectiveId, sectionId, title } = data;
+
+  const response = await fetch(
+    `http://localhost:3005/retrospectives/${retrospectiveId}`,
+  );
+
+  if (!response.ok) {
+    throw new Error("Error fetching retrospective");
+  }
+
+  const retrospective = await response.json();
+
+  const updatedSections = retrospective.sections.map(
+    (section: RetrospectiveSection) =>
+      section.id === sectionId ? { ...section, title } : section,
+  );
+
+  const res = await fetch(
+    `http://localhost:3005/retrospectives/${retrospectiveId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sections: updatedSections,
+      }),
+    },
+  );
+
+  const finalResponse = await res.json();
+
+  console.log("edit section title", finalResponse);
+
+  revalidatePath("/retro/[id]", "page");
+}
+
+export async function addParticipants(data: {
+  retrospectiveId: string;
+  participants: Participant[];
+}) {
+  const { retrospectiveId, participants } = data;
+
+  const response = await fetch(
+    `http://localhost:3005/retrospectives/${retrospectiveId}`,
+  );
+
+  if (!response.ok) {
+    throw new Error("Error fetching retrospective");
+  }
+
+  const retrospective = await response.json();
+
+  const res = await fetch(
+    `http://localhost:3005/retrospectives/${retrospectiveId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        participants,
+      }),
+    },
+  );
+  const finalResponse = await res.json();
+
+  console.log("add participant", finalResponse);
+
+  revalidatePath("/retro/[id]", "page");
 }

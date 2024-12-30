@@ -20,4 +20,8 @@ export interface RetrospectiveData {
   timer: number;
   enableChat: boolean;
   sections: RetrospectiveSection[];
+  participants: {
+    name: string;
+    id: string;
+  }[];
 }

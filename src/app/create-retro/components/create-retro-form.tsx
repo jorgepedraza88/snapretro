@@ -5,6 +5,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { nanoid } from "nanoid";
 import { DateTime } from "luxon";
+import { socket } from "@/socket";
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -40,6 +41,7 @@ export function CreateRetroForm() {
   const onSubmit = async (data: CreateRetroSpectiveData) => {
     try {
       await createRetro(data);
+      socket.emit("join-retrospective", data.id, data.adminName);
     } catch (error) {
       console.log(error);
     } finally {

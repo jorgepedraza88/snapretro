@@ -12,6 +12,7 @@ import {
   useSidebar,
 } from "./ui/sidebar";
 import { useUserSession } from "@/hooks/user-session-context";
+import { useParams } from "next/navigation";
 
 interface UserMessage {
   id: string | null;
@@ -20,7 +21,9 @@ interface UserMessage {
 }
 
 export function AppSidebar() {
+  const { id: retroSpectiveId } = useParams<{ id: string }>();
   const { userSession } = useUserSession();
+
   const [messages, setMessages] = useState<UserMessage[]>([]);
   const [message, setMessage] = useState("");
 
@@ -37,7 +40,7 @@ export function AppSidebar() {
   const sendMessage = () => {
     if (message.trim() && userSession) {
       const messageId = nanoid(5);
-      socket.emit("message", {
+      socket.emit("message", retroSpectiveId, {
         id: messageId,
         name: userSession.name,
         text: message,
@@ -62,7 +65,7 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar side="right">
+    <Sidebar side="right" variant="inset" className="border-l">
       <SidebarContent>
         <div className="p-2 text-sm">
           {messages.map((msg) => (
@@ -97,7 +100,7 @@ export function AppSidebar() {
           </Button>
         </form>
         <Button variant="secondary" onClick={toggleSidebar}>
-          Open/Close Chat
+          Close Chat
         </Button>
       </SidebarFooter>
     </Sidebar>

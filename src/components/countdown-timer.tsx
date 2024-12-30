@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import {
   HiMiniPlay as PlayIcon,
   HiMiniPause as PauseIcon,
+  HiArrowPathRoundedSquare as ArrowIcon,
 } from "react-icons/hi2";
 
 import { socket } from "@/socket";
 import { Button } from "./ui/button";
 import { useUserSession } from "@/hooks/user-session-context";
+import { useParams } from "next/navigation";
 
 interface CountdownTimerProps {
   adminId: string;
@@ -20,6 +22,7 @@ const CountdownTimer = ({
   defaultSeconds = 300,
 }: CountdownTimerProps) => {
   const { userSession } = useUserSession();
+  const { id: retroSpectiveId } = useParams<{ id: string }>();
 
   const [timeLeft, setTimeLeft] = useState(defaultSeconds);
   const [timerState, setTimerState] = useState<
@@ -28,19 +31,23 @@ const CountdownTimer = ({
 
   const isCurrentUserAdmin = adminId === userSession?.id;
 
-  // TODO: Mejorar este useEffect
   useEffect(() => {
     socket.on("timer-state", (state) => {
       setTimerState(state);
     });
 
+    socket.on("reset-timer", () => {
+      setTimerState("paused");
+      setTimeLeft(defaultSeconds);
+    });
+
     if (timeLeft <= 0) {
-      console.log("Finished time");
+      setTimerState("finished");
       return;
     }
 
     if (timerState === "running") {
-      socket.emit("timer-state", timerState);
+      socket.emit("timer-state", retroSpectiveId, timerState);
       const timer = setInterval(() => {
         setTimeLeft((prevTime) => prevTime - 1);
       }, 1000);
@@ -49,7 +56,7 @@ const CountdownTimer = ({
     }
 
     if (timerState === "paused") {
-      socket.emit("timer-state", timerState);
+      socket.emit("timer-state", retroSpectiveId, timerState);
     }
   }, [timeLeft, timerState]);
 
@@ -59,11 +66,17 @@ const CountdownTimer = ({
     return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
+  const handleResetTimer = () => {
+    setTimerState("paused");
+    setTimeLeft(defaultSeconds);
+    socket.emit("reset-timer", retroSpectiveId);
+  };
+
   return (
     <div className="flex gap-2 items-center mb-2">
-      {isCurrentUserAdmin && (
+      {isCurrentUserAdmin && timerState !== "finished" && (
         <div>
-          {timerState !== "running" && isCurrentUserAdmin && (
+          {timerState !== "running" && (
             <Button
               size="sm"
               variant="outline"
@@ -83,9 +96,15 @@ const CountdownTimer = ({
           )}
         </div>
       )}
-      <div className="bg-green-300 rounded-lg px-2 py-1 flex items-center gap-2 text-gray-800">
+      <div className="bg-violet-600 rounded-lg px-2 py-1.5 flex items-center gap-2 text-neutral-100">
         <TimerIcon size={16} /> {formatTime(timeLeft)}
       </div>
+      {isCurrentUserAdmin && (
+        <Button size="sm" variant="outline" onClick={handleResetTimer}>
+          <ArrowIcon size={16} />
+          Reset
+        </Button>
+      )}
     </div>
   );
 };

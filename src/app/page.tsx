@@ -8,7 +8,10 @@ export default function Home() {
   return (
     <div className="font-[family-name:var(--font-geist-sans)] h-screen flex flex-col justify-center">
       <main className="flex flex-col justify-center items-center">
-        <h1 className="text-6xl font-bold">Welcome to OpenRetros</h1>
+        <h1 className="text-6xl font-bold">
+          Welcome to{" "}
+          <span className="text-violet-700 font-black">FreeRetros</span>
+        </h1>
         <h2 className="text-2xl mt-2">
           A free tool for creating retrospectives
         </h2>

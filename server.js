@@ -1,4 +1,3 @@
-// server.js o server.ts
 import next from "next";
 import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
@@ -14,41 +13,101 @@ app.prepare().then(() => {
 
   const io = new SocketIOServer(server);
 
+  const activeUsers = {};
+
   io.on("connection", (socket) => {
     console.log("A user connected:", socket.id);
 
-    socket.on("message", (msg) => {
-      console.log("Received message:", msg);
-      socket.broadcast.emit("message", msg);
+    // Unirse a una sala y almacenar el retrospectiveId en el socket
+    socket.on("join-retrospective", (retrospectiveId, username) => {
+      console.log(`User ${username} joined retrospective ${retrospectiveId}`);
+
+      // Asociar el retrospectiveId con el socket
+      socket.data.retrospectiveId = retrospectiveId;
+
+      // Asegúrate de que la sala exista en la lista de usuarios activos
+      if (!activeUsers[retrospectiveId]) {
+        activeUsers[retrospectiveId] = [];
+      }
+
+      // Agregar al usuario a la lista de usuarios activos para esa retrospectiva
+      activeUsers[retrospectiveId].push({ id: socket.id, username });
+
+      // Unir al usuario a la sala
+      socket.join(retrospectiveId);
+
+      // Enviar la lista actualizada de usuarios activos en la retrospectiva
+      io.to(retrospectiveId).emit("active-users", activeUsers[retrospectiveId]);
     });
 
-    socket.on("posts", (posts) => {
-      console.log("Received post", posts);
-      socket.broadcast.emit("posts");
+    // Mensajes
+    socket.on("message", (retrospectiveId, msg) => {
+      console.log(`Message in retrospective ${retrospectiveId}:`, msg);
+      socket.to(retrospectiveId).emit("message", msg);
     });
 
-    socket.on("writing", (sectionId) => {
-      console.log("Someone is writing in:", sectionId);
-      socket.broadcast.emit("writing", sectionId);
+    // Posts
+    socket.on("posts", (retrospectiveId, post) => {
+      console.log(`Received posts in retrospective ${retrospectiveId}:`, post);
+      socket.to(retrospectiveId).emit("posts");
     });
 
-    socket.on("stop-writing", (sectionId) => {
-      console.log("Someone stopped writing in:", sectionId);
-      socket.broadcast.emit("stop-writing", sectionId);
+    // Escritura
+    socket.on("writing", (retrospectiveId, sectionId) => {
+      console.log(
+        `User writing in retrospective ${retrospectiveId}, section ${sectionId}`,
+      );
+      socket.to(retrospectiveId).emit("writing", sectionId);
     });
 
-    socket.on("delete-post", (sectionId, postId) => {
-      console.log("Someone deleted post:", postId);
-      socket.broadcast.emit("delete-post", sectionId, postId);
+    socket.on("stop-writing", (retrospectiveId, sectionId) => {
+      console.log(
+        `User stopped writing in retrospective ${retrospectiveId}, section ${sectionId}`,
+      );
+      io.to(retrospectiveId).emit("stop-writing", sectionId);
     });
 
-    socket.on("timer-state", (timerState) => {
-      console.log("timer state", timerState);
-      socket.broadcast.emit("timer-state", timerState);
+    // Eliminar post
+    socket.on("delete-post", (retrospectiveId, sectionId, postId) => {
+      console.log(
+        `Post deleted in retrospective ${retrospectiveId}, section ${sectionId}, post ${postId}`,
+      );
+      io.to(retrospectiveId).emit("delete-post", sectionId, postId);
     });
 
+    // Temporizador
+    socket.on("timer-state", (retrospectiveId, timerState) => {
+      console.log(
+        `Timer state in retrospective ${retrospectiveId}:`,
+        timerState,
+      );
+      io.to(retrospectiveId).emit("timer-state", timerState);
+    });
+
+    socket.on("reset-timer", (retrospectiveId) => {
+      console.log(`Resetting timer in retrospective ${retrospectiveId}`);
+      io.to(retrospectiveId).emit("reset-timer");
+    });
+
+    // Desconexión
     socket.on("disconnect", () => {
-      console.log("A user disconnected:", socket.id);
+      const retrospectiveId = socket.data.retrospectiveId;
+
+      if (retrospectiveId && activeUsers[retrospectiveId]) {
+        const users = activeUsers[retrospectiveId];
+        const userIndex = users.findIndex((user) => user.id === socket.id);
+
+        if (userIndex !== -1) {
+          // Eliminar al usuario de la lista de usuarios activos
+          const [removedUser] = users.splice(userIndex, 1);
+          console.log(
+            `User ${removedUser.username} disconnected from retrospective ${retrospectiveId}`,
+          );
+
+          // Emitir la lista actualizada de usuarios activos en la retrospectiva
+          io.to(retrospectiveId).emit("active-users", users);
+        }
+      }
     });
   });
 
