@@ -37,6 +37,7 @@ export interface CreateRetroSpectiveData {
 export type Participant = {
   id: string;
   username: string;
+  isAdmin: boolean;
 };
 
 export async function createPost({
@@ -194,6 +195,31 @@ export async function editRetroTitle(data: {
   const finalResponse = await res.json();
 
   console.log("edit section title", finalResponse);
+
+  revalidatePath("/retro/[id]", "page");
+}
+
+export async function editRetroAdminId(data: {
+  retrospectiveId: string;
+  adminId: string;
+}) {
+  const { retrospectiveId, adminId } = data;
+
+  const res = await fetch(
+    `http://localhost:3005/retrospectives/${retrospectiveId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        adminId,
+      }),
+    },
+  );
+  const finalResponse = await res.json();
+
+  console.log("edit admin id", finalResponse);
 
   revalidatePath("/retro/[id]", "page");
 }

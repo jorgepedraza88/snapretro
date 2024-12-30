@@ -63,153 +63,98 @@
       ]
     },
     {
-      "id": "fYGFQ-f0KoRUs3T",
-      "adminId": "aW5H4",
-      "avatarUrl": "",
-      "adminName": "Joan",
-      "date": "2024-12-28T12:06:13.798+01:00",
-      "timer": 150,
-      "allowVotes": false,
-      "enableChat": true,
-      "enablePassword": true,
-      "password": "pepe",
-      "sections": [
-        {
-          "id": "section_MAgRj",
-          "title": "🤓 Start doing",
-          "posts": []
-        },
-        {
-          "id": "section_tYAkN",
-          "title": "❌ Stop doing",
-          "posts": []
-        },
-        {
-          "id": "section_aXJoK",
-          "title": "👏🏼 Keep doing",
-          "posts": []
-        },
-        {
-          "id": "section_B7gOg",
-          "title": "🎉 Shout outs",
-          "posts": []
-        }
-      ]
-    },
-    {
-      "id": "BMSqIHejgNXC3cW",
-      "adminId": "6yqA9",
-      "avatarUrl": "",
-      "adminName": "Joan",
-      "date": "2024-12-28T12:08:20.882+01:00",
-      "timer": 150,
-      "allowVotes": false,
-      "enableChat": true,
-      "enablePassword": true,
-      "password": "pepe",
-      "sections": [
-        {
-          "id": "section_6qTBe",
-          "title": "🤓 Start doing",
-          "posts": [
-            {
-              "id": "IL_-3",
-              "userId": "6yqA9",
-              "content": "test"
-            }
-          ]
-        },
-        {
-          "id": "section_wlSk9",
-          "title": "❌ Stop doing",
-          "posts": []
-        },
-        {
-          "id": "section_DbbQM",
-          "title": "👏🏼 Keep doing",
-          "posts": []
-        },
-        {
-          "id": "section_FQlY8",
-          "title": "🎉 Shout outs",
-          "posts": []
-        }
-      ]
-    },
-    {
-      "id": "vBMdPOwZ84-yE7b",
-      "adminId": "h2wwc",
+      "id": "zMYdjPY-nn5mROG",
+      "adminId": "f_ZSP",
       "avatarUrl": "",
       "adminName": "Jorge",
-      "date": "2024-12-28T12:09:03.955+01:00",
-      "timer": 180,
+      "date": "2024-12-30T18:09:15.941+01:00",
+      "timer": 300,
       "allowVotes": false,
       "enableChat": true,
       "enablePassword": false,
       "password": null,
       "sections": [
         {
-          "id": "section_3JYKg",
+          "id": "section_LYa9-",
           "title": "🤓 Start doing",
           "posts": []
         },
         {
-          "id": "section_qy-tI",
+          "id": "section_Mf-qJ",
           "title": "❌ Stop doing",
           "posts": []
         },
         {
-          "id": "section_INU9K",
+          "id": "section_tQhZu",
           "title": "👏🏼 Keep doing",
-          "posts": []
-        },
-        {
-          "id": "section_TKJ9S",
-          "title": "🎉 Shout outs",
           "posts": []
         }
       ]
     },
     {
-      "id": "mAiSB2cs2EVO0sC",
-      "adminId": "M3DKw",
+      "id": "TDXzvTZxONHXDYw",
+      "adminId": "U-oaE",
+      "avatarUrl": "",
+      "adminName": "Test",
+      "date": "2024-12-30T18:17:27.860+01:00",
+      "timer": 300,
+      "allowVotes": false,
+      "enableChat": true,
+      "enablePassword": false,
+      "password": null,
+      "sections": [
+        {
+          "id": "section__Ts93",
+          "title": "🤓 Start doing",
+          "posts": []
+        },
+        {
+          "id": "section_XXqPP",
+          "title": "❌ Stop doing",
+          "posts": []
+        },
+        {
+          "id": "section_m_j9X",
+          "title": "👏🏼 Keep doing",
+          "posts": []
+        }
+      ]
+    },
+    {
+      "id": "cRJsboTjgKxBKT2",
+      "adminId": "_aN3b",
+      "avatarUrl": "",
+      "adminName": "Test",
+      "date": "2024-12-30T18:19:28.684+01:00",
+      "timer": 300,
+      "allowVotes": false,
+      "enableChat": true,
+      "enablePassword": false,
+      "password": null,
+      "sections": [
+        {
+          "id": "section_YeFQy",
+          "title": "🤓 Start doing",
+          "posts": []
+        },
+        {
+          "id": "section_DnqDq",
+          "title": "❌ Stop doing",
+          "posts": []
+        },
+        {
+          "id": "section_jZ4lD",
+          "title": "👏🏼 Keep doing",
+          "posts": []
+        }
+      ]
+    },
+    {
+      "id": "XvIDHTXiFOmGAqM",
+      "adminId": "CBwCO",
       "avatarUrl": "",
       "adminName": "Jorge",
-      "date": "2024-12-28T12:09:43.864+01:00",
-      "timer": 300,
-      "allowVotes": false,
-      "enableChat": true,
-      "enablePassword": true,
-      "password": "j",
-      "sections": [
-        {
-          "id": "section_oqao5",
-          "title": "🤓 Start doing",
-          "posts": []
-        },
-        {
-          "id": "section_NdKj8",
-          "title": "❌ Stop doing",
-          "posts": []
-        },
-        {
-          "id": "section_Eixdd",
-          "title": "👏🏼 Keep doing",
-          "posts": []
-        },
-        {
-          "id": "section_Mz7tS",
-          "title": "🎉 Shout outs",
-          "posts": []
-        }
-      ]
-    },
-    {
-      "id": "bbaIM2oejug9WwZ",
-      "adminId": "aZF69",
-      "avatarUrl": "",
-      "adminName": "alex",
-      "date": "2024-12-28T12:11:43.509+01:00",
+      "date": "2024-12-30T18:20:04.034+01:00",
       "timer": 300,
       "allowVotes": false,
       "enableChat": true,
@@ -217,81 +162,17 @@
       "password": null,
       "sections": [
         {
-          "id": "section_1CN3M",
+          "id": "section_K13FP",
           "title": "🤓 Start doing",
           "posts": []
         },
         {
-          "id": "section_kkBBg",
+          "id": "section_EFXV-",
           "title": "❌ Stop doing",
           "posts": []
         },
         {
-          "id": "section_t3sk_",
-          "title": "👏🏼 Keep doing",
-          "posts": []
-        }
-      ]
-    },
-    {
-      "id": "8Ma5uewqyGlcPvU",
-      "adminId": "WYqz2",
-      "avatarUrl": "",
-      "adminName": "Joan",
-      "date": "2024-12-28T12:13:15.049+01:00",
-      "timer": 300,
-      "allowVotes": false,
-      "enableChat": true,
-      "enablePassword": false,
-      "password": null,
-      "sections": [
-        {
-          "id": "section_eiVeI",
-          "title": "🤓 Start doing",
-          "posts": []
-        },
-        {
-          "id": "section_x2-Ao",
-          "title": "❌ Stop doing",
-          "posts": []
-        },
-        {
-          "id": "section_jL6Ak",
-          "title": "👏🏼 Keep doing",
-          "posts": []
-        }
-      ]
-    },
-    {
-      "id": "m-kvEC_LD_nQ0WK",
-      "adminId": "Up6hb",
-      "avatarUrl": "",
-      "adminName": "Joan",
-      "date": "2024-12-28T12:13:27.268+01:00",
-      "timer": 300,
-      "allowVotes": false,
-      "enableChat": true,
-      "enablePassword": true,
-      "password": "j",
-      "sections": [
-        {
-          "id": "section_Ni7NA",
-          "title": "🤓 Start doing",
-          "posts": [
-            {
-              "id": "WHGfi",
-              "userId": "pp4md",
-              "content": "w"
-            }
-          ]
-        },
-        {
-          "id": "section_-sE2C",
-          "title": "❌ Stop doing",
-          "posts": []
-        },
-        {
-          "id": "section_iUZzz",
+          "id": "section_8uo3M",
           "title": "👏🏼 Keep doing",
           "posts": []
         }

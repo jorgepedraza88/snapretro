@@ -41,7 +41,7 @@ export function CreateRetroForm() {
   const onSubmit = async (data: CreateRetroSpectiveData) => {
     try {
       await createRetro(data);
-      socket.emit("join-retrospective", data.id, data.adminName);
+      socket.emit("join-retrospective", data.id, data.adminName, true);
     } catch (error) {
       console.log(error);
     } finally {

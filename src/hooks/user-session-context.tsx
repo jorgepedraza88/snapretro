@@ -48,11 +48,17 @@ export function UserSessionContextProvider({
 
   const [userSession, setUserSession] = useState<UserSession | null>(null);
   const [userName, setUserName] = useState("");
+  const [disconnected, setDisconnected] = useState(false);
 
   useEffect(() => {
     if (!socket.connected) {
       socket.connect();
     }
+
+    socket.on("disconnect", () => {
+      setUserSession(null);
+      setDisconnected(true);
+    });
 
     return () => {
       socket.off();
@@ -72,7 +78,19 @@ export function UserSessionContextProvider({
 
   return (
     <UserSessionContext.Provider value={{ userSession, setUserSession }}>
-      {!userSession && shouldLoadUserDialog && (
+      {disconnected && (
+        <AlertDialog open>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Disconnected</AlertDialogTitle>
+              <AlertDialogDescription>
+                You have been disconnected from the session
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+      {!userSession && shouldLoadUserDialog && !disconnected && (
         <AlertDialog open>
           <AlertDialogContent>
             <AlertDialogHeader>
