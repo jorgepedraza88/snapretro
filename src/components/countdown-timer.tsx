@@ -58,6 +58,7 @@ const CountdownTimer = ({
     if (timerState === "paused") {
       socket.emit("timer-state", retroSpectiveId, timerState);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeLeft, timerState]);
 
   const formatTime = (seconds: number) => {

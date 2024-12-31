@@ -61,6 +61,8 @@ export function RetroProtectedWrapper({
               name="password"
               type="password"
               onChange={(e) => setPassword(e.target.value)}
+              tabIndex={0}
+              autoFocus
             />
           </Label>
           <div className="flex justify-end">

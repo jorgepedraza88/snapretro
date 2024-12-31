@@ -82,6 +82,7 @@ export function RetroCard({
       socket.off("stop-writing");
       socket.off("delete-post");
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleNewPostChange = (e: React.ChangeEvent<HTMLInputElement>) => {

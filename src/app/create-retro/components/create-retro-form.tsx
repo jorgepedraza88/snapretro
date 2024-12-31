@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { HiArrowRight as ArrowRightIcon } from "react-icons/hi2";
+import { ImSpinner as SpinnerIcon } from "react-icons/im";
 import { FormProvider, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { nanoid } from "nanoid";
@@ -20,6 +21,7 @@ export function CreateRetroForm() {
   const { setUserSession } = useUserSession();
 
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const progressPercentage = (step / 3) * 100;
 
   const form = useForm<CreateRetroSpectiveData>({
@@ -39,11 +41,13 @@ export function CreateRetroForm() {
   });
 
   const onSubmit = async (data: CreateRetroSpectiveData) => {
+    setIsSubmitting(true);
     try {
       await createRetro(data);
       socket.emit("join-retrospective", data.id, data.adminName, true);
     } catch (error) {
       console.log(error);
+      setIsSubmitting(false);
     } finally {
       router.push(`/retro/${data.id}`);
     }
@@ -115,9 +119,15 @@ export function CreateRetroForm() {
             </Button>
           )}
           {step === 3 && (
-            <Button type="submit">
-              Let&apos;s begin
-              <ArrowRightIcon size={24} />
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <SpinnerIcon className="animate-spin" />
+              ) : (
+                <>
+                  Let&apos;s begin
+                  <ArrowRightIcon size={24} />
+                </>
+              )}
             </Button>
           )}
         </div>

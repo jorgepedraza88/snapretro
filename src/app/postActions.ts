@@ -217,9 +217,7 @@ export async function editRetroAdminId(data: {
       }),
     },
   );
-  const finalResponse = await res.json();
-
-  console.log("edit admin id", finalResponse);
+  const response = await res.json();
 
   revalidatePath("/retro/[id]", "page");
 }
@@ -229,16 +227,6 @@ export async function addParticipants(data: {
   participants: Participant[];
 }) {
   const { retrospectiveId, participants } = data;
-
-  const response = await fetch(
-    `http://localhost:3005/retrospectives/${retrospectiveId}`,
-  );
-
-  if (!response.ok) {
-    throw new Error("Error fetching retrospective");
-  }
-
-  const retrospective = await response.json();
 
   const res = await fetch(
     `http://localhost:3005/retrospectives/${retrospectiveId}`,
@@ -252,9 +240,9 @@ export async function addParticipants(data: {
       }),
     },
   );
-  const finalResponse = await res.json();
+  const response = await res.json();
 
-  console.log("add participant", finalResponse);
+  console.log("add participant", response);
 
   revalidatePath("/retro/[id]", "page");
 }

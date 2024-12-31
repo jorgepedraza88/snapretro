@@ -92,7 +92,7 @@ export function UserSessionContextProvider({
       )}
       {!userSession && shouldLoadUserDialog && !disconnected && (
         <AlertDialog open>
-          <AlertDialogContent>
+          <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
             <AlertDialogHeader>
               <AlertDialogTitle>Welcome!</AlertDialogTitle>
               <AlertDialogDescription>
@@ -110,6 +110,8 @@ export function UserSessionContextProvider({
                 <Input
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
+                  tabIndex={0}
+                  autoFocus
                 />
               </Label>
               <div className="flex justify-end mt-4">

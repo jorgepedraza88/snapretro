@@ -30,30 +30,36 @@ app.prepare().then(() => {
     console.log("A user connected:", socket.id);
 
     // Unirse a una sala y almacenar el retrospectiveId en el socket
-    socket.on("join-retrospective", (retrospectiveId, username, isAdmin) => {
-      console.log(`User ${username} joined retrospective ${retrospectiveId}`);
+    socket.on(
+      "join-retrospective",
+      (retrospectiveId, username, isAdmin = false) => {
+        console.log(`User ${username} joined retrospective ${retrospectiveId}`);
 
-      if (isAdmin) {
-        console.log(`User ${username} is an admin`);
-      }
+        if (isAdmin) {
+          console.log(`User ${username} is an admin`);
+        }
 
-      // Asociar el retrospectiveId con el socket
-      socket.data.retrospectiveId = retrospectiveId;
+        // Asociar el retrospectiveId con el socket
+        socket.data.retrospectiveId = retrospectiveId;
 
-      // Asegúrate de que la sala exista en la lista de usuarios activos
-      if (!activeUsers[retrospectiveId]) {
-        activeUsers[retrospectiveId] = [];
-      }
+        // Asegúrate de que la sala exista en la lista de usuarios activos
+        if (!activeUsers[retrospectiveId]) {
+          activeUsers[retrospectiveId] = [];
+        }
 
-      // Agregar al usuario a la lista de usuarios activos para esa retrospectiva
-      activeUsers[retrospectiveId].push({ id: socket.id, username, isAdmin });
+        // Agregar al usuario a la lista de usuarios activos para esa retrospectiva
+        activeUsers[retrospectiveId].push({ id: socket.id, username, isAdmin });
 
-      // Unir al usuario a la sala
-      socket.join(retrospectiveId);
+        // Unir al usuario a la sala
+        socket.join(retrospectiveId);
 
-      // Enviar la lista actualizada de usuarios activos en la retrospectiva
-      io.to(retrospectiveId).emit("active-users", activeUsers[retrospectiveId]);
-    });
+        // Enviar la lista actualizada de usuarios activos en la retrospectiva
+        io.to(retrospectiveId).emit(
+          "active-users",
+          activeUsers[retrospectiveId],
+        );
+      },
+    );
 
     socket.on("get-active-users", (retrospectiveId) => {
       io.to(retrospectiveId).emit("active-users", activeUsers[retrospectiveId]);
@@ -114,14 +120,17 @@ app.prepare().then(() => {
       const oldAdminIndex = users.findIndex((user) => user.isAdmin);
       const newAdminIndex = users.findIndex((user) => user.id === newAdminId);
 
-      if (newAdminIndex) {
+      if (newAdminIndex !== undefined) {
         users[newAdminIndex].isAdmin = true;
         console.log(`User ${users[newAdminIndex].username} is now the admin.`);
 
         // Quitar el estado de administrador del usuario anterior
         users[oldAdminIndex].isAdmin = false;
+        console.log(
+          `User ${users[oldAdminIndex].username} is no longer the admin.`,
+        );
 
-        io.to(retrospectiveId).emit("assign-new-admin", newAdminId);
+        io.to(retrospectiveId).emit("assign-new-admin", newAdminId, users);
 
         // Emitir la lista actualizada de usuarios activos en la retrospectiva
         io.to(retrospectiveId).emit("active-users", users);

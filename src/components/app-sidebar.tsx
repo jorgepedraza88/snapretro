@@ -94,6 +94,7 @@ export function AppSidebar() {
             placeholder="Type a message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            autoFocus
           />
           <Button variant="secondary" type="submit">
             Send
