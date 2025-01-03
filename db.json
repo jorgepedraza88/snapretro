@@ -797,6 +797,81 @@
           "posts": []
         }
       ]
+    },
+    {
+      "id": "tTdtDNqdfwDJiER",
+      "adminId": "Aht0o",
+      "avatarUrl": "",
+      "adminName": "Alex",
+      "date": "2024-12-31T12:10:40.889+01:00",
+      "timer": 300,
+      "allowVotes": false,
+      "enableChat": true,
+      "enablePassword": true,
+      "password": "Pompa",
+      "sections": [
+        {
+          "id": "section_sbOo2",
+          "title": "🤓 Start doing",
+          "posts": [
+            {
+              "id": "DBY6E",
+              "userId": "QaIoV",
+              "content": "test"
+            }
+          ]
+        },
+        {
+          "id": "section_Csl3-",
+          "title": "❌ Stop doing",
+          "posts": []
+        },
+        {
+          "id": "section_R6WtA",
+          "title": "👏🏼 Keep doing",
+          "posts": []
+        },
+        {
+          "id": "section_IbcOe",
+          "title": "🎉 Shout outs",
+          "posts": []
+        }
+      ]
+    },
+    {
+      "id": "7ZXpajf6rGw054P",
+      "adminId": "9jVvP",
+      "avatarUrl": "",
+      "adminName": "Testing dark mode",
+      "date": "2025-01-03T09:11:10.403+01:00",
+      "timer": 300,
+      "allowVotes": false,
+      "enableChat": true,
+      "enablePassword": false,
+      "password": null,
+      "sections": [
+        {
+          "id": "section_w25tM",
+          "title": "🤓 Start doing",
+          "posts": [
+            {
+              "id": "z91UU",
+              "userId": "9jVvP",
+              "content": "Que"
+            }
+          ]
+        },
+        {
+          "id": "section_rpk6l",
+          "title": "❌ Stop doing",
+          "posts": []
+        },
+        {
+          "id": "section_jHDPp",
+          "title": "👏🏼 Keep doing",
+          "posts": []
+        }
+      ]
     }
   ]
 }

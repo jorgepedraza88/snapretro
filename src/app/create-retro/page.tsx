@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 
 export default function Page() {
   return (
-    <div className="font-[family-name:var(--font-geist-sans)] h-screen flex justify-center">
+    <div className="font-[family-name:var(--font-geist-sans)] h-screen flex justify-center bg-gray-100 dark:bg-neutral-800">
       <div className="py-24">
-        <h1 className="text-4xl font-medium">Create your Retrospective</h1>
+        <h1 className="text-4xl font-medium dark:text-neutral-100">
+          Create your Retrospective
+        </h1>
         <main className="flex flex-col justify-center items-center max-w-2xl">
           <CreateRetroForm />
           <div className="text-xs text-gray-500 mt-8">

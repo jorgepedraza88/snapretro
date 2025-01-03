@@ -28,7 +28,7 @@ export function CreateRetroSecond() {
 
   return (
     <div className="mb-8">
-      <h3 className="mb-4 font-medium">
+      <h3 className="mb-4 font-medium dark:text-neutral-100">
         Configure your retrospective meeting:
       </h3>
       <div className="w-full space-y-1">
@@ -110,7 +110,7 @@ export function CreateRetroSecond() {
       {!!timer && (
         <div className="my-4 ml-12">
           <Label>Select time:</Label>
-          <p className="text-sm text-center w-full">
+          <p className="text-sm text-center w-full dark:text-neutral-100">
             {formatTimer(timer)} minutes
           </p>
           <Slider

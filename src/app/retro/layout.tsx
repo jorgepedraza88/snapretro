@@ -13,7 +13,7 @@ export default async function RetroLayout({
       <SidebarProvider defaultOpen={false}>
         <SidebarInset>
           <NavBar />
-          <main className="w-full bg-neutral-50 h-full">{children}</main>
+          <main className="w-full bg-neutral-50 dark:bg-neutral-800 h-full">{children}</main>
         </SidebarInset>
         <AppSidebar />
       </SidebarProvider>

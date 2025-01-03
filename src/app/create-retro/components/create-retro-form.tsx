@@ -114,7 +114,11 @@ export function CreateRetroForm() {
             </Button>
           )}
           {step !== 3 && (
-            <Button type="button" onClick={handleChangeStep}>
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={handleChangeStep}
+            >
               Next
             </Button>
           )}

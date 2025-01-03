@@ -12,7 +12,7 @@ export function CreateRetroThird() {
         name="sectionsNumber"
         render={({ field }) => (
           <div>
-            <p className="text-lg text-center w-full">{field.value}</p>
+            <p className="text-lg text-center w-full dark:text-neutral-100">{field.value}</p>
             <Slider
               defaultValue={[3]}
               name="sections"

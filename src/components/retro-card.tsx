@@ -82,7 +82,7 @@ export function RetroCard({
       socket.off("stop-writing");
       socket.off("delete-post");
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleNewPostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,9 +150,9 @@ export function RetroCard({
 
   return (
     <div>
-      <Card className="bg-gray-100 flex flex-col justify-between h-full pb-4">
+      <Card className="bg-gray-100 dark:bg-neutral-900 flex flex-col justify-between h-full pb-4">
         <div>
-          <div className="p-4 bg-gray-200 rounded-t-lg mb-2 group">
+          <div className="p-4 bg-gray-200 dark:bg-neutral-700 rounded-t-lg mb-2 group">
             <CardTitle className="flex justify-between items-center">
               {isEditingSectionTitle ? (
                 <form onSubmit={handleChangeSectionTitle}>

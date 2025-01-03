@@ -2,6 +2,7 @@
 // import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useFormContext } from "react-hook-form";
 
 export function CreateRetroFirst() {
@@ -19,7 +20,9 @@ export function CreateRetroFirst() {
         </Avatar>
       </div> */}
       <div className="w-full text-sm space-y-1">
-        <label htmlFor="name">Name</label>
+        <Label htmlFor="name" className="dark:text-neutral-100">
+          Name
+        </Label>
         <Input
           id="name"
           placeholder="Enter your name"

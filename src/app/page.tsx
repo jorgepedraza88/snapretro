@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
-    <div className="font-[family-name:var(--font-geist-sans)] h-screen flex flex-col justify-center">
+    <div className="font-[family-name:var(--font-geist-sans)] h-screen flex flex-col justify-center bg-gray-100 dark:bg-neutral-800">
       <main className="flex flex-col justify-center items-center">
-        <h1 className="text-6xl font-bold">
+        <h1 className="text-6xl font-bold dark:text-neutral-100">
           Welcome to{" "}
-          <span className="text-violet-700 font-black">FreeRetros</span>
+          <span className="text-violet-600 font-black">FreeRetros</span>
         </h1>
-        <h2 className="text-2xl mt-2">
+        <h2 className="text-2xl mt-2 dark:text-neutral-100">
           A free tool for creating retrospectives
         </h2>
         <div className="flex justify-center max-w-96 mt-8 gap-4 items-center">

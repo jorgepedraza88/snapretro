@@ -1,15 +1,23 @@
 import Link from "next/link";
 
+import { SwitchColorMode } from "./switch-color-mode";
+
 export function NavBar() {
   return (
-    <div className="flex justify-between px-4 py-2 shadow items-center bg-neutral-50 border-b">
+    <div className="flex justify-between px-4 py-2 shadow items-center bg-neutral-50 dark:bg-neutral-900 border-b dark:border-neutral-900">
       <div>
-        <Link className="font-black text-lg text-violet-700" href="/">
+        <Link
+          className="font-black text-lg text-violet-600 dark:text-neutral-100"
+          href="/"
+        >
           FreeRetros
         </Link>
       </div>
-      <div>
-        <p className="text-sm font-semibold">Buy me a coffee!</p>
+      <div className="flex items-center gap-2">
+        <SwitchColorMode />
+        <p className="text-sm font-semibold dark:text-neutral-100">
+          Buy me a coffee!
+        </p>
       </div>
     </div>
   );
