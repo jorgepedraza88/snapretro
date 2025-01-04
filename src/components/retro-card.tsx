@@ -176,8 +176,6 @@ export function RetroCard({
     return null;
   }
 
-  console.log(sortedPostsByVotes);
-
   return (
     <div>
       <Card className="bg-gray-100 dark:bg-neutral-900 flex flex-col justify-between h-full pb-4">

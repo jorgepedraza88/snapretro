@@ -66,7 +66,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar side="right" variant="inset" className="border-l">
-      <SidebarContent>
+      <SidebarContent className="dark:bg-neutral-800">
         <div className="p-2 text-sm">
           {messages.map((msg) => (
             <p
