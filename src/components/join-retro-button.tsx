@@ -53,7 +53,7 @@ export function JoinRetroButton() {
   }
 
   return (
-    <Button variant="outline" size="lg" onClick={() => setIsAddingId(true)}>
+    <Button variant="outline" size="lg" className="w-full lg:w-auto" onClick={() => setIsAddingId(true)}>
       <JoinIcon size={24} />
       Join into a retrospective
     </Button>

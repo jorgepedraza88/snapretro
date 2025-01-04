@@ -9,6 +9,7 @@ interface CreatePostParams {
   newPost: {
     userId: string;
     content: string;
+    votes: string[];
   };
   retrospectiveId: string;
 }
@@ -45,7 +46,7 @@ export async function createPost({
   newPost,
   retrospectiveId,
 }: CreatePostParams) {
-  const { userId, content } = newPost;
+  const { userId, content, votes } = newPost;
 
   const response = await fetch(
     `http://localhost:3005/retrospectives/${retrospectiveId}`,
@@ -63,7 +64,7 @@ export async function createPost({
       sect.id === section.id
         ? {
             ...sect,
-            posts: [...sect.posts, { id: nanoid(5), userId, content }],
+            posts: [...sect.posts, { id: nanoid(5), userId, content, votes }],
           }
         : sect,
   );
@@ -243,6 +244,84 @@ export async function addParticipants(data: {
   const response = await res.json();
 
   console.log("add participant", response);
+
+  revalidatePath("/retro/[id]", "page");
+}
+
+export async function handleVotePost({
+  sectionId,
+  postId,
+  retrospectiveId,
+  userId,
+  hasVoted,
+}: {
+  sectionId: string;
+  postId: string;
+  retrospectiveId: string;
+  userId: string;
+  hasVoted: boolean;
+}) {
+  const response = await fetch(
+    `http://localhost:3005/retrospectives/${retrospectiveId}`,
+  );
+
+  if (!response.ok) {
+    throw new Error("Error fetching retrospective");
+  }
+
+  const retrospective = await response.json();
+
+  let updatedSections;
+
+  if (hasVoted) {
+    updatedSections = retrospective.sections.map(
+      (sect: RetrospectiveSection) =>
+        sect.id === sectionId
+          ? {
+              ...sect,
+              posts: sect.posts.map((post) =>
+                post.id === postId
+                  ? {
+                      ...post,
+                      votes: post.votes.filter((vote) => vote !== userId),
+                    }
+                  : post,
+              ),
+            }
+          : sect,
+    );
+  } else {
+    updatedSections = retrospective.sections.map(
+      (sect: RetrospectiveSection) =>
+        sect.id === sectionId
+          ? {
+              ...sect,
+              posts: sect.posts.map((post) =>
+                post.id === postId
+                  ? { ...post, votes: [...post.votes, userId] }
+                  : post,
+              ),
+            }
+          : sect,
+    );
+  }
+
+  const res = await fetch(
+    `http://localhost:3005/retrospectives/${retrospectiveId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sections: updatedSections,
+      }),
+    },
+  );
+
+  if (!res.ok) {
+    throw new Error("Error voting post");
+  }
 
   revalidatePath("/retro/[id]", "page");
 }

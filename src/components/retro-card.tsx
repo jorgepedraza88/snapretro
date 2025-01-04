@@ -5,6 +5,7 @@ import {
   HiOutlineChatBubbleOvalLeftEllipsis as WritingIcon,
   HiTrash as RemoveIcon,
   HiPencil as EditIcon,
+  HiHandThumbUp as VoteIcon,
 } from "react-icons/hi2";
 import { socket } from "@/socket";
 
@@ -12,6 +13,7 @@ import {
   createPost,
   destroyPost,
   editRetroTitle,
+  handleVotePost,
   revalidate,
 } from "@/app/postActions";
 import { Input } from "./ui/input";
@@ -19,6 +21,7 @@ import { Button } from "./ui/button";
 import { RetrospectiveSection } from "@/types/Retro";
 import { useParams } from "next/navigation";
 import { useUserSession } from "@/hooks/user-session-context";
+import { cn } from "@/lib/utils";
 
 interface RetroCardProps {
   title: string;
@@ -30,6 +33,7 @@ interface RetroCardProps {
 interface NewPost {
   content: string;
   userId: string;
+  votes: string[];
 }
 
 export function RetroCard({
@@ -43,7 +47,11 @@ export function RetroCard({
   const retrospectiveId = params.id;
   const isAdmin = adminId === userSession?.id;
 
-  const defaultPostState = { userId: userSession?.id || "", content: "" };
+  const defaultPostState = {
+    userId: userSession?.id || "",
+    content: "",
+    votes: [],
+  };
 
   const [newPost, setNewPost] = useState<NewPost>(defaultPostState);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -148,6 +156,28 @@ export function RetroCard({
     }
   };
 
+  const handleAddVote = async (postId: string, hasVoted: boolean) => {
+    if (userSession?.id) {
+      await handleVotePost({
+        sectionId: section.id,
+        postId,
+        retrospectiveId,
+        userId: userSession.id,
+        hasVoted,
+      });
+    }
+  };
+
+  const sortedPostsByVotes = section.posts.sort(
+    (a, b) => b.votes.length - a.votes.length,
+  );
+
+  if (!userSession) {
+    return null;
+  }
+
+  console.log(sortedPostsByVotes);
+
   return (
     <div>
       <Card className="bg-gray-100 dark:bg-neutral-900 flex flex-col justify-between h-full pb-4">
@@ -178,23 +208,47 @@ export function RetroCard({
             <CardDescription>{description}</CardDescription>
           </div>
           <div>
-            {section.posts.length > 0 ? (
-              section.posts.map((post) => (
-                <Card key={post.id} className="mx-2 my-2 group">
-                  <div className="p-2 text-sm flex justify-between items-center gap-2">
-                    <p>{post.content}</p>
-                    {userSession?.id === post.userId && (
-                      <Button
-                        variant="ghost"
-                        className="p-1.5 h-auto invisible group-hover:visible"
-                        onClick={() => handleDestroyPost(post.id)}
-                      >
-                        <RemoveIcon className="shrink-0" />
-                      </Button>
-                    )}
-                  </div>
-                </Card>
-              ))
+            {sortedPostsByVotes.length > 0 ? (
+              sortedPostsByVotes.map((post) => {
+                const hasVoted = post.votes.includes(userSession.id);
+
+                return (
+                  <Card key={post.id} className="mx-2 my-2 group">
+                    <div className="p-2 text-sm flex justify-between items-center gap-2">
+                      <p>{post.content}</p>
+
+                      <div className="flex gap-2 items-center">
+                        <div className="text-xs mt-px">
+                          {post.votes.length !== 0 && `+${post.votes.length}`}
+                        </div>
+                        {userSession.id !== post.userId && (
+                          <Button
+                            variant="ghost"
+                            className={cn(
+                              "p-1.5 h-auto invisible group-hover:visible",
+                              {
+                                "text-violet-500 visible": hasVoted,
+                              },
+                            )}
+                            onClick={() => handleAddVote(post.id, hasVoted)}
+                          >
+                            <VoteIcon className="shrink-0" />
+                          </Button>
+                        )}
+                        {userSession.id === post.userId && (
+                          <Button
+                            variant="ghost"
+                            className="p-1.5 h-auto "
+                            onClick={() => handleDestroyPost(post.id)}
+                          >
+                            <RemoveIcon className="shrink-0" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })
             ) : (
               <div className="p-2 text-sm text-gray-400">Write anything</div>
             )}

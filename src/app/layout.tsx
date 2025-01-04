@@ -26,10 +26,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased max-h-screen lg:overflow-hidden`}
       >
+        
         <UserSessionContextProvider>{children}</UserSessionContextProvider>
         <Toaster />
       </body>

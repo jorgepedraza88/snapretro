@@ -2,6 +2,7 @@ export interface RetrospectivePost {
   id: string;
   userId: string;
   content: string;
+  votes: string[]
 }
 
 export interface RetrospectiveSection {

@@ -30,7 +30,7 @@ export default async function Page({
       passwordEnabled={retroSpectiveData.enablePassword}
       retroPassword={retroSpectiveData.password}
     >
-      <div className="flex gap-2">
+      <div className="lg:flex gap-2">
         <div className="min-w-60">
           <Participants adminId={retroSpectiveData.adminId} />
         </div>
