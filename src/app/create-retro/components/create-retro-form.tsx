@@ -5,7 +5,6 @@ import { ImSpinner as SpinnerIcon } from "react-icons/im";
 import { FormProvider, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { nanoid } from "nanoid";
-import { DateTime } from "luxon";
 import { socket } from "@/socket";
 
 import { Button } from "@/components/ui/button";
@@ -30,7 +29,6 @@ export function CreateRetroForm() {
       adminId: nanoid(5),
       avatarUrl: "",
       adminName: "",
-      date: DateTime.now().toISO(),
       timer: 300,
       allowVotes: false,
       enableChat: true,

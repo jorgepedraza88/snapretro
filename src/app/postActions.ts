@@ -3,6 +3,11 @@ import { RetrospectiveSection } from "@/types/Retro";
 import { nanoid } from "nanoid";
 import { revalidatePath } from "next/cache";
 import { generateDefaultSections } from "./utils";
+import { DateTime } from "luxon";
+
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 interface CreatePostParams {
   section: RetrospectiveSection;
@@ -138,66 +143,46 @@ export async function destroyPost({
 
 export async function createRetro(data: CreateRetroSpectiveData) {
   const { sectionsNumber, ...restData } = data;
-  const res = await fetch(`http://localhost:3005/retrospectives`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      ...restData,
-      sections: generateDefaultSections(sectionsNumber),
-    }),
-  });
 
-  if (!res.ok) {
+  try {
+    const retrospective = await prisma.retrospective.create({
+      data: {
+        ...restData,
+        date: DateTime.now().toISO(),
+        sections: {
+          create: generateDefaultSections(sectionsNumber),
+        },
+      },
+      include: { sections: { include: { posts: true } } }, // Include nested sections and posts
+    });
+
+    return retrospective; // Return the created retrospective
+  } catch (error) {
+    console.error("Error creating retrospective:", error);
     throw new Error("Error creating retrospective");
   }
-
-  const response = await res.json();
-
-  return response;
 }
 
-export async function editRetroTitle(data: {
+export async function editRetroSectionTitle(data: {
   retrospectiveId: string;
   sectionId: string;
   title: string;
 }) {
-  const { retrospectiveId, sectionId, title } = data;
+  const { sectionId, title } = data;
 
-  const response = await fetch(
-    `http://localhost:3005/retrospectives/${retrospectiveId}`,
-  );
+  try {
+    // Update the section title directly in the database
+    await prisma.retrospectiveSection.update({
+      where: { id: sectionId },
+      data: { title },
+    });
 
-  if (!response.ok) {
-    throw new Error("Error fetching retrospective");
+    // Optionally revalidate the page to reflect changes
+    revalidatePath("/retro/[id]", "page");
+  } catch (error) {
+    console.error("Error editing section title:", error);
+    throw new Error("Failed to edit section title");
   }
-
-  const retrospective = await response.json();
-
-  const updatedSections = retrospective.sections.map(
-    (section: RetrospectiveSection) =>
-      section.id === sectionId ? { ...section, title } : section,
-  );
-
-  const res = await fetch(
-    `http://localhost:3005/retrospectives/${retrospectiveId}`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        sections: updatedSections,
-      }),
-    },
-  );
-
-  const finalResponse = await res.json();
-
-  console.log("edit section title", finalResponse);
-
-  revalidatePath("/retro/[id]", "page");
 }
 
 export async function editRetroAdminId(data: {
@@ -219,31 +204,6 @@ export async function editRetroAdminId(data: {
     },
   );
   const response = await res.json();
-
-  revalidatePath("/retro/[id]", "page");
-}
-
-export async function addParticipants(data: {
-  retrospectiveId: string;
-  participants: Participant[];
-}) {
-  const { retrospectiveId, participants } = data;
-
-  const res = await fetch(
-    `http://localhost:3005/retrospectives/${retrospectiveId}`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        participants,
-      }),
-    },
-  );
-  const response = await res.json();
-
-  console.log("add participant", response);
 
   revalidatePath("/retro/[id]", "page");
 }

@@ -2,7 +2,7 @@ export interface RetrospectivePost {
   id: string;
   userId: string;
   content: string;
-  votes: string[]
+  votes: string[];
 }
 
 export interface RetrospectiveSection {
@@ -14,15 +14,11 @@ export interface RetrospectiveSection {
 export interface RetrospectiveData {
   id: string;
   adminId: string;
-  date: string;
+  date: Date;
   allowVotes: boolean;
   enablePassword: boolean;
   password: string | null;
   timer: number;
   enableChat: boolean;
   sections: RetrospectiveSection[];
-  participants: {
-    name: string;
-    id: string;
-  }[];
 }

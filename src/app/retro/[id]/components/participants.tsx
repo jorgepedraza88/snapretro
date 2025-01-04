@@ -19,6 +19,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { setupChannel } from "@/hooks/use-supabase-realtime";
 
 export function Participants({ adminId }: { adminId: string }) {
   const { toast } = useToast();
@@ -30,6 +31,8 @@ export function Participants({ adminId }: { adminId: string }) {
   const isCurrentUserAdmin = adminId === userSession?.id;
 
   useEffect(() => {
+    const channel = setupChannel("retro-channel");
+
     const socketId = socket.id;
     socket.emit("get-active-users", retrospectiveId);
 
@@ -44,7 +47,6 @@ export function Participants({ adminId }: { adminId: string }) {
         newAdminId: string,
         users: { id: string; username: string; isAdmin: boolean }[],
       ) => {
-        // TODO: Mirar para refactor esto
         if (newAdminId === socketId && userSession) {
           await editRetroAdminId({
             retrospectiveId,
@@ -67,6 +69,7 @@ export function Participants({ adminId }: { adminId: string }) {
     return () => {
       socket.off("active-users");
       socket.off("assign-new-admin");
+      channel.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [retrospectiveId, userSession]);

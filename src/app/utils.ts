@@ -8,16 +8,19 @@ export function generateDefaultSections(numberOfSections: number) {
     "🎉 Shout outs",
   ];
 
-  function generateDefaultSection(title: string) {
+  function generateDefaultSection(title: string, index: number) {
     return {
       id: `section_${nanoid(5)}`,
       title,
-      posts: [],
+      sortOrder: index, // Set the order explicitly
+      posts: {
+        create: [],
+      },
     };
   }
 
   const defaultSections = Array.from({ length: numberOfSections }, (_, index) =>
-    generateDefaultSection(sectionTitles[index] || "New Section"),
+    generateDefaultSection(sectionTitles[index] || "New Section", index),
   );
 
   return defaultSections;

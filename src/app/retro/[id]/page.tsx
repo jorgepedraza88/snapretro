@@ -1,12 +1,14 @@
 import { redirect } from "next/navigation";
+import { PrismaClient } from "@prisma/client";
 
 import CountdownTimer from "@/components/countdown-timer";
 import { RetroCardGroup } from "@/components/retro-card-group";
-import { RetrospectiveData } from "@/types/Retro";
 import { Footer } from "@/components/footer";
 import { RetroProtectedWrapper } from "./retro-protected-wrapper";
 import { EndRetroDialog } from "./components/end-retro-dialog";
 import { Participants } from "./components/participants";
+
+const prisma = new PrismaClient();
 
 export default async function Page({
   params,
@@ -14,36 +16,43 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const retrospectiveId = (await params).id;
-  const response = await fetch(
-    `http://localhost:3005/retrospectives/${retrospectiveId}`,
-  );
 
-  if (!response.ok) {
+  const retrospectiveData = await prisma.retrospective.findUnique({
+    where: { id: retrospectiveId },
+    include: {
+      sections: {
+        include: {
+          posts: true, // Include nested posts for each section
+        },
+        orderBy: { sortOrder: "asc" }, // Explicitly order sections by sortOrder
+      },
+    },
+  });
+
+  if (!retrospectiveData) {
     redirect("/not-found");
   }
 
-  const retroSpectiveData: RetrospectiveData = await response.json();
-
   return (
     <RetroProtectedWrapper
-      adminId={retroSpectiveData.adminId}
-      passwordEnabled={retroSpectiveData.enablePassword}
-      retroPassword={retroSpectiveData.password}
+      adminId={retrospectiveData.adminId}
+      passwordEnabled={retrospectiveData.enablePassword}
+      retroPassword={retrospectiveData.password}
     >
       <div className="lg:flex gap-2">
         <div className="min-w-60">
-          <Participants adminId={retroSpectiveData.adminId} />
+          <Participants adminId={retrospectiveData.adminId} />
         </div>
         <div className="max-w-6xl mx-auto flex flex-col items-center w-full p-8 h-full">
-          {retroSpectiveData.timer && (
+          {retrospectiveData.timer && (
             <CountdownTimer
-              defaultSeconds={retroSpectiveData.timer}
-              adminId={retroSpectiveData.adminId}
+              defaultSeconds={retrospectiveData.timer}
+              adminId={retrospectiveData.adminId}
             />
           )}
-          <RetroCardGroup retroSpectiveData={retroSpectiveData} />
-          {retroSpectiveData.enableChat && <Footer />}
-          <EndRetroDialog adminId={retroSpectiveData.adminId} />
+          <RetroCardGroup retrospectiveData={retrospectiveData} />
+          {retrospectiveData.enableChat && <Footer />}
+          <EndRetroDialog adminId={retrospectiveData.adminId} />
         </div>
       </div>
     </RetroProtectedWrapper>

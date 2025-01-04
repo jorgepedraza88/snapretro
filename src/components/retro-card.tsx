@@ -12,7 +12,7 @@ import { socket } from "@/socket";
 import {
   createPost,
   destroyPost,
-  editRetroTitle,
+  editRetroSectionTitle,
   handleVotePost,
   revalidate,
 } from "@/app/postActions";
@@ -47,18 +47,18 @@ export function RetroCard({
   const retrospectiveId = params.id;
   const isAdmin = adminId === userSession?.id;
 
-  const defaultPostState = {
+  const defaultPostState: NewPost = {
     userId: userSession?.id || "",
     content: "",
     votes: [],
   };
 
-  const [newPost, setNewPost] = useState<NewPost>(defaultPostState);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isWriting, setIsWriting] = useState<boolean>(false);
+  const [newPost, setNewPost] = useState(defaultPostState);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isWriting, setIsWriting] = useState(false);
   const [isEditingSectionTitle, setIsEditingSectionTitle] =
     useState<boolean>(false);
-  const [newSectionTitle, setNewSectionTitle] = useState<string>(title);
+  const [newSectionTitle, setNewSectionTitle] = useState(title);
 
   useEffect(() => {
     socket.on("posts", () => {
@@ -142,7 +142,7 @@ export function RetroCard({
     e.preventDefault();
 
     try {
-      editRetroTitle({
+      editRetroSectionTitle({
         title: newSectionTitle,
         sectionId: section.id,
         retrospectiveId,

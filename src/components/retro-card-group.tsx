@@ -3,11 +3,11 @@ import { RetroCard } from "./retro-card";
 import { cn } from "@/lib/utils";
 
 export async function RetroCardGroup({
-  retroSpectiveData,
+  retrospectiveData: retrospectiveData,
 }: {
-  retroSpectiveData: RetrospectiveData;
+  retrospectiveData: RetrospectiveData;
 }) {
-  const sectionsNumber = retroSpectiveData.sections.length;
+  const sectionsNumber = retrospectiveData.sections.length;
 
   return (
     <div
@@ -18,8 +18,13 @@ export async function RetroCardGroup({
         "grid-cols-4": sectionsNumber === 4,
       })}
     >
-      {retroSpectiveData.sections.map((section) => (
-        <RetroCard key={section.id} title={section.title} section={section} adminId={retroSpectiveData.adminId} />
+      {retrospectiveData.sections.map((section) => (
+        <RetroCard
+          key={section.id}
+          title={section.title}
+          section={section}
+          adminId={retrospectiveData.adminId}
+        />
       ))}
     </div>
   );
