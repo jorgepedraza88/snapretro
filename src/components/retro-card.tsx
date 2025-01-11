@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useActionState, useEffect, useOptimistic, useState } from "react";
 import { Card, CardTitle, CardDescription } from "./ui/card";
 import {
   HiOutlineChatBubbleOvalLeftEllipsis as WritingIcon,
@@ -10,12 +11,13 @@ import {
 import { socket } from "@/socket";
 
 import {
+  addVoteToPost,
   createPost,
   destroyPost,
   editRetroSectionTitle,
-  handleVotePost,
+  removeVoteFromPost,
   revalidate,
-} from "@/app/postActions";
+} from "@/app/actions";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { RetrospectiveSection } from "@/types/Retro";
@@ -36,29 +38,36 @@ interface NewPost {
   votes: string[];
 }
 
+const getDefaultPostState = (userId: string | undefined): NewPost => ({
+  userId: userId || "",
+  content: "",
+  votes: [],
+});
+
 export function RetroCard({
   title,
   description,
   section,
   adminId,
 }: RetroCardProps) {
-  const { userSession } = useUserSession();
   const params = useParams<{ id: string }>();
   const retrospectiveId = params.id;
-  const isAdmin = adminId === userSession?.id;
+  const { userSession } = useUserSession();
 
-  const defaultPostState: NewPost = {
-    userId: userSession?.id || "",
-    content: "",
-    votes: [],
-  };
+  const isCurrentUserAdmin = adminId === userSession?.id;
+  const defaultPostState = getDefaultPostState(userSession?.id);
 
   const [newPost, setNewPost] = useState(defaultPostState);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const [isWriting, setIsWriting] = useState(false);
+
   const [isEditingSectionTitle, setIsEditingSectionTitle] =
     useState<boolean>(false);
   const [newSectionTitle, setNewSectionTitle] = useState(title);
+  // TODO: Mirar si es necesario o no, es guay en verdad
+  const [optimisticTitle, addOptimisticTitle] = useOptimistic<string>(
+    section.title,
+  );
 
   useEffect(() => {
     socket.on("posts", () => {
@@ -79,11 +88,12 @@ export function RetroCard({
       }
     });
 
-    socket.on("delete-post", async (sectionId, postId) => {
-      if (section.id === sectionId) {
-        await destroyPost({ section, postId, retrospectiveId });
-      }
-    });
+    // socket.on("delete-post", async (sectionId, postId) => {
+    //   if (section.id === sectionId) {
+    //     revalidate();
+    //   }
+    // });
+
     return () => {
       socket.off("posts");
       socket.off("writing");
@@ -92,6 +102,10 @@ export function RetroCard({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  if (!userSession) {
+    return null;
+  }
 
   const handleNewPostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     socket.emit("writing", retrospectiveId, section.id);
@@ -104,77 +118,53 @@ export function RetroCard({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSavePost = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     socket.emit("stop-writing", retrospectiveId, section.id);
-    setIsLoading(true);
-
-    if (!newPost.userId) {
-      console.error("User not found");
-      setIsLoading(false);
-      return;
-    }
+    setIsLoadingPosts(true);
 
     try {
-      await createPost({ section, newPost, retrospectiveId });
+      await createPost({ sectionId: section.id, newPost });
       socket.emit("posts", retrospectiveId, newPost);
       setNewPost(defaultPostState);
     } catch (error) {
       console.error("Error creating post:", error);
     } finally {
-      setIsLoading(false);
+      setIsLoadingPosts(false);
     }
   };
 
   const handleDestroyPost = async (postId: string) => {
-    setIsLoading(true);
-    try {
-      await destroyPost({ section, postId, retrospectiveId });
-    } catch (error) {
-      console.error("Error deleting post:", error);
-    } finally {
-      socket.emit("delete-post", retrospectiveId, section.id, postId);
-      setIsLoading(false);
-    }
+    setIsLoadingPosts(true);
+    await destroyPost({ postId });
+    socket.emit("delete-post", retrospectiveId, section.id, postId);
+    setIsLoadingPosts(false);
   };
 
-  const handleChangeSectionTitle = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleChangeSectionTitle = async (formData: FormData) => {
+    addOptimisticTitle(newSectionTitle);
 
-    try {
-      editRetroSectionTitle({
-        title: newSectionTitle,
-        sectionId: section.id,
-        retrospectiveId,
-      });
-    } catch (error) {
-      console.error("Error editing section title:", error);
-    } finally {
-      setTimeout(() => {
-        setIsEditingSectionTitle(false);
-      }, 500);
-    }
+    await editRetroSectionTitle({
+      title: newSectionTitle,
+      sectionId: section.id,
+    });
+
+    setIsEditingSectionTitle(false);
   };
 
-  const handleAddVote = async (postId: string, hasVoted: boolean) => {
-    if (userSession?.id) {
-      await handleVotePost({
-        sectionId: section.id,
-        postId,
-        retrospectiveId,
-        userId: userSession.id,
-        hasVoted,
-      });
+  const handlePostVoting = async (postId: string, hasVoted: boolean) => {
+    if (userSession.id) {
+      if (hasVoted) {
+        await removeVoteFromPost(postId, userSession.id);
+      } else {
+        await addVoteToPost(postId, userSession.id);
+      }
     }
   };
 
   const sortedPostsByVotes = section.posts.sort(
     (a, b) => b.votes.length - a.votes.length,
   );
-
-  if (!userSession) {
-    return null;
-  }
 
   return (
     <div>
@@ -183,17 +173,18 @@ export function RetroCard({
           <div className="p-4 bg-gray-200 dark:bg-neutral-700 rounded-t-lg mb-2 group">
             <CardTitle className="flex justify-between items-center">
               {isEditingSectionTitle ? (
-                <form onSubmit={handleChangeSectionTitle}>
+                <form action={handleChangeSectionTitle}>
                   <Input
                     value={newSectionTitle}
                     className="w-full"
+                    name="title"
                     onChange={(e) => setNewSectionTitle(e.target.value)}
                   />
                 </form>
               ) : (
-                title
+                optimisticTitle
               )}
-              {isAdmin && !isEditingSectionTitle && (
+              {isCurrentUserAdmin && !isEditingSectionTitle && (
                 <Button
                   size="icon"
                   className="bg-invisible text-gray-900 invisible group-hover:visible hover:bg-gray-300"
@@ -228,7 +219,7 @@ export function RetroCard({
                                 "text-violet-500 visible": hasVoted,
                               },
                             )}
-                            onClick={() => handleAddVote(post.id, hasVoted)}
+                            onClick={() => handlePostVoting(post.id, hasVoted)}
                           >
                             <VoteIcon className="shrink-0" />
                           </Button>
@@ -253,11 +244,11 @@ export function RetroCard({
           </div>
         </div>
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleSavePost}
           className="mx-2 mt-10 flex flex-col justify-end"
         >
           <Input
-            disabled={isLoading}
+            disabled={isLoadingPosts}
             className="p-2 text-sm"
             value={newPost.content}
             onChange={handleNewPostChange}

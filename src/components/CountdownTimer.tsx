@@ -17,10 +17,10 @@ interface CountdownTimerProps {
   defaultSeconds?: number;
 }
 
-const CountdownTimer = ({
+export function CountdownTimer({
   adminId,
   defaultSeconds = 300,
-}: CountdownTimerProps) => {
+}: CountdownTimerProps) {
   const { userSession } = useUserSession();
   const { id: retroSpectiveId } = useParams<{ id: string }>();
 
@@ -108,6 +108,4 @@ const CountdownTimer = ({
       )}
     </div>
   );
-};
-
-export default CountdownTimer;
+}

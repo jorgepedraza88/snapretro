@@ -3,7 +3,6 @@ import { useState } from "react";
 import { HiArrowRight as ArrowRightIcon } from "react-icons/hi2";
 import { ImSpinner as SpinnerIcon } from "react-icons/im";
 import { FormProvider, useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
 import { nanoid } from "nanoid";
 import { socket } from "@/socket";
 
@@ -11,9 +10,22 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { CreateRetroFirst } from "./create-retro-first";
 import { CreateRetroSecond } from "./create-retro-second";
-import { createRetro, CreateRetroSpectiveData } from "@/app/postActions";
+import { createRetro, CreateRetrospectiveData } from "@/app/actions";
 import { useUserSession } from "@/hooks/user-session-context";
 import { CreateRetroThird } from "./create-retro-third";
+import { useRouter } from "next/navigation";
+
+const defaultFormValues: CreateRetrospectiveData = {
+  adminId: nanoid(5),
+  avatarUrl: "",
+  adminName: "",
+  timer: 300,
+  allowVotes: false,
+  enableChat: true,
+  enablePassword: false,
+  password: null,
+  sectionsNumber: 3,
+};
 
 export function CreateRetroForm() {
   const router = useRouter();
@@ -23,35 +35,29 @@ export function CreateRetroForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const progressPercentage = (step / 3) * 100;
 
-  const form = useForm<CreateRetroSpectiveData>({
-    defaultValues: {
-      id: nanoid(15),
-      adminId: nanoid(5),
-      avatarUrl: "",
-      adminName: "",
-      timer: 300,
-      allowVotes: false,
-      enableChat: true,
-      enablePassword: false,
-      password: null,
-      sectionsNumber: 3,
-    },
+  const form = useForm<CreateRetrospectiveData>({
+    defaultValues: defaultFormValues,
   });
 
-  const onSubmit = async (data: CreateRetroSpectiveData) => {
+  const onSubmit = async (data: CreateRetrospectiveData) => {
     setIsSubmitting(true);
     try {
-      await createRetro(data);
-      socket.emit("join-retrospective", data.id, data.adminName, true);
+      const retrospective = await createRetro(data);
+
+      socket.emit(
+        "join-retrospective",
+        retrospective.id,
+        retrospective.adminName,
+        true,
+      );
+
+      router.push(`/retro/${retrospective.id}`);
     } catch (error) {
       console.log(error);
       setIsSubmitting(false);
-    } finally {
-      router.push(`/retro/${data.id}`);
     }
   };
 
-  // Create user in session storage and go to next step
   const handleChangeStep = () => {
     const retroData = form.getValues();
     if (step === 1) {
@@ -65,7 +71,7 @@ export function CreateRetroForm() {
 
       return;
     }
-    // Validate if the password is empty
+    // Validate manually if the password is empty
     if (retroData.enablePassword && !retroData.password) {
       form.setError("password", {
         type: "required",

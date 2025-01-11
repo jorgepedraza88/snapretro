@@ -10,7 +10,7 @@ import { FaCrown as CrownIcon } from "react-icons/fa";
 import { socket } from "@/socket";
 import { useParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { editRetroAdminId, Participant, revalidate } from "@/app/postActions";
+import { editRetroAdminId, revalidate } from "@/app/actions";
 import { useUserSession } from "@/hooks/user-session-context";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,20 +19,21 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { setupChannel } from "@/hooks/use-supabase-realtime";
+
+interface Participant {
+  id: string;
+  username: string;
+  isAdmin: boolean;
+}
 
 export function Participants({ adminId }: { adminId: string }) {
-  const { toast } = useToast();
-  const { userSession } = useUserSession();
   const { id: retrospectiveId } = useParams<{ id: string }>();
+  const { userSession } = useUserSession();
+  const { toast } = useToast();
 
   const [participants, setParticipants] = useState<Participant[]>([]);
 
-  const isCurrentUserAdmin = adminId === userSession?.id;
-
   useEffect(() => {
-    const channel = setupChannel("retro-channel");
-
     const socketId = socket.id;
     socket.emit("get-active-users", retrospectiveId);
 
@@ -69,10 +70,15 @@ export function Participants({ adminId }: { adminId: string }) {
     return () => {
       socket.off("active-users");
       socket.off("assign-new-admin");
-      channel.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [retrospectiveId, userSession]);
+
+  if (!userSession) {
+    return null;
+  }
+
+  const isCurrentUserAdmin = adminId === userSession.id;
 
   const handleRemoveUser = (userId: string) => {
     socket.emit("disconnect-user", retrospectiveId, userId);

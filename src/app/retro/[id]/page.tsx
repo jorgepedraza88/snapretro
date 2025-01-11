@@ -1,14 +1,12 @@
 import { redirect } from "next/navigation";
-import { PrismaClient } from "@prisma/client";
 
-import CountdownTimer from "@/components/countdown-timer";
+import { CountdownTimer } from "@/components/CountdownTimer";
 import { RetroCardGroup } from "@/components/retro-card-group";
 import { Footer } from "@/components/footer";
 import { RetroProtectedWrapper } from "./retro-protected-wrapper";
 import { EndRetroDialog } from "./components/end-retro-dialog";
 import { Participants } from "./components/participants";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export default async function Page({
   params,
