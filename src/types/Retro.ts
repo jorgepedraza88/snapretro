@@ -8,6 +8,7 @@ export interface RetrospectivePost {
 export interface RetrospectiveSection {
   id: string;
   title: string;
+  retrospectiveId: string;
   posts: RetrospectivePost[];
 }
 

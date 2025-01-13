@@ -7,6 +7,7 @@ import { RetroProtectedWrapper } from "./retro-protected-wrapper";
 import { EndRetroDialog } from "./components/end-retro-dialog";
 import { Participants } from "./components/participants";
 import { prisma } from "@/lib/prisma";
+import { getRetrospetiveData } from "@/app/actions";
 
 export default async function Page({
   params,
@@ -14,18 +15,7 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const retrospectiveId = (await params).id;
-
-  const retrospectiveData = await prisma.retrospective.findUnique({
-    where: { id: retrospectiveId },
-    include: {
-      sections: {
-        include: {
-          posts: true, // Include nested posts for each section
-        },
-        orderBy: { sortOrder: "asc" }, // Explicitly order sections by sortOrder
-      },
-    },
-  });
+  const retrospectiveData = await getRetrospetiveData(retrospectiveId);
 
   if (!retrospectiveData) {
     redirect("/not-found");
@@ -41,7 +31,7 @@ export default async function Page({
         <div className="min-w-60">
           <Participants adminId={retrospectiveData.adminId} />
         </div>
-        <div className="max-w-6xl mx-auto flex flex-col items-center w-full p-8 h-full">
+        <div className="max-w-6xl mx-auto flex flex-col items-center p-8 size-full">
           {retrospectiveData.timer && (
             <CountdownTimer
               defaultSeconds={retrospectiveData.timer}

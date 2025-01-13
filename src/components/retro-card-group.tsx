@@ -9,14 +9,16 @@ export async function RetroCardGroup({
 }) {
   const sectionsNumber = retrospectiveData.sections.length;
 
+  function getColumnNumberClass(sectionNumber: number) {
+    return `grid-cols-${sectionNumber}`;
+  }
+
   return (
     <div
-      className={cn("lg:grid gap-4 block space-y-4 lg:space-y-0 w-full", {
-        "grid-cols-1": sectionsNumber === 1,
-        "grid-cols-2": sectionsNumber === 2,
-        "grid-cols-3": sectionsNumber === 3,
-        "grid-cols-4": sectionsNumber === 4,
-      })}
+      className={cn(
+        "lg:grid gap-4 block space-y-4 lg:space-y-0 w-full",
+        getColumnNumberClass(sectionsNumber),
+      )}
     >
       {retrospectiveData.sections.map((section) => (
         <RetroCard

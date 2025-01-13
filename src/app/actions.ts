@@ -35,6 +35,22 @@ export async function revalidate() {
   revalidatePath("/retro/[id]", "page");
 }
 
+export async function getRetrospetiveData(retrospectiveId: string) {
+  const retrospective = await prisma.retrospective.findUnique({
+    where: { id: retrospectiveId },
+    include: {
+      sections: {
+        include: {
+          posts: true, // Include nested posts for each section
+        },
+        orderBy: { sortOrder: "asc" }, // Explicitly order sections by sortOrder
+      },
+    },
+  });
+
+  return retrospective;
+}
+
 export async function createPost({ sectionId, newPost }: CreatePostParams) {
   const { userId, content, votes } = newPost;
 
@@ -44,7 +60,6 @@ export async function createPost({ sectionId, newPost }: CreatePostParams) {
       data: {
         posts: {
           create: {
-            id: nanoid(),
             userId,
             content,
             votes,

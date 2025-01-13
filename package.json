@@ -7,8 +7,7 @@
     "dev": "node server.js --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "server": "json-server --watch db.json --port 3005"
+    "lint": "next lint"
   },
   "dependencies": {
     "@hookform/error-message": "^2.0.1",
@@ -29,7 +28,6 @@
     "@supabase/supabase-js": "^2.47.10",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "json-server": "^1.0.0-beta.3",
     "lucide-react": "^0.454.0",
     "luxon": "^3.5.0",
     "nanoid": "^5.0.9",

@@ -100,6 +100,13 @@ app.prepare().then(() => {
       io.to(retrospectiveId).emit("delete-post", sectionId, postId);
     });
 
+    socket.on("vote-post", (retrospectiveId, sectionId, postId) => {
+      console.log(
+        `Post voted in retrospective ${retrospectiveId}, section ${sectionId}, post ${postId}`,
+      );
+      io.to(retrospectiveId).emit("vote-post", sectionId, postId);
+    })
+
     // Temporizador
     socket.on("timer-state", (retrospectiveId, timerState) => {
       console.log(
