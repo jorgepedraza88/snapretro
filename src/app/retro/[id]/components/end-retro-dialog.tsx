@@ -1,4 +1,6 @@
 "use client";
+
+import { endRetrospective } from "@/app/actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,12 +15,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { useUserSession } from "@/hooks/user-session-context";
 
-export function EndRetroDialog({ adminId }: { adminId: string }) {
+export function EndRetroDialog({
+  adminId,
+  retrospectiveId,
+}: {
+  adminId: string;
+  retrospectiveId: string;
+}) {
   const { userSession } = useUserSession();
 
-  const isAdmin = adminId === userSession?.id;
+  const isCurrentUserAdmin = adminId === userSession?.id;
 
-  if (!isAdmin) return null;
+  if (!isCurrentUserAdmin) return null;
+
+  const handleEndRetro = async () => {
+    await endRetrospective(retrospectiveId);
+  };
 
   return (
     <AlertDialog>
@@ -53,6 +65,7 @@ export function EndRetroDialog({ adminId }: { adminId: string }) {
             <Button
               variant="destructive"
               className="bg-red-500 hover:bg-red-600"
+              onClick={handleEndRetro}
             >
               END
             </Button>

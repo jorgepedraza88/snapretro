@@ -1,5 +1,5 @@
 "use server";
-import { nanoid } from "nanoid";
+
 import { revalidatePath } from "next/cache";
 import { generateDefaultSections } from "./utils";
 import { DateTime } from "luxon";
@@ -94,6 +94,7 @@ export async function createRetro(data: CreateRetrospectiveData) {
     const retrospective = await prisma.retrospective.create({
       data: {
         ...restData,
+        status: 'active',
         date: DateTime.now().toISO(),
         sections: {
           create: generateDefaultSections(sectionsNumber),
@@ -191,6 +192,31 @@ export async function removeVoteFromPost(postId: string, userId: string) {
   } catch (error) {
     console.log(error);
     throw new Error("Error removing vote from post");
+  }
+
+  revalidatePath("/retro/[id]", "page");
+}
+
+export async function endRetrospective(retrospectiveId: string) {
+  try {
+    const retrospective = await prisma.retrospective.update({
+      where: { id: retrospectiveId },
+      data: { status: "finished" },
+      include: {
+        sections: {
+          include: {
+            posts: true, // Include nested posts for each section
+          },
+          orderBy: { sortOrder: "asc" }, // Explicitly order sections by sortOrder
+        },
+      },
+    });
+
+    // TODO: Formatear con una funcion externa para hacer un display de los datos de la retro
+    console.log(retrospective);
+  } catch (error) {
+    console.log(error);
+    throw new Error("Error ending retrospective");
   }
 
   revalidatePath("/retro/[id]", "page");

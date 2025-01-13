@@ -22,4 +22,6 @@ export interface RetrospectiveData {
   timer: number;
   enableChat: boolean;
   sections: RetrospectiveSection[];
+  // TODO: Mirarlo bien
+  status: string; // "active" | "finished"
 }
