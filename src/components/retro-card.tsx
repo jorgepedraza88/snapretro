@@ -64,7 +64,6 @@ export function RetroCard({
 
   useEffect(() => {
     socket.on("posts", () => {
-      console.log("receiving posts");
       revalidate();
     });
 
@@ -80,22 +79,28 @@ export function RetroCard({
       }
     });
 
-    socket.on("vote-post", (sectionId, postId) => {
+    socket.on("vote-post", (sectionId) => {
       if (section.id === sectionId) {
         revalidate();
       }
     });
 
-    socket.on("remove-vote-post", (sectionId, postId) => {
+    socket.on("remove-vote-post", (sectionId) => {
       if (section.id === sectionId) {
         revalidate();
       }
     });
 
-    socket.on("delete-post", async (sectionId, postId) => {
+    socket.on("delete-post", async (sectionId) => {
       if (section.id === sectionId) {
-        revalidate();
+        await revalidate();
       }
+    });
+
+    socket.on("retro-ended", async (content) => {
+      console.log("termina y revalida");
+      socket.emit("retro-ended-user", retrospectiveId, content);
+      await revalidate();
     });
 
     return () => {
@@ -105,6 +110,7 @@ export function RetroCard({
       socket.off("delete-post");
       socket.off("vote-post");
       socket.off("remove-vote-post");
+      socket.off("retro-ended");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

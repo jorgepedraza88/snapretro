@@ -1,10 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { generateDefaultSections } from "./utils";
+import { decryptMessage, generateDefaultSections } from "./utils";
 import { DateTime } from "luxon";
 
 import { prisma } from "@/lib/prisma";
+import { RetrospectiveData } from "@/types/Retro";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 interface CreatePostParams {
   sectionId: string;
@@ -94,7 +96,7 @@ export async function createRetro(data: CreateRetrospectiveData) {
     const retrospective = await prisma.retrospective.create({
       data: {
         ...restData,
-        status: 'active',
+        status: "active",
         date: DateTime.now().toISO(),
         sections: {
           create: generateDefaultSections(sectionsNumber),
@@ -201,7 +203,7 @@ export async function endRetrospective(retrospectiveId: string) {
   try {
     const retrospective = await prisma.retrospective.update({
       where: { id: retrospectiveId },
-      data: { status: "finished" },
+      data: { status: "ended" },
       include: {
         sections: {
           include: {
@@ -212,12 +214,62 @@ export async function endRetrospective(retrospectiveId: string) {
       },
     });
 
-    // TODO: Formatear con una funcion externa para hacer un display de los datos de la retro
-    console.log(retrospective);
+    revalidatePath("/retro/[id]", "page");
+
+    return retrospective;
   } catch (error) {
     console.log(error);
     throw new Error("Error ending retrospective");
   }
+}
 
-  revalidatePath("/retro/[id]", "page");
+export async function generateAIContent(data: RetrospectiveData) {
+  const { adminName, date, sections } = data;
+  try {
+    const geminiAPIKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+
+    if (!geminiAPIKey) {
+      throw new Error("Missing GEMINI_API_KEY");
+    }
+
+    const decryptedPostsSections = sections.map((section) => {
+      const newPosts = section.posts.map((post) => {
+        const decryptedPostContent = decryptMessage(post.content);
+        return { ...post, content: decryptedPostContent };
+      });
+      return { ...section, posts: newPosts };
+    });
+
+    const formattedBody = {
+      adminName: adminName,
+      date: DateTime.fromJSDate(date).toFormat("MM/dd/yyyy"),
+      sections: decryptedPostsSections,
+    };
+
+    const genAI = new GoogleGenerativeAI(geminiAPIKey);
+
+    const generationConfig = {
+      temperature: 2,
+      responseMimeType: "text/plain",
+    };
+
+    // Ininitalise a generative model
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: "casual tone, natural output in a well formatted text",
+      generationConfig,
+    });
+
+    const prompt = `Do a summary in a list format, about what have been talked in this retrospective meeting. Include the number of votes is there is any in +{number} format. If a post doesn't have any votes, then, don't mention anything about votes in that specific post. Separate sections and include the section titles. Do a summary of each section posts and format the post to an understandable way. Do not include Section number and do not include the word "Summary". Do not include the user id or name. At the beginning of the text, include the adminName and the date. Use ## for titles. Admin tag will be replace for Host. Host and Date labels should be in strong format. Inside sections, do a summary about the posts in one paragraph ${JSON.stringify(formattedBody)}`;
+
+    // Pass the prompt to the model and retrieve the output
+    const result = await model.generateContent(prompt);
+
+    const response = result.response;
+    const output = response.text();
+
+    return output;
+  } catch (error) {
+    console.error(error);
+  }
 }

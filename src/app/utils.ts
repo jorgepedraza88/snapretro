@@ -1,3 +1,4 @@
+import { RetrospectiveData } from "@/types/Retro";
 import crypto from "crypto";
 
 export function generateDefaultSections(numberOfSections: number) {
@@ -62,3 +63,41 @@ export const decryptMessage = (encryptedMessage: string) => {
 
   return decrypted;
 };
+
+export function generateHTMLFromJSON(json: RetrospectiveData): string {
+  let htmlTemplate = `<div class='retrospective'>`;
+
+  // Add header details
+  htmlTemplate += `
+    <div class='header'>
+      <h2>Retrospective - ${json.adminId}</h2>
+      <p><b>Date:</b> ${new Date(json.date).toLocaleString()}</p>
+    </div>
+  `;
+
+  // Process sections
+  htmlTemplate += `<div class='sections'>`;
+  json.sections.forEach((section) => {
+    htmlTemplate += `
+      <div class='section'>
+        <h3><b>${section.title}</b></h3>
+        <ul>`;
+
+    if (section.posts.length > 0) {
+      section.posts.forEach((post) => {
+        const decryptedPost = decryptMessage(post.content);
+        htmlTemplate += `<li>${decryptedPost}</li>`;
+      });
+    } else {
+      htmlTemplate += `<li><i>No posts yet.</i></li>`;
+    }
+
+    htmlTemplate += `</ul>
+      </div>`;
+  });
+  htmlTemplate += `</div>`;
+
+  htmlTemplate += `</div>`;
+
+  return htmlTemplate;
+}

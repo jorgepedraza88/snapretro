@@ -62,3 +62,19 @@ body {
     --chart-5: 340 75% 55%;
   }
 }
+
+.markdown {
+  @apply p-2
+}
+
+.markdown h2 {
+  @apply text-3xl my-4 font-bold;
+}
+
+.markdown p {
+  @apply my-4;
+}
+
+.markdown ul {
+  list-style: disc;
+}

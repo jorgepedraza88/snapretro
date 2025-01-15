@@ -15,6 +15,7 @@ export interface RetrospectiveSection {
 export interface RetrospectiveData {
   id: string;
   adminId: string;
+  adminName: string
   date: Date;
   allowVotes: boolean;
   enablePassword: boolean;

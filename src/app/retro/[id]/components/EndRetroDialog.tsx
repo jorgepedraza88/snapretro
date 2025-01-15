@@ -1,6 +1,5 @@
 "use client";
 
-import { endRetrospective } from "@/app/actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,31 +12,19 @@ import {
   AlertDialogDescription,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { useUserSession } from "@/hooks/user-session-context";
 
 export function EndRetroDialog({
-  adminId,
-  retrospectiveId,
+  onEndRetro,
+  isCurrentUserAdmin,
 }: {
-  adminId: string;
-  retrospectiveId: string;
+  isCurrentUserAdmin: boolean;
+  onEndRetro: () => void;
 }) {
-  const { userSession } = useUserSession();
-
-  const isCurrentUserAdmin = adminId === userSession?.id;
-
   if (!isCurrentUserAdmin) return null;
-
-  const handleEndRetro = async () => {
-    await endRetrospective(retrospectiveId);
-  };
-
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" className="absolute bottom-20 right-20">
-          END RETRO
-        </Button>
+        <Button variant="destructive">END RETRO</Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="transition-none">
         <AlertDialogHeader>
@@ -58,14 +45,10 @@ export function EndRetroDialog({
           <AlertDialogCancel asChild>
             <Button variant="secondary">Cancel</Button>
           </AlertDialogCancel>
-          <AlertDialogAction
-            asChild
-            onClick={() => console.log("ending retro")}
-          >
+          <AlertDialogAction asChild onClick={onEndRetro}>
             <Button
               variant="destructive"
               className="bg-red-500 hover:bg-red-600"
-              onClick={handleEndRetro}
             >
               END
             </Button>

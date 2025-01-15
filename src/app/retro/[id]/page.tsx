@@ -4,10 +4,10 @@ import { CountdownTimer } from "@/components/CountdownTimer";
 import { RetroCardGroup } from "@/components/retro-card-group";
 import { Footer } from "@/components/footer";
 import { RetroProtectedWrapper } from "./retro-protected-wrapper";
-import { EndRetroDialog } from "./components/end-retro-dialog";
 import { Participants } from "./components/participants";
 
 import { getRetrospetiveData } from "@/app/actions";
+import { EndRetroContainer } from "./components/EndRetroContainer";
 
 export default async function Page({
   params,
@@ -25,7 +25,7 @@ export default async function Page({
     retrospectiveData;
 
   const shouldDisplayTimer = timer && status === "active";
-  const shouldDisplayEndRetroButton = status === "active";
+  const shouldDiplayRetroCards = status === "active";
 
   return (
     <RetroProtectedWrapper
@@ -41,14 +41,11 @@ export default async function Page({
           {shouldDisplayTimer && (
             <CountdownTimer defaultSeconds={timer} adminId={adminId} />
           )}
-          <RetroCardGroup retrospectiveData={retrospectiveData} />
-          {enableChat && <Footer />}
-          {shouldDisplayEndRetroButton && (
-            <EndRetroDialog
-              adminId={adminId}
-              retrospectiveId={retrospectiveId}
-            />
+          {shouldDiplayRetroCards && (
+            <RetroCardGroup retrospectiveData={retrospectiveData} />
           )}
+          <EndRetroContainer retrospectiveData={retrospectiveData} />
+          {enableChat && <Footer />}
         </div>
       </div>
     </RetroProtectedWrapper>

@@ -1,7 +1,9 @@
 import next from "next";
 import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
+import { PrismaClient } from "@prisma/client";
 
+const prisma = new PrismaClient();
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();
@@ -105,7 +107,7 @@ app.prepare().then(() => {
         `Post voted in retrospective ${retrospectiveId}, section ${sectionId}, post ${postId}`,
       );
       io.to(retrospectiveId).emit("vote-post", sectionId, postId);
-    })
+    });
 
     // Temporizador
     socket.on("timer-state", (retrospectiveId, timerState) => {
@@ -160,8 +162,19 @@ app.prepare().then(() => {
       }
     });
 
+    // Eliminar retrospectiva
+    socket.on("retro-ended", async (retrospectiveId, content) => {
+      console.log(`Retrospective ${retrospectiveId} ended.`);
+      io.to(retrospectiveId).emit("retro-ended", content);
+    });
+
+    socket.on("retro-ended-user", async (retrospectiveId, content) => {
+      console.log(`Retrospective ${retrospectiveId} ended. content: ${content}`);
+      io.to(retrospectiveId).emit("retro-ended-user", content);
+    });
+
     // Desconexión
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
       const retrospectiveId = socket.data.retrospectiveId;
 
       if (retrospectiveId && activeUsers[retrospectiveId]) {
@@ -187,11 +200,17 @@ app.prepare().then(() => {
               console.log(`User ${users[0].username} is now the admin.`);
 
               io.to(retrospectiveId).emit("assign-new-admin", users[0].id);
-            } else {
-              // Remove the retrospective from the list of active retrospectives
-              delete activeUsers[retrospectiveId];
-              console.log("No users left in the retrospective.");
             }
+          }
+          if (users.length === 0) {
+            // Delete the retrospective from the list of active users
+            delete activeUsers[retrospectiveId];
+
+            await prisma.retrospective.delete({
+              where: { id: retrospectiveId },
+            });
+
+            console.log("No users left in the retrospective.");
           }
 
           // Emit the updated list of active users in the retrospective
