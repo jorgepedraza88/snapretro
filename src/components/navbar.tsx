@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { SwitchColorMode } from "./switch-color-mode";
+import { SwitchColorMode } from "./SwitchColorMode";
 
 export function NavBar() {
   return (

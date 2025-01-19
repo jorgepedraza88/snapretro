@@ -1,7 +1,7 @@
-import { NavBar } from "@/components/navbar";
+import { NavBar } from "@/components/NavBar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 
 export default async function RetroLayout({
   children,

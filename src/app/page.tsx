@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { HiOutlineUserGroup as CreateRetroIcon } from "react-icons/hi2";
 
-import { JoinRetroButton } from "@/components/join-retro-button";
+import { JoinRetroButton } from "@/components/JoinRetroButton";
 import { Button } from "@/components/ui/button";
-import { SwitchColorMode } from "@/components/switch-color-mode";
+import { SwitchColorMode } from "@/components/SwitchColorMode";
 
 export default function Home() {
   return (

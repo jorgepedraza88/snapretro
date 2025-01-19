@@ -68,22 +68,6 @@ export function CreateRetroSecond() {
             )}
           />
         </div>
-        {/* <div className="flex items-center gap-1">
-          <Controller
-            name="allowVotes"
-            render={({ field }) => (
-              <Switch
-                id="allow-votes"
-                disabled
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-            )}
-          />
-          <Label className="text-gray-500" htmlFor="allow-votes">
-            Allow votes (coming soon)
-          </Label>
-        </div> */}
         <div className="flex items-center gap-2">
           <Controller
             name="enablePassword"

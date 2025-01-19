@@ -1,5 +1,5 @@
 import { RetrospectiveData } from "@/types/Retro";
-import { RetroCard } from "./retro-card";
+import { RetroCard } from "./RetroCard";
 import { cn } from "@/lib/utils";
 
 export async function RetroCardGroup({

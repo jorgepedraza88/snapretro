@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CreateRetroForm } from "./components/create-retro-form";
+import { CreateRetroForm } from "./components/CreateRetroForm";
 import { Button } from "@/components/ui/button";
 
 export default function Page() {

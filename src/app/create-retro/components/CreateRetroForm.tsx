@@ -8,11 +8,10 @@ import { socket } from "@/socket";
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { CreateRetroFirst } from "./create-retro-first";
-import { CreateRetroSecond } from "./create-retro-second";
+import { CreateRetroFirst } from "./CreateRetroFirst";
+import { CreateRetroSecond } from "./CreateRetroSecond";
 import { createRetro, CreateRetrospectiveData } from "@/app/actions";
 import { useUserSession } from "@/hooks/user-session-context";
-import { CreateRetroThird } from "./create-retro-third";
 import { useRouter } from "next/navigation";
 
 const defaultFormValues: CreateRetrospectiveData = {
@@ -71,6 +70,7 @@ export function CreateRetroForm() {
 
       return;
     }
+
     // Validate manually if the password is empty
     if (retroData.enablePassword && !retroData.password) {
       form.setError("password", {
@@ -89,7 +89,7 @@ export function CreateRetroForm() {
         onSubmit={form.handleSubmit(onSubmit)}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
-            if (step !== 3) {
+            if (step !== 2) {
               e.preventDefault();
               handleChangeStep();
             }
@@ -103,7 +103,6 @@ export function CreateRetroForm() {
         <div className="mt-16">
           {step === 1 && <CreateRetroFirst />}
           {step === 2 && <CreateRetroSecond />}
-          {step === 3 && <CreateRetroThird />}
         </div>
         <div className="mt-4 flex w-full justify-end gap-4">
           {step > 1 && (
@@ -117,7 +116,7 @@ export function CreateRetroForm() {
               Back
             </Button>
           )}
-          {step !== 3 && (
+          {step !== 2 && (
             <Button
               variant="secondary"
               type="button"
@@ -126,7 +125,7 @@ export function CreateRetroForm() {
               Next
             </Button>
           )}
-          {step === 3 && (
+          {step === 2 && (
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <SpinnerIcon className="animate-spin" />
