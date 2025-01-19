@@ -20,9 +20,10 @@ import {
 } from "@/components/ui/tooltip";
 import { useRetroContext } from "./RetroContextProvider";
 
-export function Participants({ adminId }: { adminId: string }) {
+export function Participants() {
   const { userSession } = useUserSession();
-  const { retrospectiveId, participants } = useRetroContext();
+  const { retrospectiveId, participants, isCurrentUserAdmin } =
+    useRetroContext();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -63,8 +64,6 @@ export function Participants({ adminId }: { adminId: string }) {
   if (!userSession) {
     return null;
   }
-
-  const isCurrentUserAdmin = adminId === userSession.id;
 
   const handleRemoveUser = (userId: string) => {
     socket.emit("disconnect-user", retrospectiveId, userId);

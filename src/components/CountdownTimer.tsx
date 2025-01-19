@@ -1,4 +1,5 @@
 "use client";
+
 import { HiClock as TimerIcon } from "react-icons/hi2";
 import { useState, useEffect } from "react";
 import {
@@ -9,27 +10,20 @@ import {
 
 import { socket } from "@/socket";
 import { Button } from "./ui/button";
-import { useUserSession } from "@/hooks/user-session-context";
-import { useParams } from "next/navigation";
+import { useRetroContext } from "@/app/retro/[id]/components/RetroContextProvider";
 
 interface CountdownTimerProps {
   adminId: string;
   defaultSeconds?: number;
 }
 
-export function CountdownTimer({
-  adminId,
-  defaultSeconds = 300,
-}: CountdownTimerProps) {
-  const { userSession } = useUserSession();
-  const { id: retroSpectiveId } = useParams<{ id: string }>();
+export function CountdownTimer({ defaultSeconds = 300 }: CountdownTimerProps) {
+  const { isCurrentUserAdmin, retrospectiveId } = useRetroContext();
 
   const [timeLeft, setTimeLeft] = useState(defaultSeconds);
   const [timerState, setTimerState] = useState<
     "running" | "paused" | "finished"
   >("paused");
-
-  const isCurrentUserAdmin = adminId === userSession?.id;
 
   useEffect(() => {
     socket.on("timer-state", (state) => {
@@ -47,7 +41,7 @@ export function CountdownTimer({
     }
 
     if (timerState === "running") {
-      socket.emit("timer-state", retroSpectiveId, timerState);
+      socket.emit("timer-state", retrospectiveId, timerState);
       const timer = setInterval(() => {
         setTimeLeft((prevTime) => prevTime - 1);
       }, 1000);
@@ -56,7 +50,7 @@ export function CountdownTimer({
     }
 
     if (timerState === "paused") {
-      socket.emit("timer-state", retroSpectiveId, timerState);
+      socket.emit("timer-state", retrospectiveId, timerState);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeLeft, timerState]);
@@ -70,7 +64,7 @@ export function CountdownTimer({
   const handleResetTimer = () => {
     setTimerState("paused");
     setTimeLeft(defaultSeconds);
-    socket.emit("reset-timer", retroSpectiveId);
+    socket.emit("reset-timer", retrospectiveId);
   };
 
   return (

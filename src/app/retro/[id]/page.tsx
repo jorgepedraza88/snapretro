@@ -38,7 +38,7 @@ export default async function Page({
       <RetroContextProvider retrospectiveData={retrospectiveData}>
         <div className="lg:flex gap-2">
           <div className="min-w-60">
-            <Participants adminId={adminId} />
+            <Participants />
           </div>
           <div className="max-w-6xl mx-auto flex flex-col items-center p-8 size-full relative">
             {shouldDisplayTimer && (
