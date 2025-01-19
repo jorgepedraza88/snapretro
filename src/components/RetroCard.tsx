@@ -22,51 +22,39 @@ import {
   destroyPost,
   editRetroSectionTitle,
   removeVoteFromPost,
-  revalidate,
 } from "@/app/actions";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { RetrospectiveSection } from "@/types/Retro";
-import { useUserSession } from "@/hooks/user-session-context";
 import { cn } from "@/lib/utils";
 import { decryptMessage, encryptMessage } from "@/app/utils";
 import { nanoid } from "nanoid";
+import { useRetroContext } from "@/app/retro/[id]/components/RetroContextProvider";
 
 interface RetroCardProps {
   title: string;
   description?: string;
   section: RetrospectiveSection;
-  adminId: string;
 }
 
-export function RetroCard({
-  title,
-  description,
-  section,
-  adminId,
-}: RetroCardProps) {
-  const { userSession } = useUserSession();
+export function RetroCard({ title, description, section }: RetroCardProps) {
+  const { userSession, isCurrentUserAdmin, adminSettings } = useRetroContext();
   const postFormRef = useRef<HTMLFormElement>(null);
 
   const [isWriting, setIsWriting] = useState(false);
-  const [isEditingSectionTitle, setIsEditingSectionTitle] =
-    useState<boolean>(false);
+  const [isEditingSectionTitle, setIsEditingSectionTitle] = useState(false);
   const [newSectionTitle, setNewSectionTitle] = useState(title);
 
   const [optimisticTitle, addOptimisticTitle] = useOptimistic(section.title);
   const [optimisticPosts, addOptimisticPosts] = useOptimistic(section.posts);
 
   const retrospectiveId = section.retrospectiveId;
-  const isCurrentUserAdmin = adminId === userSession?.id;
+
   const sortedPostsByVotes = optimisticPosts.sort(
     (a, b) => b.votes.length - a.votes.length,
   );
 
   useEffect(() => {
-    socket.on("posts", () => {
-      revalidate();
-    });
-
     socket.on("writing", (sectionId: string) => {
       if (section.id === sectionId) {
         setIsWriting(true);
@@ -79,45 +67,11 @@ export function RetroCard({
       }
     });
 
-    socket.on("vote-post", (sectionId) => {
-      if (section.id === sectionId) {
-        revalidate();
-      }
-    });
-
-    socket.on("remove-vote-post", (sectionId) => {
-      if (section.id === sectionId) {
-        revalidate();
-      }
-    });
-
-    socket.on("delete-post", async (sectionId) => {
-      if (section.id === sectionId) {
-        await revalidate();
-      }
-    });
-
-    socket.on("retro-ended", async (content) => {
-      console.log("termina y revalida");
-      socket.emit("retro-ended-user", retrospectiveId, content);
-      await revalidate();
-    });
-
     return () => {
-      socket.off("posts");
       socket.off("writing");
       socket.off("stop-writing");
-      socket.off("delete-post");
-      socket.off("vote-post");
-      socket.off("remove-vote-post");
-      socket.off("retro-ended");
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  if (!userSession) {
-    return null;
-  }
 
   const handleNewPostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     socket.emit("writing", retrospectiveId, section.id);
@@ -155,7 +109,7 @@ export function RetroCard({
         sectionId: section.id,
         newPost,
       });
-      socket.emit("posts", retrospectiveId, newPost);
+      socket.emit("revalidate", retrospectiveId);
     } catch (error) {
       console.error("Error creating post:", error);
     }
@@ -167,7 +121,8 @@ export function RetroCard({
     });
 
     await destroyPost({ postId });
-    socket.emit("delete-post", retrospectiveId, section.id, postId);
+
+    socket.emit("revalidate", retrospectiveId);
   };
 
   const handleChangeSectionTitle = async () => {
@@ -177,6 +132,8 @@ export function RetroCard({
       title: newSectionTitle,
       sectionId: section.id,
     });
+
+    socket.emit("revalidate", retrospectiveId);
 
     setIsEditingSectionTitle(false);
   };
@@ -197,7 +154,8 @@ export function RetroCard({
         );
       });
       await removeVoteFromPost(postId, userSession.id);
-      socket.emit("remove-vote-post", retrospectiveId, section.id, postId);
+
+      socket.emit("revalidate", retrospectiveId);
     } else {
       startTransition(() => {
         addOptimisticPosts((prev) =>
@@ -213,7 +171,7 @@ export function RetroCard({
         );
       });
       await addVoteToPost(postId, userSession.id);
-      socket.emit("vote-post", retrospectiveId, section.id, postId);
+      socket.emit("revalidate", retrospectiveId);
     }
   };
 
@@ -230,6 +188,13 @@ export function RetroCard({
                     className="w-full"
                     name="title"
                     onChange={(e) => setNewSectionTitle(e.target.value)}
+                    onBlur={() => setIsEditingSectionTitle(false)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") {
+                        setIsEditingSectionTitle(false);
+                      }
+                    }}
+                    autoFocus
                   />
                 </form>
               ) : (
@@ -251,7 +216,8 @@ export function RetroCard({
             {sortedPostsByVotes.length > 0 ? (
               sortedPostsByVotes.map((post) => {
                 const hasVoted = post.votes.includes(userSession.id);
-                const canVote = userSession.id !== post.userId;
+                const canVote =
+                  userSession.id !== post.userId && adminSettings.allowVotes;
                 const canDetroyPost = userSession.id === post.userId;
                 const postContent = decryptMessage(post.content);
 
@@ -302,6 +268,7 @@ export function RetroCard({
           className="mx-2 mt-10 flex flex-col justify-end"
         >
           <Input
+            disabled={!adminSettings.allowMessages}
             name="content"
             className="p-2 text-sm"
             onChange={handleNewPostChange}

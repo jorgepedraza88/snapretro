@@ -21,6 +21,7 @@ export function EndRetroDialog({
   onEndRetro: () => void;
 }) {
   if (!isCurrentUserAdmin) return null;
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>

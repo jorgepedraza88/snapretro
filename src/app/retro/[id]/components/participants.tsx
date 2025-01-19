@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   HiUserGroup as UsersIcon,
   HiTrash as RemoveIcon,
@@ -8,7 +8,6 @@ import {
 import { FaCrown as CrownIcon } from "react-icons/fa";
 
 import { socket } from "@/socket";
-import { useParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { editRetroAdminId, revalidate } from "@/app/actions";
 import { useUserSession } from "@/hooks/user-session-context";
@@ -19,28 +18,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-interface Participant {
-  id: string;
-  username: string;
-  isAdmin: boolean;
-}
+import { useRetroContext } from "./RetroContextProvider";
 
 export function Participants({ adminId }: { adminId: string }) {
-  const { id: retrospectiveId } = useParams<{ id: string }>();
   const { userSession } = useUserSession();
+  const { retrospectiveId, participants } = useRetroContext();
   const { toast } = useToast();
-
-  const [participants, setParticipants] = useState<Participant[]>([]);
 
   useEffect(() => {
     const socketId = socket.id;
-    socket.emit("get-active-users", retrospectiveId);
-
-    // Listen for updates to the active participants
-    socket.on("active-users", (users) => {
-      setParticipants(users); // Update the state with the new participants list
-    });
 
     socket.on(
       "assign-new-admin",

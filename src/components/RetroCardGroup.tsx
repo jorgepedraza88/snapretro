@@ -19,12 +19,7 @@ export async function RetroCardGroup({
       })}
     >
       {retrospectiveData.sections.map((section) => (
-        <RetroCard
-          key={section.id}
-          title={section.title}
-          section={section}
-          adminId={retrospectiveData.adminId}
-        />
+        <RetroCard key={section.id} title={section.title} section={section} />
       ))}
     </div>
   );

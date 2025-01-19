@@ -94,21 +94,6 @@ app.prepare().then(() => {
       io.to(retrospectiveId).emit("stop-writing", sectionId);
     });
 
-    // Eliminar post
-    socket.on("delete-post", (retrospectiveId, sectionId, postId) => {
-      console.log(
-        `Post deleted in retrospective ${retrospectiveId}, section ${sectionId}, post ${postId}`,
-      );
-      io.to(retrospectiveId).emit("delete-post", sectionId, postId);
-    });
-
-    socket.on("vote-post", (retrospectiveId, sectionId, postId) => {
-      console.log(
-        `Post voted in retrospective ${retrospectiveId}, section ${sectionId}, post ${postId}`,
-      );
-      io.to(retrospectiveId).emit("vote-post", sectionId, postId);
-    });
-
     // Temporizador
     socket.on("timer-state", (retrospectiveId, timerState) => {
       console.log(
@@ -121,6 +106,18 @@ app.prepare().then(() => {
     socket.on("reset-timer", (retrospectiveId) => {
       console.log(`Resetting timer in retrospective ${retrospectiveId}`);
       io.to(retrospectiveId).emit("reset-timer");
+    });
+
+    // Revalidar pagina
+    socket.on("revalidate", (retrospectiveId) => {
+      console.log(`Revalidating page in retrospective ${retrospectiveId}`);
+      io.to(retrospectiveId).emit("revalidate");
+    });
+
+    // Admin Settings
+    socket.on("settings", (retrospectiveId, settings) => {
+      console.log(`Settings in retrospective ${retrospectiveId}:`, settings);
+      io.to(retrospectiveId).emit("settings", settings);
     });
 
     // Asignar nuevo administrador
@@ -169,7 +166,9 @@ app.prepare().then(() => {
     });
 
     socket.on("retro-ended-user", async (retrospectiveId, content) => {
-      console.log(`Retrospective ${retrospectiveId} ended. content: ${content}`);
+      console.log(
+        `Retrospective ${retrospectiveId} ended. content: ${content}`,
+      );
       io.to(retrospectiveId).emit("retro-ended-user", content);
     });
 

@@ -15,14 +15,12 @@ export interface RetrospectiveSection {
 export interface RetrospectiveData {
   id: string;
   adminId: string;
-  adminName: string
+  adminName: string;
   date: Date;
-  allowVotes: boolean;
   enablePassword: boolean;
   password: string | null;
   timer: number;
   enableChat: boolean;
   sections: RetrospectiveSection[];
-  // TODO: Mirarlo bien
-  status: string; // "active" | "finished"
+  status: string;
 }

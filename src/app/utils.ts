@@ -2,13 +2,6 @@ import { RetrospectiveData } from "@/types/Retro";
 import crypto from "crypto";
 
 export function generateDefaultSections(numberOfSections: number) {
-  const sectionTitles = [
-    "🤓 Start doing",
-    "❌ Stop doing",
-    "👏🏼 Keep doing",
-    "🎉 Shout outs",
-  ];
-
   function generateDefaultSection(title: string, index: number) {
     return {
       title,
@@ -20,7 +13,7 @@ export function generateDefaultSections(numberOfSections: number) {
   }
 
   const defaultSections = Array.from({ length: numberOfSections }, (_, index) =>
-    generateDefaultSection(sectionTitles[index] || "New Section", index),
+    generateDefaultSection(`Untitled Section`, index),
   );
 
   return defaultSections;

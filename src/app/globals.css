@@ -64,11 +64,19 @@ body {
 }
 
 .markdown {
-  @apply p-2
+  @apply p-2;
+}
+
+.markdown h1 {
+  @apply text-5xl my-4 font-bold;
 }
 
 .markdown h2 {
   @apply text-3xl my-4 font-bold;
+}
+
+.markdown h3 {
+  @apply text-2xl my-4 font-bold;
 }
 
 .markdown p {
@@ -77,4 +85,5 @@ body {
 
 .markdown ul {
   list-style: disc;
+  margin-left: 2rem;
 }

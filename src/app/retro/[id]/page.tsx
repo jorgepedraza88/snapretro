@@ -8,6 +8,8 @@ import { Participants } from "./components/Participants";
 
 import { getRetrospetiveData } from "@/app/actions";
 import { EndRetroContainer } from "./components/EndRetroContainer";
+import { AdminMenu } from "./components/AdminMenu";
+import { RetroContextProvider } from "./components/RetroContextProvider";
 
 export default async function Page({
   params,
@@ -33,21 +35,24 @@ export default async function Page({
       passwordEnabled={enablePassword}
       retroPassword={password}
     >
-      <div className="lg:flex gap-2">
-        <div className="min-w-60">
-          <Participants adminId={adminId} />
-        </div>
-        <div className="max-w-6xl mx-auto flex flex-col items-center p-8 size-full">
-          {shouldDisplayTimer && (
-            <CountdownTimer defaultSeconds={timer} adminId={adminId} />
-          )}
-          {shouldDiplayRetroCards && (
-            <RetroCardGroup retrospectiveData={retrospectiveData} />
-          )}
-          <EndRetroContainer retrospectiveData={retrospectiveData} />
+      <RetroContextProvider retrospectiveData={retrospectiveData}>
+        <div className="lg:flex gap-2">
+          <div className="min-w-60">
+            <Participants adminId={adminId} />
+          </div>
+          <div className="max-w-6xl mx-auto flex flex-col items-center p-8 size-full relative">
+            {shouldDisplayTimer && (
+              <CountdownTimer defaultSeconds={timer} adminId={adminId} />
+            )}
+            {shouldDiplayRetroCards && (
+              <RetroCardGroup retrospectiveData={retrospectiveData} />
+            )}
+            <EndRetroContainer />
+            <AdminMenu retrospectiveData={retrospectiveData} />
+          </div>
           {enableChat && <Footer />}
         </div>
-      </div>
+      </RetroContextProvider>
     </RetroProtectedWrapper>
   );
 }

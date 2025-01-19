@@ -21,7 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-interface UserSession {
+export interface UserSession {
   id: string;
   name: string;
   avatarUrl: string;
@@ -133,6 +133,7 @@ export function UserSessionContextProvider({
 
 export function useUserSession() {
   const context = useContext(UserSessionContext);
+
   if (!context) {
     throw new Error(
       "useUserSession needs to be used within a UserSessionContextProvider",

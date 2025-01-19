@@ -148,6 +148,48 @@ export async function editRetroAdminId(data: {
   revalidatePath("/retro/[id]", "page");
 }
 
+export async function editRetroSectionsNumber(
+  retrospectiveId: string,
+  newNumber: number,
+) {
+  try {
+    const sections = await prisma.retrospectiveSection.findMany({
+      where: { retrospectiveId },
+      orderBy: { sortOrder: "asc" },
+    });
+
+    const currentNumber = sections.length;
+
+    if (newNumber > currentNumber) {
+      const newSections = generateDefaultSections(newNumber - currentNumber);
+
+      await prisma.retrospective.update({
+        where: { id: retrospectiveId },
+        data: {
+          sections: {
+            create: newSections,
+          },
+        },
+      });
+    } else if (newNumber < currentNumber) {
+      const sectionsToRemove = sections.slice(newNumber);
+
+      await prisma.$transaction(
+        sectionsToRemove.map((section) =>
+          prisma.retrospectiveSection.delete({
+            where: { id: section.id },
+          }),
+        ),
+      );
+    }
+  } catch (error) {
+    console.log(error);
+    throw new Error("Failed to edit sections number");
+  }
+
+  revalidatePath("/retro/[id]", "page");
+}
+
 async function getPostVotes(postId: string) {
   const post = await prisma.retrospectivePost.findUnique({
     where: { id: postId },
@@ -223,7 +265,10 @@ export async function endRetrospective(retrospectiveId: string) {
   }
 }
 
-export async function generateAIContent(data: RetrospectiveData) {
+export async function generateAIContent(
+  data: RetrospectiveData,
+  participants: string[],
+) {
   const { adminName, date, sections } = data;
   try {
     const geminiAPIKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
@@ -244,6 +289,7 @@ export async function generateAIContent(data: RetrospectiveData) {
       adminName: adminName,
       date: DateTime.fromJSDate(date).toFormat("MM/dd/yyyy"),
       sections: decryptedPostsSections,
+      participants,
     };
 
     const genAI = new GoogleGenerativeAI(geminiAPIKey);
@@ -260,7 +306,34 @@ export async function generateAIContent(data: RetrospectiveData) {
       generationConfig,
     });
 
-    const prompt = `Do a summary in a list format, about what have been talked in this retrospective meeting. Include the number of votes is there is any in +{number} format. If a post doesn't have any votes, then, don't mention anything about votes in that specific post. Separate sections and include the section titles. Do a summary of each section posts and format the post to an understandable way. Do not include Section number and do not include the word "Summary". Do not include the user id or name. At the beginning of the text, include the adminName and the date. Use ## for titles. Admin tag will be replace for Host. Host and Date labels should be in strong format. Inside sections, do a summary about the posts in one paragraph ${JSON.stringify(formattedBody)}`;
+    const prompt = `Generate a structured summary in Markdown format for the following information:
+
+${JSON.stringify(formattedBody)}
+
+* **Retrospective Meeting:**
+    * Host: [adminName]
+    * Date: [date]
+    * Participants: [participants]
+    * Summary:
+        * [<h2>sectionName</h2>]: 
+        * [Summary]
+        * [<h2>sectionName</h2>]: 
+        * [Summary]
+        * (repeat with the rest of the sections)
+
+**Markdown format:**
+
+* Use headings (H2, H3, H4) for titles and subtitles.
+* Use list format for the summary sections.
+* Use bold to emphatize the important parts, inside the sections.
+
+**Important**:
+* Make sure the summary is clear and concise.
+* Avoid including personal information or sensitive data.
+* Make sure the summary is well formatted and easy to read.
+* Organize and give importance to the most relevant information, taking in account the number of votes.
+* Do not include users ids or personal information in the summary.
+`;
 
     // Pass the prompt to the model and retrieve the output
     const result = await model.generateContent(prompt);
