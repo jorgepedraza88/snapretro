@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useUserSession } from "@/hooks/user-session-context";
+import { useUserSession } from "@/components/UserSessionContext";
 import {
   AlertDialogHeader,
   AlertDialog,

@@ -11,7 +11,7 @@ import {
   SidebarFooter,
   useSidebar,
 } from "./ui/sidebar";
-import { useUserSession } from "@/hooks/user-session-context";
+import { useUserSession } from "@/components/UserSessionContext";
 import { useParams } from "next/navigation";
 
 interface UserMessage {

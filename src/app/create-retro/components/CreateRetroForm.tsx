@@ -11,7 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { CreateRetroFirst } from "./CreateRetroFirst";
 import { CreateRetroSecond } from "./CreateRetroSecond";
 import { createRetro, CreateRetrospectiveData } from "@/app/actions";
-import { useUserSession } from "@/hooks/user-session-context";
+import { useUserSession } from "@/components/UserSessionContext";
 import { useRouter } from "next/navigation";
 
 const defaultFormValues: CreateRetrospectiveData = {

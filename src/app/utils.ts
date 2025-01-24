@@ -57,40 +57,32 @@ export const decryptMessage = (encryptedMessage: string) => {
   return decrypted;
 };
 
-export function generateHTMLFromJSON(json: RetrospectiveData): string {
-  let htmlTemplate = `<div class='retrospective'>`;
+export function generateMarkdownFromJSON(
+  json: RetrospectiveData,
+  participants: string[],
+): string {
+  let markdownTemplate = `# Retrospective\n\n`;
 
   // Add header details
-  htmlTemplate += `
-    <div class='header'>
-      <h2>Retrospective - ${json.adminId}</h2>
-      <p><b>Date:</b> ${new Date(json.date).toLocaleString()}</p>
-    </div>
-  `;
+  markdownTemplate += `**Retrospective Meeting:**\n\n`;
+  markdownTemplate += `* **Host**: ${json.adminName || "Not specified"}\n`;
+  markdownTemplate += `* **Date**: ${new Date(json.date).toLocaleString()}\n`;
+  markdownTemplate += `* **Participants**: ${participants?.join(", ") || "Not specified"}\n\n`;
 
-  // Process sections
-  htmlTemplate += `<div class='sections'>`;
   json.sections.forEach((section) => {
-    htmlTemplate += `
-      <div class='section'>
-        <h3><b>${section.title}</b></h3>
-        <ul>`;
+    markdownTemplate += `- **${section.title}:**\n`;
 
     if (section.posts.length > 0) {
       section.posts.forEach((post) => {
         const decryptedPost = decryptMessage(post.content);
-        htmlTemplate += `<li>${decryptedPost}</li>`;
+        markdownTemplate += `    - ${decryptedPost} (${post.votes.length} votes)\n`;
       });
     } else {
-      htmlTemplate += `<li><i>No posts yet.</i></li>`;
+      markdownTemplate += `  *No posts yet.*\n`;
     }
 
-    htmlTemplate += `</ul>
-      </div>`;
+    markdownTemplate += `\n`;
   });
-  htmlTemplate += `</div>`;
 
-  htmlTemplate += `</div>`;
-
-  return htmlTemplate;
+  return markdownTemplate;
 }

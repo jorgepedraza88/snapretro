@@ -190,6 +190,26 @@ export async function editRetroSectionsNumber(
   revalidatePath("/retro/[id]", "page");
 }
 
+export async function editRetroPassword(
+  retrospectiveId: string,
+  newPassword: string,
+) {
+  try {
+    await prisma.retrospective.update({
+      where: { id: retrospectiveId },
+      data: {
+        password: newPassword,
+        enablePassword: newPassword ? true : false,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    throw new Error("Failed to edit password");
+  }
+
+  revalidatePath("/retro/[id]", "page");
+}
+
 async function getPostVotes(postId: string) {
   const post = await prisma.retrospectivePost.findUnique({
     where: { id: postId },
@@ -295,7 +315,7 @@ export async function generateAIContent(
     const genAI = new GoogleGenerativeAI(geminiAPIKey);
 
     const generationConfig = {
-      temperature: 2,
+      temperature: 1.5,
       responseMimeType: "text/plain",
     };
 
@@ -310,28 +330,28 @@ export async function generateAIContent(
 
 ${JSON.stringify(formattedBody)}
 
-* **Retrospective Meeting:**
-    * Host: [adminName]
-    * Date: [date]
-    * Participants: [participants]
-    * Summary:
-        * [<h2>sectionName</h2>]: 
-        * [Summary]
-        * [<h2>sectionName</h2>]: 
-        * [Summary]
+* **Retrospective Meeting:** - use h2 font size
+    * *Host*: [adminName] - use normal text size
+    * *Date*: [date] - use normal text size
+    * *Participants*: [participants] - use normal text size
+    *
+        * [sectionName - use h2]: (only include section name)
+        * [use list format - Make a summary of the section - don't use summary word - give importance to the most relevant information and format it to a clear and concise summary]
+        * [sectionName - use h2]: (only include section name)
+        * [use list format - Make a summary of the section - don't use summary word - give importance to the most relevant information and format it to a clear and concise summary]
         * (repeat with the rest of the sections)
 
 **Markdown format:**
 
 * Use headings (H2, H3, H4) for titles and subtitles.
-* Use list format for the summary sections.
 * Use bold to emphatize the important parts, inside the sections.
+* Use bold for Host, Date and Participants tags
 
 **Important**:
 * Make sure the summary is clear and concise.
 * Avoid including personal information or sensitive data.
 * Make sure the summary is well formatted and easy to read.
-* Organize and give importance to the most relevant information, taking in account the number of votes.
+* Organize and give importance to the most relevant information, taking in account the number of votes but do not include the number of votes in the summary.
 * Do not include users ids or personal information in the summary.
 `;
 

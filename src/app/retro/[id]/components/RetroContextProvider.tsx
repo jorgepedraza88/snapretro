@@ -7,19 +7,20 @@ import React, {
   useEffect,
   ReactNode,
   useMemo,
+  useCallback,
 } from "react";
 import { ImSpinner as SpinnerIcon } from "react-icons/im";
 
 import { RetrospectiveData } from "@/types/Retro";
-import { UserSession, useUserSession } from "@/hooks/user-session-context";
+import { UserSession, useUserSession } from "@/components/UserSessionContext";
 import { socket } from "@/socket";
 import { endRetrospective, generateAIContent, revalidate } from "@/app/actions";
-import { AdminMenu } from "./AdminMenu";
+import { generateMarkdownFromJSON } from "@/app/utils";
 
 interface AdminSettings {
-  allowNewParticipants: boolean;
   allowMessages: boolean;
   allowVotes: boolean;
+  useSummaryAI: boolean;
 }
 
 export interface RetroContextValue {
@@ -31,6 +32,7 @@ export interface RetroContextValue {
   participants: Participant[];
   isLoadingFinalContent: boolean;
   adminSettings: AdminSettings;
+  displayedContent: string;
   setAdminSettings: React.Dispatch<React.SetStateAction<AdminSettings>>;
   handleEndRetro: () => void;
 }
@@ -48,6 +50,8 @@ interface Participant {
   isAdmin: boolean;
 }
 
+const TYPING_EFFECT_SPEED = 5;
+
 export function RetroContextProvider({
   retrospectiveData,
   children,
@@ -57,41 +61,54 @@ export function RetroContextProvider({
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [isLoadingFinalContent, setIsLoadingFinalContent] = useState(false);
   const [finalRetroSummary, setFinalRetroSummary] = useState("");
+  const [displayedContent, setDisplayedContent] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const [adminSettings, setAdminSettings] = useState({
-    allowNewParticipants: true,
     allowMessages: true,
     allowVotes: true,
+    useSummaryAI: true,
   });
 
   const hasRetroEnded = retrospectiveData.status === "ended";
   const isCurrentUserAdmin = retrospectiveData.adminId === userSession?.id;
 
-  const handleEndRetro = async () => {
+  const handleEndRetro = useCallback(async () => {
+    let finalSummaryContent = "";
+
     setIsLoadingFinalContent(true);
-    const retrospective = await endRetrospective(retrospectiveData.id);
+
+    const endResponse = await endRetrospective(retrospectiveData.id);
+
     const participantsNames = participants.map(
       (participant) => participant.username,
     );
 
-    if (retrospective) {
-      const generatedAIContent = await generateAIContent(
-        retrospective,
-        participantsNames,
-      );
+    if (endResponse) {
+      if (adminSettings.useSummaryAI) {
+        finalSummaryContent =
+          (await generateAIContent(endResponse, participantsNames)) ??
+          "An Error has ocurred. No summary generated";
+      } else {
+        finalSummaryContent = generateMarkdownFromJSON(
+          endResponse,
+          participantsNames,
+        );
 
-      if (!generatedAIContent) {
-        setFinalRetroSummary("An Error has ocurred. No summary generated");
+        setDisplayedContent(finalSummaryContent);
         setIsLoadingFinalContent(false);
         return;
       }
 
-      setFinalRetroSummary(generatedAIContent);
+      socket.emit("retro-ended", endResponse.id, finalSummaryContent);
 
-      socket.emit("retro-ended", retrospective.id, generatedAIContent);
+      setFinalRetroSummary(finalSummaryContent);
+      setDisplayedContent(""); // Reset displayed content
+      setIsTyping(true);
+      setIsLoadingFinalContent(false);
     }
 
     setIsLoadingFinalContent(false);
-  };
+  }, [retrospectiveData.id, participants, adminSettings.useSummaryAI]);
 
   useEffect(() => {
     socket.emit("get-active-users", retrospectiveData.id);
@@ -115,7 +132,12 @@ export function RetroContextProvider({
     });
 
     socket.on("retro-ended-user", (content: string) => {
-      setFinalRetroSummary(content);
+      if (adminSettings.useSummaryAI) {
+        setFinalRetroSummary(content);
+        return;
+      }
+
+      setDisplayedContent(content);
     });
 
     return () => {
@@ -123,7 +145,25 @@ export function RetroContextProvider({
       socket.off("active-users");
       socket.off("retro-ended-user");
     };
-  }, []);
+  }, [adminSettings.useSummaryAI, retrospectiveData.id]);
+
+  useEffect(() => {
+    if (isTyping && finalRetroSummary) {
+      let index = 0;
+
+      const interval = setInterval(() => {
+        if (index < finalRetroSummary.length) {
+          setDisplayedContent((prev) => prev + finalRetroSummary.charAt(index));
+          index++;
+        } else {
+          clearInterval(interval);
+          setIsTyping(false);
+        }
+      }, TYPING_EFFECT_SPEED);
+
+      return () => clearInterval(interval);
+    }
+  }, [isTyping, finalRetroSummary]);
 
   if (!userSession) {
     throw new Error("User session is required");
@@ -139,22 +179,30 @@ export function RetroContextProvider({
       participants,
       isLoadingFinalContent,
       adminSettings,
+      displayedContent,
       setAdminSettings,
       handleEndRetro,
     }),
     [
+      retrospectiveData.id,
       finalRetroSummary,
       isCurrentUserAdmin,
+      userSession,
       hasRetroEnded,
       participants,
       isLoadingFinalContent,
       adminSettings,
+      displayedContent,
+      handleEndRetro,
     ],
   );
 
   if (isLoadingFinalContent) {
     return (
-      <SpinnerIcon size={50} className="animate-spin text-violet-700 mt-12" />
+      <div className="flex flex-col justify-center items-center gap-2 h-full">
+        <p>Loading final summary...</p>
+        <SpinnerIcon size={50} className="animate-spin text-violet-700" />
+      </div>
     );
   }
 

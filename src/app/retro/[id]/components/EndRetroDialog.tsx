@@ -1,5 +1,6 @@
 "use client";
 
+import { BsStars as AiIcon } from "react-icons/bs";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,14 +13,14 @@ import {
   AlertDialogDescription,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { useRetroContext } from "./RetroContextProvider";
 
-export function EndRetroDialog({
-  onEndRetro,
-  isCurrentUserAdmin,
-}: {
-  isCurrentUserAdmin: boolean;
-  onEndRetro: () => void;
-}) {
+export function EndRetroDialog({ onEndRetro }: { onEndRetro: () => void }) {
+  const { isCurrentUserAdmin, adminSettings, setAdminSettings } =
+    useRetroContext();
+
   if (!isCurrentUserAdmin) return null;
 
   return (
@@ -42,18 +43,28 @@ export function EndRetroDialog({
           </p>
           <p className="text-xs text-red-500">This action is not reversible</p>
         </div>
-        <AlertDialogFooter>
-          <AlertDialogCancel asChild>
-            <Button variant="secondary">Cancel</Button>
-          </AlertDialogCancel>
-          <AlertDialogAction asChild onClick={onEndRetro}>
-            <Button
-              variant="destructive"
-              className="bg-red-500 hover:bg-red-600"
-            >
-              END
-            </Button>
-          </AlertDialogAction>
+        <AlertDialogFooter className="sm:justify-between w-full">
+          <Label className="items-center flex gap-1">
+            <Switch
+              checked={adminSettings.useSummaryAI}
+              onCheckedChange={(val) =>
+                setAdminSettings((prev) => ({
+                  ...prev,
+                  useSummaryAI: val,
+                }))
+              }
+            />
+            <span className="mr-2">Generate Summary with AI</span>
+            <AiIcon size={16} className="text-violet-700" />
+          </Label>
+          <div className="flex gap-2">
+            <AlertDialogCancel asChild>
+              <Button variant="secondary">Cancel</Button>
+            </AlertDialogCancel>
+            <AlertDialogAction asChild onClick={onEndRetro}>
+              <Button>End Retro</Button>
+            </AlertDialogAction>
+          </div>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -8,9 +8,9 @@ import {
 import { FaCrown as CrownIcon } from "react-icons/fa";
 
 import { socket } from "@/socket";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/useToast";
 import { editRetroAdminId, revalidate } from "@/app/actions";
-import { useUserSession } from "@/hooks/user-session-context";
+import { useUserSession } from "@/components/UserSessionContext";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
