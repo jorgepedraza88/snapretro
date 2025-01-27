@@ -43,13 +43,6 @@ export function CreateRetroForm() {
     try {
       const retrospective = await createRetro(data);
 
-      // socket.emit(
-      //   "join-retrospective",
-      //   retrospective.id,
-      //   retrospective.adminName,
-      //   true,
-      // );
-
       router.push(`/retro/${retrospective.id}`);
     } catch (error) {
       console.log(error);

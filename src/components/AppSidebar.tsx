@@ -42,7 +42,7 @@ export function AppSidebar() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [retrospectiveId]);
 
   const sendMessage = () => {
     if (inputMessage.trim() && userSession) {

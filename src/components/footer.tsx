@@ -46,7 +46,7 @@ export function Footer() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [retrospectiveId, userSession?.id]);
 
   return (
     <div className="w-full absolute bottom-8 hidden justify-center p-4 lg:flex">

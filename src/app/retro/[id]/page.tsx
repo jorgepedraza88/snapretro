@@ -10,7 +10,6 @@ import { getRetrospetiveData } from "@/app/actions";
 import { EndRetroContainer } from "./components/EndRetroContainer";
 import { AdminMenu } from "./components/AdminMenu";
 import { RetroContextProvider } from "./components/RetroContextProvider";
-import { ChannelProvider } from "@/components/RealtimeProvider";
 
 export default async function Page({
   params,

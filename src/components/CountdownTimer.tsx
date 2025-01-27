@@ -1,7 +1,7 @@
 "use client";
 
 import { HiClock as TimerIcon } from "react-icons/hi2";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import {
   HiMiniPlay as PlayIcon,
   HiMiniPause as PauseIcon,
@@ -10,42 +10,26 @@ import {
 
 import { Button } from "./ui/button";
 import { useRetroContext } from "@/app/retro/[id]/components/RetroContextProvider";
-import { supabase } from "@/supabaseClient";
+import { handleTimerBroadcast } from "@/app/realtimeActions";
 
 interface CountdownTimerProps {
   adminId: string;
   defaultSeconds?: number;
 }
 
-type TimerState = "on" | "off" | "finished";
-
 const DEFAULT_SECONDS = 300;
 
 export function CountdownTimer({
   defaultSeconds = DEFAULT_SECONDS,
 }: CountdownTimerProps) {
-  const { isCurrentUserAdmin, retrospectiveId } = useRetroContext();
-
-  const [timeLeft, setTimeLeft] = useState(defaultSeconds);
-  const [timerState, setTimerState] = useState<TimerState>("off");
-
-  const channelId = `retrospective:${retrospectiveId}`;
-
-  useEffect(() => {
-    const channel = supabase.channel(channelId);
-
-    channel
-      .on("broadcast", { event: "timer" }, ({ payload }) => {
-        if (isCurrentUserAdmin) return;
-        setTimerState(payload.timerState);
-      })
-      .on("broadcast", { event: "reset-timer" }, () => {
-        if (isCurrentUserAdmin) return;
-
-        setTimerState("off");
-        setTimeLeft(defaultSeconds);
-      });
-  }, []);
+  const {
+    isCurrentUserAdmin,
+    retrospectiveId,
+    timerState,
+    timeLeft,
+    setTimerState,
+    setTimeLeft,
+  } = useRetroContext();
 
   useEffect(() => {
     if (timeLeft <= 0) {
@@ -60,6 +44,7 @@ export function CountdownTimer({
 
       return () => clearInterval(timer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeLeft, timerState]);
 
   const formatTime = (seconds: number) => {
@@ -68,35 +53,23 @@ export function CountdownTimer({
     return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
-  const startTimer = () => {
+  const startTimer = async () => {
     setTimerState("on");
 
-    supabase.channel(channelId).send({
-      type: "broadcast",
-      event: "timer",
-      payload: { timerState: "on" },
-    });
+    await handleTimerBroadcast(retrospectiveId, "on");
   };
 
-  const pauseTimer = () => {
+  const pauseTimer = async () => {
     setTimerState("off");
 
-    supabase.channel(channelId).send({
-      type: "broadcast",
-      event: "timer",
-      payload: { timerState: "off" },
-    });
+    await handleTimerBroadcast(retrospectiveId, "off");
   };
 
-  const handleResetTimer = () => {
+  const handleResetTimer = async () => {
     setTimerState("off");
     setTimeLeft(defaultSeconds);
 
-    supabase.channel(channelId).send({
-      type: "broadcast",
-      event: "reset-timer",
-      payload: {},
-    });
+    await handleTimerBroadcast(retrospectiveId, "reset");
   };
 
   return (

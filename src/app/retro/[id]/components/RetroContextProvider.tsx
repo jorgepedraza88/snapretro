@@ -13,8 +13,10 @@ import { ImSpinner as SpinnerIcon } from "react-icons/im";
 
 import { RetrospectiveData } from "@/types/Retro";
 import { UserSession, useUserSession } from "@/components/UserSessionContext";
-import { endRetrospective, generateAIContent } from "@/app/actions";
+import { endRetrospective, generateAIContent, revalidate } from "@/app/actions";
 import { generateMarkdownFromJSON } from "@/app/utils";
+import { endRetroBroadcast } from "@/app/realtimeActions";
+import { supabase } from "@/supabaseClient";
 
 interface AdminSettings {
   allowMessages: boolean;
@@ -32,6 +34,10 @@ export interface RetroContextValue {
   isLoadingFinalContent: boolean;
   adminSettings: AdminSettings;
   displayedContent: string;
+  timerState: TimerState;
+  timeLeft: number;
+  setTimerState: React.Dispatch<React.SetStateAction<TimerState>>;
+  setTimeLeft: React.Dispatch<React.SetStateAction<number>>;
   setAdminSettings: React.Dispatch<React.SetStateAction<AdminSettings>>;
   handleEndRetro: () => void;
 }
@@ -49,7 +55,10 @@ interface Participant {
   isAdmin: boolean;
 }
 
+type TimerState = "on" | "off" | "finished";
+
 const TYPING_EFFECT_SPEED = 5;
+const DEFAULT_SECONDS = 300;
 
 export function RetroContextProvider({
   retrospectiveData,
@@ -67,6 +76,9 @@ export function RetroContextProvider({
     allowVotes: true,
     useSummaryAI: true,
   });
+  const [timerState, setTimerState] = useState<TimerState>("off");
+  const defaultSeconds = retrospectiveData.timer ?? DEFAULT_SECONDS;
+  const [timeLeft, setTimeLeft] = useState(defaultSeconds);
 
   const hasRetroEnded = retrospectiveData.status === "ended";
   const isCurrentUserAdmin = retrospectiveData.adminId === userSession?.id;
@@ -98,7 +110,7 @@ export function RetroContextProvider({
         return;
       }
 
-      // socket.emit("retro-ended", endResponse.id, finalSummaryContent);
+      await endRetroBroadcast(retrospectiveData.id, finalSummaryContent);
 
       setFinalRetroSummary(finalSummaryContent);
       setDisplayedContent(""); // Reset displayed content
@@ -110,36 +122,39 @@ export function RetroContextProvider({
   }, [retrospectiveData.id, participants, adminSettings.useSummaryAI]);
 
   useEffect(() => {
+    const channel = supabase.channel(`retrospective:${retrospectiveData.id}`);
     // socket.emit("get-active-users", retrospectiveData.id);
-
     // Listen for updates to the active participants
     // socket.on("active-users", (users) => {
     //   setParticipants(users); // Update the state with the new participants list
     // });
+    channel
+      .on("broadcast", { event: "revalidate" }, async () => {
+        await revalidate();
+      })
+      .on("broadcast", { event: "end-retro" }, ({ payload }) => {
+        setFinalRetroSummary(payload.finalSummary);
+      })
+      .on("broadcast", { event: "settings" }, ({ payload }) => {
+        setAdminSettings(payload);
+      })
+      .on("broadcast", { event: "timer" }, ({ payload }) => {
+        if (isCurrentUserAdmin) return;
+        setTimerState(payload.timerState);
+      })
+      .on("broadcast", { event: "reset-timer" }, () => {
+        if (isCurrentUserAdmin) return;
 
-    // socket.on("revalidate", () => {
-    //   revalidate();
-    // });
+        setTimerState("off");
+        setTimeLeft(defaultSeconds);
+      })
+      .subscribe();
 
-    // socket.on("settings", (settings) => {
-    //   setAdminSettings(settings);
-    // });
-
-    // socket.on("retro-ended", (content) => {
-    //   socket.emit("retro-ended-user", retrospectiveData.id, content);
-    //   revalidate();
-    // });
-
-    // socket.on("retro-ended-user", (content: string) => {
-    //   if (adminSettings.useSummaryAI) {
-    //     setFinalRetroSummary(content);
-    //     return;
-    //   }
-
-    //   setDisplayedContent(content);
-    // });
-
-  }, [adminSettings.useSummaryAI, retrospectiveData.id]);
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [adminSettings.useSummaryAI, isCurrentUserAdmin]);
 
   useEffect(() => {
     if (isTyping && finalRetroSummary) {
@@ -174,11 +189,19 @@ export function RetroContextProvider({
       isLoadingFinalContent,
       adminSettings,
       displayedContent,
+      defaultSeconds,
+      timerState,
+      timeLeft,
+      setTimerState,
       setAdminSettings,
       handleEndRetro,
+      setTimeLeft,
     }),
     [
       retrospectiveData.id,
+      timeLeft,
+      timerState,
+      defaultSeconds,
       finalRetroSummary,
       isCurrentUserAdmin,
       userSession,
@@ -188,6 +211,7 @@ export function RetroContextProvider({
       adminSettings,
       displayedContent,
       handleEndRetro,
+      setTimeLeft,
     ],
   );
 

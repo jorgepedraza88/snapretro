@@ -67,7 +67,6 @@ export function UserSessionContextProvider({
       avatarUrl: "",
     };
     setUserSession(newUser);
-    // socket.emit("join-retrospective", retrospectiveId, newUser.name);
   }
 
   return (

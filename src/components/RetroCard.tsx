@@ -21,8 +21,6 @@ import {
   destroyPost,
   editRetroSectionTitle,
   removeVoteFromPost,
-  revalidatePageBroadcast,
-  writingAction,
 } from "@/app/actions";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
@@ -32,6 +30,7 @@ import { decryptMessage, encryptMessage } from "@/app/utils";
 import { nanoid } from "nanoid";
 import { useRetroContext } from "@/app/retro/[id]/components/RetroContextProvider";
 import { supabase } from "@/supabaseClient";
+import { revalidatePageBroadcast, writingAction } from "@/app/realtimeActions";
 
 interface RetroCardProps {
   title: string;
@@ -69,11 +68,11 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
         }
       })
       .on("broadcast", { event: "stop-writing" }, ({ payload }) => {
-        debugger;
         if (section.id === payload.sectionId) {
           setIsWriting(false);
         }
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleNewPostChange = async (

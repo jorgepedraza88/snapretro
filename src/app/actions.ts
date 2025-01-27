@@ -7,7 +7,6 @@ import { DateTime } from "luxon";
 import { prisma } from "@/lib/prisma";
 import { RetrospectiveData } from "@/types/Retro";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { supabase } from "@/supabaseClient";
 
 interface CreatePostParams {
   sectionId: string;
@@ -366,28 +365,4 @@ ${JSON.stringify(formattedBody)}
   } catch (error) {
     console.error(error);
   }
-}
-
-export async function writingAction(
-  retroId: string,
-  sectionId: string,
-  userId: string,
-  action: "start" | "stop",
-) {
-  supabase.channel(`retrospective:${retroId}`).send({
-    type: "broadcast",
-    event: action === "start" ? "writing" : "stop-writing",
-    payload: {
-      sectionId,
-      userId,
-    },
-  });
-}
-
-export async function revalidatePageBroadcast(retroId: string) {
-  supabase.channel(`retrospective:${retroId}`).send({
-    type: "broadcast",
-    event: "revalidate",
-    payload: {},
-  });
 }
