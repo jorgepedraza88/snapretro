@@ -17,7 +17,6 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import { HiCog8Tooth as AdminSettingsIcon } from "react-icons/hi2";
 import { useRetroContext } from "./RetroContextProvider";
 import { useState } from "react";
-import { socket } from "@/socket";
 
 interface AdminMenuData {
   columns: number;
@@ -65,12 +64,12 @@ export function AdminMenu({
       allowVotes: data.allowVotes,
     }));
 
-    socket.emit("settings", retrospectiveData.id, {
-      allowMessages: data.allowMessages,
-      allowVotes: data.allowVotes,
-    });
+    // socket.emit("settings", retrospectiveData.id, {
+    //   allowMessages: data.allowMessages,
+    //   allowVotes: data.allowVotes,
+    // });
 
-    socket.emit("revalidate", retrospectiveData.id);
+    // socket.emit("revalidate", retrospectiveData.id);
 
     setIsPopoverOpen(false);
     setIsSubmitting(false);

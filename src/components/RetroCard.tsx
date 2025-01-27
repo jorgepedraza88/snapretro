@@ -14,7 +14,6 @@ import {
   HiPencil as EditIcon,
   HiHandThumbUp as VoteIcon,
 } from "react-icons/hi2";
-import { socket } from "@/socket";
 
 import {
   addVoteToPost,
@@ -22,6 +21,8 @@ import {
   destroyPost,
   editRetroSectionTitle,
   removeVoteFromPost,
+  revalidatePageBroadcast,
+  writingAction,
 } from "@/app/actions";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
@@ -30,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { decryptMessage, encryptMessage } from "@/app/utils";
 import { nanoid } from "nanoid";
 import { useRetroContext } from "@/app/retro/[id]/components/RetroContextProvider";
+import { supabase } from "@/supabaseClient";
 
 interface RetroCardProps {
   title: string;
@@ -55,29 +57,35 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
   );
 
   useEffect(() => {
-    socket.on("writing", (sectionId: string) => {
-      if (section.id === sectionId) {
-        setIsWriting(true);
-      }
-    });
+    const channel = supabase.channel(`retrospective:${retrospectiveId}`);
 
-    socket.on("stop-writing", (id: string) => {
-      if (section.id === id) {
-        setIsWriting(false);
-      }
-    });
-
-    return () => {
-      socket.off("writing");
-      socket.off("stop-writing");
-    };
+    channel
+      .on("broadcast", { event: "writing" }, ({ payload }) => {
+        if (
+          section.id === payload.sectionId &&
+          userSession.id !== payload.userId
+        ) {
+          setIsWriting(true);
+        }
+      })
+      .on("broadcast", { event: "stop-writing" }, ({ payload }) => {
+        debugger;
+        if (section.id === payload.sectionId) {
+          setIsWriting(false);
+        }
+      });
   }, []);
 
-  const handleNewPostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    socket.emit("writing", retrospectiveId, section.id);
+  const handleNewPostChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    if (!isWriting) {
+      await writingAction(retrospectiveId, section.id, userSession.id, "start");
+    }
 
     if (e.target.value === "") {
-      socket.emit("stop-writing", retrospectiveId, section.id);
+      await writingAction(retrospectiveId, section.id, userSession.id, "stop");
+
       return;
     }
   };
@@ -85,7 +93,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
   const handleSavePost = async (formData: FormData) => {
     const postContent = formData.get("content") as string;
 
-    socket.emit("stop-writing", retrospectiveId, section.id);
+    await writingAction(retrospectiveId, section.id, userSession.id, "stop");
 
     try {
       const temporalId = nanoid(5);
@@ -109,7 +117,8 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
         sectionId: section.id,
         newPost,
       });
-      socket.emit("revalidate", retrospectiveId);
+
+      await revalidatePageBroadcast(retrospectiveId);
     } catch (error) {
       console.error("Error creating post:", error);
     }
@@ -122,7 +131,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
 
     await destroyPost({ postId });
 
-    socket.emit("revalidate", retrospectiveId);
+    await revalidatePageBroadcast(retrospectiveId);
   };
 
   const handleChangeSectionTitle = async () => {
@@ -133,7 +142,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
       sectionId: section.id,
     });
 
-    socket.emit("revalidate", retrospectiveId);
+    await revalidatePageBroadcast(retrospectiveId);
 
     setIsEditingSectionTitle(false);
   };
@@ -155,7 +164,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
       });
       await removeVoteFromPost(postId, userSession.id);
 
-      socket.emit("revalidate", retrospectiveId);
+      await revalidatePageBroadcast(retrospectiveId);
     } else {
       startTransition(() => {
         addOptimisticPosts((prev) =>
@@ -171,7 +180,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
         );
       });
       await addVoteToPost(postId, userSession.id);
-      socket.emit("revalidate", retrospectiveId);
+      await revalidatePageBroadcast(retrospectiveId);
     }
   };
 

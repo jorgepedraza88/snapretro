@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { useSidebar } from "./ui/sidebar";
-
-import { socket } from "@/socket";
+import { supabase } from "@/supabaseClient";
+import { useParams } from "next/navigation";
+import { useUserSession } from "./UserSessionContext";
 
 function ChatNotificationDot() {
   return (
@@ -16,31 +17,36 @@ function ChatNotificationDot() {
 }
 
 export function Footer() {
+  const { userSession } = useUserSession();
+  const { id: retrospectiveId } = useParams<{ id: string }>();
   const { toggleSidebar, open } = useSidebar();
-  const [chatNotification, setChatNotification] = useState(false);
 
-  const handleSetNotification = useCallback(() => {
-    // Set the notification only if the chat is closed
-    if (!open) {
-      setChatNotification(true);
-    }
-  }, [open]);
+  const [chatNotification, setChatNotification] = useState(false);
 
   const handleToogleSidebar = () => {
     // Remove the notification when opening the chat
     if (chatNotification) {
       setChatNotification(false);
     }
+
     toggleSidebar();
   };
 
   useEffect(() => {
-    socket.on("message", handleSetNotification);
+    const channel = supabase.channel(`notifications:${retrospectiveId}`);
+
+    channel
+      .on("broadcast", { event: "chat-notification" }, ({ payload }) => {
+        if (payload.user !== userSession?.id) {
+          setChatNotification(true);
+        }
+      })
+      .subscribe();
 
     return () => {
-      socket.off("message", handleSetNotification);
+      supabase.removeChannel(channel);
     };
-  }, [handleSetNotification]);
+  }, []);
 
   return (
     <div className="w-full absolute bottom-8 hidden justify-center p-4 lg:flex">
@@ -48,7 +54,7 @@ export function Footer() {
         <Button onClick={handleToogleSidebar} variant="secondary">
           Open Chat
         </Button>
-        {chatNotification && <ChatNotificationDot />}
+        {chatNotification && !open && <ChatNotificationDot />}
       </div>
     </div>
   );

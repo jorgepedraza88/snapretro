@@ -7,7 +7,6 @@ import {
 } from "react-icons/hi2";
 import { FaCrown as CrownIcon } from "react-icons/fa";
 
-import { socket } from "@/socket";
 import { useToast } from "@/hooks/useToast";
 import { editRetroAdminId, revalidate } from "@/app/actions";
 import { useUserSession } from "@/components/UserSessionContext";
@@ -27,37 +26,32 @@ export function Participants() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const socketId = socket.id;
+    // const socketId = socket.id;
 
-    socket.on(
-      "assign-new-admin",
-      async (
-        newAdminId: string,
-        users: { id: string; username: string; isAdmin: boolean }[],
-      ) => {
-        if (newAdminId === socketId && userSession) {
-          await editRetroAdminId({
-            retrospectiveId,
-            adminId: userSession.id,
-          });
-          toast({
-            title: "You are now the host",
-          });
-        } else {
-          revalidate();
-          const newAdmin = users.find((p) => p.id === newAdminId);
-          toast({
-            title: `${newAdmin?.username} is now the host`,
-          });
-        }
-      },
-    );
+    // socket.on(
+    //   "assign-new-admin",
+    //   async (
+    //     newAdminId: string,
+    //     users: { id: string; username: string; isAdmin: boolean }[],
+    //   ) => {
+    //     if (newAdminId === socketId && userSession) {
+    //       await editRetroAdminId({
+    //         retrospectiveId,
+    //         adminId: userSession.id,
+    //       });
+    //       toast({
+    //         title: "You are now the host",
+    //       });
+    //     } else {
+    //       revalidate();
+    //       const newAdmin = users.find((p) => p.id === newAdminId);
+    //       toast({
+    //         title: `${newAdmin?.username} is now the host`,
+    //       });
+    //     }
+    //   },
+    // );
 
-    // Cleanup listeners on unmount
-    return () => {
-      socket.off("active-users");
-      socket.off("assign-new-admin");
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [retrospectiveId, userSession]);
 
@@ -65,13 +59,13 @@ export function Participants() {
     return null;
   }
 
-  const handleRemoveUser = (userId: string) => {
-    socket.emit("disconnect-user", retrospectiveId, userId);
-  };
+  // const handleRemoveUser = (userId: string) => {
+  //   socket.emit("disconnect-user", retrospectiveId, userId);
+  // };
 
-  const handleChangeAdmin = (userId: string) => {
-    socket.emit("assign-new-admin", retrospectiveId, userId);
-  };
+  // const handleChangeAdmin = (userId: string) => {
+  //   socket.emit("assign-new-admin", retrospectiveId, userId);
+  // };
 
   return (
     <div className="space-y-1 p-8 max-w-60">
@@ -92,7 +86,7 @@ export function Participants() {
               <p>{participant.username}</p>
             </div>
 
-            {isCurrentUserAdmin && participant.id !== socket.id && (
+            {/* {isCurrentUserAdmin && participant.id !== socket.id && (
               <div className="flex gap-1">
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -100,7 +94,7 @@ export function Participants() {
                       size="icon"
                       variant="ghost"
                       className="invisible size-0 px-4 py-3 group-hover:visible text-yellow-500 hover:text-yellow-600"
-                      onClick={() => handleChangeAdmin(participant.id)}
+                      // onClick={() => handleChangeAdmin(participant.id)}
                     >
                       <CrownIcon size={16} />
                     </Button>
@@ -115,7 +109,7 @@ export function Participants() {
                       size="icon"
                       variant="ghost"
                       className="invisible size-0 px-4 py-3 group-hover:visible"
-                      onClick={() => handleRemoveUser(participant.id)}
+                      // onClick={() => handleRemoveUser(participant.id)}
                     >
                       <RemoveIcon size={16} />
                     </Button>
@@ -125,7 +119,7 @@ export function Participants() {
                   </TooltipContent>
                 </Tooltip>
               </div>
-            )}
+            )} */}
           </div>
         ))}
       </TooltipProvider>

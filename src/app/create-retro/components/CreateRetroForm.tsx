@@ -1,10 +1,10 @@
 "use client";
+
 import { useState } from "react";
 import { HiArrowRight as ArrowRightIcon } from "react-icons/hi2";
 import { ImSpinner as SpinnerIcon } from "react-icons/im";
 import { FormProvider, useForm } from "react-hook-form";
 import { nanoid } from "nanoid";
-import { socket } from "@/socket";
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -43,12 +43,12 @@ export function CreateRetroForm() {
     try {
       const retrospective = await createRetro(data);
 
-      socket.emit(
-        "join-retrospective",
-        retrospective.id,
-        retrospective.adminName,
-        true,
-      );
+      // socket.emit(
+      //   "join-retrospective",
+      //   retrospective.id,
+      //   retrospective.adminName,
+      //   true,
+      // );
 
       router.push(`/retro/${retrospective.id}`);
     } catch (error) {

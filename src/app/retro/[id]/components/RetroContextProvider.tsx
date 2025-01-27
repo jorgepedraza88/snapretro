@@ -13,8 +13,7 @@ import { ImSpinner as SpinnerIcon } from "react-icons/im";
 
 import { RetrospectiveData } from "@/types/Retro";
 import { UserSession, useUserSession } from "@/components/UserSessionContext";
-import { socket } from "@/socket";
-import { endRetrospective, generateAIContent, revalidate } from "@/app/actions";
+import { endRetrospective, generateAIContent } from "@/app/actions";
 import { generateMarkdownFromJSON } from "@/app/utils";
 
 interface AdminSettings {
@@ -99,7 +98,7 @@ export function RetroContextProvider({
         return;
       }
 
-      socket.emit("retro-ended", endResponse.id, finalSummaryContent);
+      // socket.emit("retro-ended", endResponse.id, finalSummaryContent);
 
       setFinalRetroSummary(finalSummaryContent);
       setDisplayedContent(""); // Reset displayed content
@@ -111,40 +110,35 @@ export function RetroContextProvider({
   }, [retrospectiveData.id, participants, adminSettings.useSummaryAI]);
 
   useEffect(() => {
-    socket.emit("get-active-users", retrospectiveData.id);
+    // socket.emit("get-active-users", retrospectiveData.id);
 
     // Listen for updates to the active participants
-    socket.on("active-users", (users) => {
-      setParticipants(users); // Update the state with the new participants list
-    });
+    // socket.on("active-users", (users) => {
+    //   setParticipants(users); // Update the state with the new participants list
+    // });
 
-    socket.on("revalidate", () => {
-      revalidate();
-    });
+    // socket.on("revalidate", () => {
+    //   revalidate();
+    // });
 
-    socket.on("settings", (settings) => {
-      setAdminSettings(settings);
-    });
+    // socket.on("settings", (settings) => {
+    //   setAdminSettings(settings);
+    // });
 
-    socket.on("retro-ended", (content) => {
-      socket.emit("retro-ended-user", retrospectiveData.id, content);
-      revalidate();
-    });
+    // socket.on("retro-ended", (content) => {
+    //   socket.emit("retro-ended-user", retrospectiveData.id, content);
+    //   revalidate();
+    // });
 
-    socket.on("retro-ended-user", (content: string) => {
-      if (adminSettings.useSummaryAI) {
-        setFinalRetroSummary(content);
-        return;
-      }
+    // socket.on("retro-ended-user", (content: string) => {
+    //   if (adminSettings.useSummaryAI) {
+    //     setFinalRetroSummary(content);
+    //     return;
+    //   }
 
-      setDisplayedContent(content);
-    });
+    //   setDisplayedContent(content);
+    // });
 
-    return () => {
-      socket.off("revalidate");
-      socket.off("active-users");
-      socket.off("retro-ended-user");
-    };
   }, [adminSettings.useSummaryAI, retrospectiveData.id]);
 
   useEffect(() => {

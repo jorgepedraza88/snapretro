@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node server.js --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -39,8 +39,6 @@
     "react-hook-form": "^7.54.0",
     "react-icons": "^5.3.0",
     "react-markdown": "^9.0.3",
-    "socket.io": "^4.8.1",
-    "socket.io-client": "^4.8.1",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7"
   },

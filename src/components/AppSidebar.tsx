@@ -1,7 +1,7 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { nanoid } from "nanoid";
-import { socket } from "@/socket";
 
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -13,6 +13,7 @@ import {
 } from "./ui/sidebar";
 import { useUserSession } from "@/components/UserSessionContext";
 import { useParams } from "next/navigation";
+import { supabase } from "@/supabaseClient";
 
 interface UserMessage {
   id: string | null;
@@ -21,39 +22,51 @@ interface UserMessage {
 }
 
 export function AppSidebar() {
-  const { id: retroSpectiveId } = useParams<{ id: string }>();
+  const { id: retrospectiveId } = useParams<{ id: string }>();
   const { userSession } = useUserSession();
 
   const [messages, setMessages] = useState<UserMessage[]>([]);
-  const [message, setMessage] = useState("");
+  const [inputMessage, setInputMessage] = useState("");
+
+  const { toggleSidebar } = useSidebar();
 
   useEffect(() => {
-    socket.on("message", (msg: { id: string; name: string; text: string }) => {
-      setMessages((prev) => [...prev, msg]);
-    });
+    const channel = supabase.channel(`messages:${retrospectiveId}`);
+
+    channel
+      .on("broadcast", { event: "chat" }, ({ payload }) => {
+        setMessages((prev) => [...prev, payload]);
+      })
+      .subscribe();
 
     return () => {
-      socket.off("message");
+      supabase.removeChannel(channel);
     };
   }, []);
 
   const sendMessage = () => {
-    if (message.trim() && userSession) {
+    if (inputMessage.trim() && userSession) {
       const messageId = nanoid(5);
-      socket.emit("message", retroSpectiveId, {
-        id: messageId,
-        name: userSession.name,
-        text: message,
+
+      supabase.channel(`messages:${retrospectiveId}`).send({
+        type: "broadcast",
+        event: "chat",
+        payload: {
+          id: messageId,
+          name: userSession.name,
+          text: inputMessage,
+        },
       });
-      setMessages((prev) => [
-        ...prev,
-        { id: messageId, name: userSession.name, text: message },
-      ]);
-      setMessage("");
+
+      supabase.channel(`notifications:${retrospectiveId}`).send({
+        type: "broadcast",
+        event: "chat-notification",
+        payload: { user: userSession.id },
+      });
+
+      setInputMessage("");
     }
   };
-
-  const { toggleSidebar } = useSidebar();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -92,8 +105,8 @@ export function AppSidebar() {
         <form onSubmit={handleSubmit} className="flex gap-2">
           <Input
             placeholder="Type a message"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
             autoFocus
           />
           <Button variant="secondary" type="submit">

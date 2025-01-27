@@ -7,7 +7,6 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { socket } from "@/socket";
 import { nanoid } from "nanoid";
 
 import { Input } from "@/components/ui/input";
@@ -52,19 +51,13 @@ export function UserSessionContextProvider({
   const [disconnected, setDisconnected] = useState(false);
 
   useEffect(() => {
-    if (!socket.connected) {
-      socket.connect();
-    }
-
-    socket.on("disconnect", () => {
-      setUserSession(null);
-      setDisconnected(true);
-    });
-
-    return () => {
-      socket.off();
-      socket.disconnect();
-    };
+    // if (!socket.connected) {
+    //   socket.connect();
+    // }
+    // socket.on("disconnect", () => {
+    //   setUserSession(null);
+    //   setDisconnected(true);
+    // });
   }, []);
 
   function handleSubmitNewUser() {
@@ -74,7 +67,7 @@ export function UserSessionContextProvider({
       avatarUrl: "",
     };
     setUserSession(newUser);
-    socket.emit("join-retrospective", retrospectiveId, newUser.name);
+    // socket.emit("join-retrospective", retrospectiveId, newUser.name);
   }
 
   return (
