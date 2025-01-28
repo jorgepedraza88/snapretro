@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import {
@@ -60,7 +61,7 @@ export function Participants() {
               <p>{participant.username}</p>
             </div>
 
-            {isCurrentUserAdmin && (
+            {/* {isCurrentUserAdmin && (
               <div className="flex gap-1">
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -93,7 +94,7 @@ export function Participants() {
                   </TooltipContent>
                 </Tooltip>
               </div>
-            )}
+            )} */}
           </div>
         ))}
       </TooltipProvider>

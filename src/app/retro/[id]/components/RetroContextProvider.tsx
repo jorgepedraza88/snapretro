@@ -13,12 +13,7 @@ import { ImSpinner as SpinnerIcon } from "react-icons/im";
 
 import { RetrospectiveData } from "@/types/Retro";
 import { UserSession, useUserSession } from "@/components/UserSessionContext";
-import {
-  editRetroAdminId,
-  endRetrospective,
-  generateAIContent,
-  revalidate,
-} from "@/app/actions";
+import { endRetrospective, generateAIContent, revalidate } from "@/app/actions";
 import { generateMarkdownFromJSON } from "@/app/utils";
 import { endRetroBroadcast } from "@/app/realtimeActions";
 import { supabase } from "@/supabaseClient";
