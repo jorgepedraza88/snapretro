@@ -107,6 +107,7 @@ export async function createRetro(data: CreateRetrospectiveData) {
 
     return retrospective;
   } catch (error) {
+    console.log(error);
     throw new Error(`Failed to create retrospective, ${error}`);
   }
 }
