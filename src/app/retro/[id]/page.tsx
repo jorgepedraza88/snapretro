@@ -2,9 +2,9 @@ import { redirect } from "next/navigation";
 
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { RetroCardGroup } from "@/components/RetroCardGroup";
-import { Footer } from "@/components/Footer";
+import { Footer } from "@/components/Footers";
 import { RetroProtectedWrapper } from "./RetroProtectedWrapper";
-import { Participants } from "./components/Participants";
+import { Participants } from "./components/Participantss";
 
 import { getRetrospetiveData } from "@/app/actions";
 import { EndRetroContainer } from "./components/EndRetroContainer";

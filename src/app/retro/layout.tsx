@@ -1,4 +1,4 @@
-import { NavBar } from "@/components/NavBar";
+import { NavBar } from "@/components/NavBars";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 import { AppSidebar } from "@/components/AppSidebar";
