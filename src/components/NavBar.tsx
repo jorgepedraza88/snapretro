@@ -12,6 +12,7 @@ export function NavBar() {
         >
           FreeRetros
         </Link>
+        <span className="ml-4 text-violet-500 text-sm italic">Beta</span>
       </div>
       <div className="flex items-center gap-2">
         <SwitchColorMode />
