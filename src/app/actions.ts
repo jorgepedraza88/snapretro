@@ -131,18 +131,18 @@ export async function editRetroSectionTitle(data: {
 
 export async function editRetroAdminId(data: {
   retrospectiveId: string;
-  adminId: string;
+  newAdminId: string;
 }) {
-  const { retrospectiveId, adminId } = data;
+  const { retrospectiveId, newAdminId } = data;
 
   try {
     await prisma.retrospective.update({
       where: { id: retrospectiveId },
-      data: { adminId },
+      data: { adminId: newAdminId },
     });
   } catch (error) {
     console.log(error);
-    throw new Error("Failed to edit adminId");
+    throw new Error("Failed to edit newAdminId");
   }
 
   revalidatePath("/retro/[id]", "page");

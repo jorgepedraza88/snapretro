@@ -18,6 +18,11 @@ import { HiCog8Tooth as AdminSettingsIcon } from "react-icons/hi2";
 import { useRetroContext } from "./RetroContextProvider";
 import { useState } from "react";
 
+import {
+  editAdminSettingsBroadcast,
+  revalidatePageBroadcast,
+} from "@/app/realtimeActions";
+
 interface AdminMenuData {
   columns: number;
   password: string;
@@ -64,12 +69,13 @@ export function AdminMenu({
       allowVotes: data.allowVotes,
     }));
 
-    // socket.emit("settings", retrospectiveData.id, {
-    //   allowMessages: data.allowMessages,
-    //   allowVotes: data.allowVotes,
-    // });
+    await editAdminSettingsBroadcast(
+      retrospectiveData.id,
+      data.allowMessages,
+      data.allowVotes,
+    );
 
-    // socket.emit("revalidate", retrospectiveData.id);
+    await revalidatePageBroadcast(retrospectiveData.id);
 
     setIsPopoverOpen(false);
     setIsSubmitting(false);

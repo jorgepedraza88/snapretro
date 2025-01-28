@@ -1,14 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
 import {
   HiUserGroup as UsersIcon,
   HiTrash as RemoveIcon,
 } from "react-icons/hi2";
 import { FaCrown as CrownIcon } from "react-icons/fa";
 
-import { useToast } from "@/hooks/useToast";
-import { editRetroAdminId, revalidate } from "@/app/actions";
+import { editRetroAdminId } from "@/app/actions";
 import { useUserSession } from "@/components/UserSessionContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,53 +16,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useRetroContext } from "./RetroContextProvider";
-import { supabase } from "@/supabaseClient";
-import {
-  changeAdminBroadcast,
-  removeUserBroadcast,
-} from "@/app/realtimeActions";
+
+import { removeUserBroadcast } from "@/app/realtimeActions";
 
 export function Participants() {
   const { userSession } = useUserSession();
   const { retrospectiveId, participants, isCurrentUserAdmin } =
     useRetroContext();
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const channel = supabase.channel(`retrospective:${retrospectiveId}`);
-
-    channel.on(
-      "broadcast",
-      { event: "assign-new-admin" },
-      async ({ payload }) => {
-        if (!userSession) {
-          return;
-        }
-
-        const { newAdminId, users } = payload as {
-          newAdminId: string;
-          users: { id: string; username: string; isAdmin: boolean }[];
-        };
-        if (newAdminId === userSession?.id) {
-          editRetroAdminId({
-            retrospectiveId,
-            adminId: userSession.id,
-          });
-          toast({
-            title: "You are now the host",
-          });
-        } else {
-          await revalidate();
-          const newAdmin = users.find((p) => p.id === newAdminId);
-          toast({
-            title: `${newAdmin?.username} is now the host`,
-          });
-        }
-      },
-    );
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [retrospectiveId, userSession]);
 
   if (!userSession) {
     return null;
@@ -75,7 +33,12 @@ export function Participants() {
   };
 
   const handleChangeAdmin = async (userId: string) => {
-    await changeAdminBroadcast(retrospectiveId, userSession.id, userId);
+    if (userId !== userSession.id) {
+      await editRetroAdminId({
+        retrospectiveId,
+        newAdminId: userId,
+      });
+    }
   };
 
   return (

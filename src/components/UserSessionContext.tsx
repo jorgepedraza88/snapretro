@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
+import { createContext, useContext, useState, ReactNode } from "react";
 import { nanoid } from "nanoid";
 
 import { Input } from "@/components/ui/input";
@@ -48,17 +42,6 @@ export function UserSessionContextProvider({
 
   const [userSession, setUserSession] = useState<UserSession | null>(null);
   const [userName, setUserName] = useState("");
-  const [disconnected, setDisconnected] = useState(false);
-
-  useEffect(() => {
-    // if (!socket.connected) {
-    //   socket.connect();
-    // }
-    // socket.on("disconnect", () => {
-    //   setUserSession(null);
-    //   setDisconnected(true);
-    // });
-  }, []);
 
   function handleSubmitNewUser() {
     const newUser = {
@@ -71,19 +54,7 @@ export function UserSessionContextProvider({
 
   return (
     <UserSessionContext.Provider value={{ userSession, setUserSession }}>
-      {disconnected && (
-        <AlertDialog open>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Disconnected</AlertDialogTitle>
-              <AlertDialogDescription>
-                You have been disconnected from the session
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
-      {!userSession && shouldLoadUserDialog && !disconnected && (
+      {!userSession && shouldLoadUserDialog && (
         <AlertDialog open>
           <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
             <AlertDialogHeader>

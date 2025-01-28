@@ -13,10 +13,17 @@ import { ImSpinner as SpinnerIcon } from "react-icons/im";
 
 import { RetrospectiveData } from "@/types/Retro";
 import { UserSession, useUserSession } from "@/components/UserSessionContext";
-import { endRetrospective, generateAIContent, revalidate } from "@/app/actions";
+import {
+  editRetroAdminId,
+  endRetrospective,
+  generateAIContent,
+  revalidate,
+} from "@/app/actions";
 import { generateMarkdownFromJSON } from "@/app/utils";
 import { endRetroBroadcast } from "@/app/realtimeActions";
 import { supabase } from "@/supabaseClient";
+import { useToast } from "@/hooks/useToast";
+import { RealtimePresenceState } from "@supabase/supabase-js";
 
 interface AdminSettings {
   allowMessages: boolean;
@@ -49,11 +56,13 @@ interface RetroContextProviderProps {
   children: ReactNode;
 }
 
-interface Participant {
+export interface Participant {
   id: string;
   username: string;
   isAdmin: boolean;
 }
+
+type RealtimeParticipants = RealtimePresenceState<Participant>;
 
 type TimerState = "on" | "off" | "finished";
 
@@ -66,21 +75,33 @@ export function RetroContextProvider({
 }: RetroContextProviderProps) {
   const { userSession } = useUserSession();
 
-  const [participants, setParticipants] = useState<Participant[]>([]);
-  const [isLoadingFinalContent, setIsLoadingFinalContent] = useState(false);
-  const [finalRetroSummary, setFinalRetroSummary] = useState("");
-  const [displayedContent, setDisplayedContent] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
+  if (!userSession) {
+    throw new Error("User session is required");
+  }
+
+  const { toast } = useToast();
+
   const [adminSettings, setAdminSettings] = useState({
     allowMessages: true,
     allowVotes: true,
     useSummaryAI: true,
   });
-  const [timerState, setTimerState] = useState<TimerState>("off");
-  const defaultSeconds = retrospectiveData.timer ?? DEFAULT_SECONDS;
-  const [timeLeft, setTimeLeft] = useState(defaultSeconds);
+
+  const [participants, setParticipants] = useState<Participant[]>([]);
+
+  // End Retro State
+  const [isLoadingFinalContent, setIsLoadingFinalContent] = useState(false);
+  const [finalRetroSummary, setFinalRetroSummary] = useState("");
+  const [displayedContent, setDisplayedContent] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
 
   const hasRetroEnded = retrospectiveData.status === "ended";
+
+  // Timer state
+  const defaultSeconds = retrospectiveData.timer ?? DEFAULT_SECONDS;
+  const [timerState, setTimerState] = useState<TimerState>("off");
+  const [timeLeft, setTimeLeft] = useState(defaultSeconds);
+
   const isCurrentUserAdmin = retrospectiveData.adminId === userSession?.id;
 
   const handleEndRetro = useCallback(async () => {
@@ -122,13 +143,60 @@ export function RetroContextProvider({
   }, [retrospectiveData.id, participants, adminSettings.useSummaryAI]);
 
   useEffect(() => {
-    const channel = supabase.channel(`retrospective:${retrospectiveData.id}`);
-    // socket.emit("get-active-users", retrospectiveData.id);
-    // Listen for updates to the active participants
-    // socket.on("active-users", (users) => {
-    //   setParticipants(users); // Update the state with the new participants list
-    // });
+    const channel = supabase.channel(`retrospective:${retrospectiveData.id}`, {
+      config: {
+        presence: {
+          key: userSession.id,
+        },
+      },
+    });
+
     channel
+      .on("presence", { event: "join" }, ({ newPresences }) => {
+        const newParticipant = newPresences[0];
+
+        setParticipants((prevParticipants) => [
+          ...prevParticipants,
+          {
+            id: newParticipant.userId,
+            username: newParticipant.username,
+            isAdmin: newParticipant.isAdmin,
+          },
+        ]);
+
+        toast({
+          title: `${newParticipant?.username} has joined the session`,
+        });
+      })
+      .on("presence", { event: "leave" }, ({ leftPresences }) => {
+        const leftParticipant = leftPresences[0];
+
+        setParticipants((prevParticipants) =>
+          prevParticipants.filter(
+            (participant) => participant.id !== leftParticipant?.id,
+          ),
+        );
+
+        toast({
+          title: `${leftParticipant?.username} has left the session`,
+        });
+      })
+      .on("broadcast", { event: "assign-new-admin" }, async ({ payload }) => {
+        const { newAdminId } = payload;
+
+        if (newAdminId === userSession.id) {
+          toast({
+            title: "You are now the host",
+          });
+        } else {
+          const users = channel.presenceState() as RealtimeParticipants;
+          const newAdmin = users[newAdminId][0];
+
+          toast({
+            title: `${newAdmin?.username} is now the host`,
+          });
+        }
+      })
       .on("broadcast", { event: "revalidate" }, async () => {
         await revalidate();
       })
@@ -148,13 +216,23 @@ export function RetroContextProvider({
         setTimerState("off");
         setTimeLeft(defaultSeconds);
       })
-      .subscribe();
+      .subscribe(async (status) => {
+        if (status !== "SUBSCRIBED") {
+          return;
+        }
+
+        await channel.track({
+          userId: userSession.id,
+          username: userSession?.name,
+          isAdmin: isCurrentUserAdmin,
+        });
+      });
 
     return () => {
       supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [adminSettings.useSummaryAI, isCurrentUserAdmin]);
+  }, []);
 
   useEffect(() => {
     if (isTyping && finalRetroSummary) {
@@ -173,10 +251,6 @@ export function RetroContextProvider({
       return () => clearInterval(interval);
     }
   }, [isTyping, finalRetroSummary]);
-
-  if (!userSession) {
-    throw new Error("User session is required");
-  }
 
   const contextValue = useMemo(
     () => ({

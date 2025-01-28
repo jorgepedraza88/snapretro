@@ -35,11 +35,9 @@ export async function endRetroBroadcast(retroId: string, finalSummary: string) {
 export async function changeAdminBroadcast(
   retroId: string,
   newAdminId: string,
-  userId: string,
 ) {
   sendBroadcast(retroId, "assign-new-admin", {
     newAdminId,
-    userId,
   });
 }
 
@@ -59,5 +57,16 @@ export async function handleTimerBroadcast(
 
   sendBroadcast(retroId, "timer", {
     timerState,
+  });
+}
+
+export async function editAdminSettingsBroadcast(
+  retroId: string,
+  allowMessages: boolean,
+  allowVotes: boolean,
+) {
+  sendBroadcast(retroId, "settings", {
+    allowMessages,
+    allowVotes,
   });
 }
