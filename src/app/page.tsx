@@ -3,14 +3,14 @@ import { HiOutlineUserGroup as CreateRetroIcon } from "react-icons/hi2";
 
 import { JoinRetroButton } from "@/components/JoinRetroButton";
 import { Button } from "@/components/ui/button";
-import { SwitchColorMode } from "@/components/SwitchColorMode";
+// import { SwitchColorMode } from "@/components/SwitchColorMode";
 
 export default function Home() {
   return (
     <div className="font-[family-name:var(--font-geist-sans)] h-screen flex flex-col justify-center bg-gray-100 dark:bg-neutral-800 relative p-4">
-      <div className="absolute top-4 right-4">
+      {/* <div className="absolute top-4 right-4">
         <SwitchColorMode />
-      </div>
+      </div> */}
       <main className="flex flex-col justify-center items-center">
         <h1 className="text-5xl text-center lg:text-left lg:text-6xl font-bold dark:text-neutral-100">
           Welcome to{" "}

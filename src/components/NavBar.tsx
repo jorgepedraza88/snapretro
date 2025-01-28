@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { SwitchColorMode } from "./SwitchColorMode";
+// import { SwitchColorMode } from "./SwitchColorMode";
 
 export function NavBar() {
   return (
@@ -12,13 +12,15 @@ export function NavBar() {
         >
           FreeRetros
         </Link>
-        <span className="ml-4 text-violet-500 text-sm italic">Beta</span>
+        <span className="ml-4 text-violet-500 text-sm italic">
+          Beta - Work still in Progress
+        </span>
       </div>
       <div className="flex items-center gap-2">
-        <SwitchColorMode />
-        <p className="text-sm font-semibold dark:text-neutral-100">
+        {/* <SwitchColorMode /> */}
+        {/* <p className="text-sm font-semibold dark:text-neutral-100">
           Buy me a coffee!
-        </p>
+        </p> */}
       </div>
     </div>
   );

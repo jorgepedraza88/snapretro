@@ -165,10 +165,10 @@ export function RetroContextProvider({
       })
       .on("presence", { event: "leave" }, ({ leftPresences }) => {
         const leftParticipant = leftPresences[0];
-
+        debugger;
         setParticipants((prevParticipants) =>
           prevParticipants.filter(
-            (participant) => participant.id !== leftParticipant?.id,
+            (participant) => participant.id !== leftParticipant?.userId,
           ),
         );
 
