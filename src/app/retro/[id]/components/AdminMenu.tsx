@@ -21,7 +21,7 @@ import { useState } from "react";
 import {
   editAdminSettingsBroadcast,
   revalidatePageBroadcast,
-} from "@/app/realtimeActions";
+} from "@/hooks/useRealtimeActions";
 
 interface AdminMenuData {
   columns: number;

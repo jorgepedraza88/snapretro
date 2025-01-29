@@ -30,7 +30,7 @@ import { decryptMessage, encryptMessage } from "@/app/utils";
 import { nanoid } from "nanoid";
 import { useRetroContext } from "@/app/retro/[id]/components/RetroContextProvider";
 import { supabase } from "@/supabaseClient";
-import { revalidatePageBroadcast, writingAction } from "@/app/realtimeActions";
+import { useRealtimeActions } from "@/hooks/useRealtimeActions";
 
 interface RetroCardProps {
   title: string;
@@ -40,6 +40,7 @@ interface RetroCardProps {
 
 export function RetroCard({ title, description, section }: RetroCardProps) {
   const { userSession, isCurrentUserAdmin, adminSettings } = useRetroContext();
+  const { writingAction, revalidatePageBroadcast } = useRealtimeActions();
   const postFormRef = useRef<HTMLFormElement>(null);
 
   const [isWriting, setIsWriting] = useState(false);
@@ -79,11 +80,11 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     if (!isWriting) {
-      await writingAction(retrospectiveId, section.id, userSession.id, "start");
+      writingAction(retrospectiveId, section.id, userSession.id, "start");
     }
 
     if (e.target.value === "") {
-      await writingAction(retrospectiveId, section.id, userSession.id, "stop");
+      writingAction(retrospectiveId, section.id, userSession.id, "stop");
 
       return;
     }
@@ -92,7 +93,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
   const handleSavePost = async (formData: FormData) => {
     const postContent = formData.get("content") as string;
 
-    await writingAction(retrospectiveId, section.id, userSession.id, "stop");
+    writingAction(retrospectiveId, section.id, userSession.id, "stop");
 
     try {
       const temporalId = nanoid(5);
@@ -117,7 +118,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
         newPost,
       });
 
-      await revalidatePageBroadcast(retrospectiveId);
+      revalidatePageBroadcast(retrospectiveId);
     } catch (error) {
       console.error("Error creating post:", error);
     }
@@ -130,7 +131,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
 
     await destroyPost({ postId });
 
-    await revalidatePageBroadcast(retrospectiveId);
+    revalidatePageBroadcast(retrospectiveId);
   };
 
   const handleChangeSectionTitle = async () => {
@@ -141,7 +142,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
       sectionId: section.id,
     });
 
-    await revalidatePageBroadcast(retrospectiveId);
+    revalidatePageBroadcast(retrospectiveId);
 
     setIsEditingSectionTitle(false);
   };
@@ -163,7 +164,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
       });
       await removeVoteFromPost(postId, userSession.id);
 
-      await revalidatePageBroadcast(retrospectiveId);
+      revalidatePageBroadcast(retrospectiveId);
     } else {
       startTransition(() => {
         addOptimisticPosts((prev) =>
@@ -179,7 +180,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
         );
       });
       await addVoteToPost(postId, userSession.id);
-      await revalidatePageBroadcast(retrospectiveId);
+      revalidatePageBroadcast(retrospectiveId);
     }
   };
 

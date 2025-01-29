@@ -10,7 +10,7 @@ import {
 
 import { Button } from "./ui/button";
 import { useRetroContext } from "@/app/retro/[id]/components/RetroContextProvider";
-import { handleTimerBroadcast } from "@/app/realtimeActions";
+import { useRealtimeActions } from "@/hooks/useRealtimeActions";
 
 interface CountdownTimerProps {
   adminId: string;
@@ -30,6 +30,7 @@ export function CountdownTimer({
     setTimerState,
     setTimeLeft,
   } = useRetroContext();
+  const { handleTimerBroadcast } = useRealtimeActions();
 
   useEffect(() => {
     if (timeLeft <= 0) {
@@ -56,20 +57,20 @@ export function CountdownTimer({
   const startTimer = async () => {
     setTimerState("on");
 
-    await handleTimerBroadcast(retrospectiveId, "on");
+    handleTimerBroadcast(retrospectiveId, "on");
   };
 
   const pauseTimer = async () => {
     setTimerState("off");
 
-    await handleTimerBroadcast(retrospectiveId, "off");
+    handleTimerBroadcast(retrospectiveId, "off");
   };
 
   const handleResetTimer = async () => {
     setTimerState("off");
     setTimeLeft(defaultSeconds);
 
-    await handleTimerBroadcast(retrospectiveId, "reset");
+    handleTimerBroadcast(retrospectiveId, "reset");
   };
 
   return (

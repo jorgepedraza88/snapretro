@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
-    <div className="font-[family-name:var(--font-geist-sans)] h-screen flex flex-col justify-center bg-gray-100 dark:bg-neutral-800 relative p-4">
+    <div className="font-[family-name:var(--font-geist-sans)] h-screen flex flex-col justify-center bg-gray-50 dark:bg-neutral-800 relative p-4">
       {/* <div className="absolute top-4 right-4">
         <SwitchColorMode />
       </div> */}

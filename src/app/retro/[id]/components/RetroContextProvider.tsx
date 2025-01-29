@@ -15,7 +15,7 @@ import { RetrospectiveData } from "@/types/Retro";
 import { UserSession, useUserSession } from "@/components/UserSessionContext";
 import { endRetrospective, generateAIContent, revalidate } from "@/app/actions";
 import { generateMarkdownFromJSON } from "@/app/utils";
-import { endRetroBroadcast } from "@/app/realtimeActions";
+import { useRealtimeActions } from "@/hooks/useRealtimeActions";
 import { supabase } from "@/supabaseClient";
 import { useToast } from "@/hooks/useToast";
 import { RealtimePresenceState } from "@supabase/supabase-js";
@@ -69,6 +69,7 @@ export function RetroContextProvider({
   children,
 }: RetroContextProviderProps) {
   const { userSession } = useUserSession();
+  const { endRetroBroadcast } = useRealtimeActions();
 
   if (!userSession) {
     throw new Error("User session is required");
@@ -126,7 +127,7 @@ export function RetroContextProvider({
         return;
       }
 
-      await endRetroBroadcast(retrospectiveData.id, finalSummaryContent);
+      endRetroBroadcast(retrospectiveData.id, finalSummaryContent);
 
       setFinalRetroSummary(finalSummaryContent);
       setDisplayedContent(""); // Reset displayed content
@@ -135,7 +136,12 @@ export function RetroContextProvider({
     }
 
     setIsLoadingFinalContent(false);
-  }, [retrospectiveData.id, participants, adminSettings.useSummaryAI]);
+  }, [
+    retrospectiveData.id,
+    participants,
+    adminSettings.useSummaryAI,
+    endRetroBroadcast,
+  ]);
 
   useEffect(() => {
     const channel = supabase.channel(`retrospective:${retrospectiveData.id}`, {

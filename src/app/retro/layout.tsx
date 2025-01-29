@@ -1,6 +1,3 @@
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-
-import { AppSidebar } from "@/components/AppSidebar";
 import { NavBar } from "@/components/NavBar";
 
 export default async function RetroLayout({
@@ -9,14 +6,9 @@ export default async function RetroLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <SidebarProvider defaultOpen={false}>
-      <SidebarInset>
-        <NavBar />
-        <main className="size-full bg-neutral-50 dark:bg-neutral-800">
-          {children}
-        </main>
-      </SidebarInset>
-      <AppSidebar />
-    </SidebarProvider>
+    <main className="size-full h-screen bg-neutral-50 dark:bg-neutral-800">
+      <NavBar />
+      {children}
+    </main>
   );
 }

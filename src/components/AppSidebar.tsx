@@ -5,15 +5,11 @@ import { nanoid } from "nanoid";
 
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  useSidebar,
-} from "./ui/sidebar";
 import { useUserSession } from "@/components/UserSessionContext";
 import { useParams } from "next/navigation";
 import { supabase } from "@/supabaseClient";
+import REALTIME_EVENT_KEYS from "@/constants/realtimeEventKeys";
+import { Sheet, SheetClose, SheetContent, SheetTitle } from "./ui/sheet";
 
 interface UserMessage {
   id: string | null;
@@ -21,20 +17,26 @@ interface UserMessage {
   text: string;
 }
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  isSidebarOpen: boolean;
+  setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export function AppSidebar({
+  isSidebarOpen,
+  setIsSidebarOpen,
+}: AppSidebarProps) {
   const { id: retrospectiveId } = useParams<{ id: string }>();
   const { userSession } = useUserSession();
 
   const [messages, setMessages] = useState<UserMessage[]>([]);
   const [inputMessage, setInputMessage] = useState("");
 
-  const { toggleSidebar } = useSidebar();
-
   useEffect(() => {
     const channel = supabase.channel(`messages:${retrospectiveId}`);
 
     channel
-      .on("broadcast", { event: "chat" }, ({ payload }) => {
+      .on("broadcast", { event: REALTIME_EVENT_KEYS.CHAT }, ({ payload }) => {
         setMessages((prev) => [...prev, payload]);
       })
       .subscribe();
@@ -50,7 +52,7 @@ export function AppSidebar() {
 
       supabase.channel(`messages:${retrospectiveId}`).send({
         type: "broadcast",
-        event: "chat",
+        event: REALTIME_EVENT_KEYS.CHAT,
         payload: {
           id: messageId,
           name: userSession.name,
@@ -60,7 +62,7 @@ export function AppSidebar() {
 
       supabase.channel(`notifications:${retrospectiveId}`).send({
         type: "broadcast",
-        event: "chat-notification",
+        event: REALTIME_EVENT_KEYS.CHAT_NOTIFICATION,
         payload: { user: userSession.id },
       });
 
@@ -78,8 +80,12 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar side="right" variant="inset" className="border-l">
-      <SidebarContent className="dark:bg-neutral-800">
+    <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+      <SheetContent
+        className="dark:bg-neutral-800 bg-neutral-100 flex flex-col justify-between"
+        side="right"
+      >
+        <SheetTitle className="sr-only">Chat panel</SheetTitle>
         <div className="p-2 text-sm">
           {messages.map((msg) => (
             <p
@@ -100,23 +106,25 @@ export function AppSidebar() {
             </p>
           ))}
         </div>
-      </SidebarContent>
-      <SidebarFooter>
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <Input
-            placeholder="Type a message"
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            autoFocus
-          />
-          <Button variant="secondary" type="submit">
-            Send
-          </Button>
-        </form>
-        <Button variant="secondary" onClick={toggleSidebar}>
-          Close Chat
-        </Button>
-      </SidebarFooter>
-    </Sidebar>
+        <div>
+          <form onSubmit={handleSubmit} className="flex gap-2">
+            <Input
+              placeholder="Type a message"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              autoFocus
+            />
+            <Button variant="secondary" type="submit">
+              Send
+            </Button>
+          </form>
+          <SheetClose asChild>
+            <Button variant="secondary" className="w-full mt-4">
+              Close Chat
+            </Button>
+          </SheetClose>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }

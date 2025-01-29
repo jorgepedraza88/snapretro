@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useRetroContext } from "./RetroContextProvider";
 
-import { removeUserBroadcast } from "@/app/realtimeActions";
+import { removeUserBroadcast } from "@/hooks/useRealtimeActions";
 
 export function Participants() {
   const { userSession } = useUserSession();

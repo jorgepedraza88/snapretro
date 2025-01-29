@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
-import { useSidebar } from "./ui/sidebar";
 import { supabase } from "@/supabaseClient";
 import { useParams } from "next/navigation";
 import { useUserSession } from "./UserSessionContext";
+import { AppSidebar } from "./AppSidebar";
 
 function ChatNotificationDot() {
   return (
@@ -19,8 +19,8 @@ function ChatNotificationDot() {
 export function Footer() {
   const { userSession } = useUserSession();
   const { id: retrospectiveId } = useParams<{ id: string }>();
-  const { toggleSidebar, open } = useSidebar();
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [chatNotification, setChatNotification] = useState(false);
 
   const handleToogleSidebar = () => {
@@ -29,7 +29,7 @@ export function Footer() {
       setChatNotification(false);
     }
 
-    toggleSidebar();
+    setIsSidebarOpen((prev) => !prev);
   };
 
   useEffect(() => {
@@ -56,6 +56,10 @@ export function Footer() {
         </Button>
         {chatNotification && !open && <ChatNotificationDot />}
       </div>
+      <AppSidebar
+        setIsSidebarOpen={setIsSidebarOpen}
+        isSidebarOpen={isSidebarOpen}
+      />
     </div>
   );
 }
