@@ -1,5 +1,3 @@
-import { NavBar } from "@/components/NavBar";
-
 export default async function RetroLayout({
   children,
 }: Readonly<{
@@ -7,7 +5,6 @@ export default async function RetroLayout({
 }>) {
   return (
     <main className="size-full h-screen bg-neutral-50 dark:bg-neutral-800">
-      <NavBar />
       {children}
     </main>
   );

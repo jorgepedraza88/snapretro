@@ -17,11 +17,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useRetroContext } from "./RetroContextProvider";
-
-import { removeUserBroadcast } from "@/hooks/useRealtimeActions";
+import { useRealtimeActions } from "@/hooks/useRealtimeActions";
 
 export function Participants() {
   const { userSession } = useUserSession();
+  const { removeUserBroadcast } = useRealtimeActions();
   const { retrospectiveId, participants, isCurrentUserAdmin } =
     useRetroContext();
 
@@ -30,7 +30,7 @@ export function Participants() {
   }
 
   const handleRemoveUser = async (userId: string) => {
-    await removeUserBroadcast(retrospectiveId, userId);
+    removeUserBroadcast(retrospectiveId, userId);
   };
 
   const handleChangeAdmin = async (userId: string) => {
@@ -61,7 +61,7 @@ export function Participants() {
               <p>{participant.username}</p>
             </div>
 
-            {/* {isCurrentUserAdmin && (
+            {isCurrentUserAdmin && (
               <div className="flex gap-1">
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -94,7 +94,7 @@ export function Participants() {
                   </TooltipContent>
                 </Tooltip>
               </div>
-            )} */}
+            )}
           </div>
         ))}
       </TooltipProvider>

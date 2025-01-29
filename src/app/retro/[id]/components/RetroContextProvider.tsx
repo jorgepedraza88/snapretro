@@ -13,7 +13,12 @@ import { ImSpinner as SpinnerIcon } from "react-icons/im";
 
 import { RetrospectiveData } from "@/types/Retro";
 import { UserSession, useUserSession } from "@/components/UserSessionContext";
-import { endRetrospective, generateAIContent, revalidate } from "@/app/actions";
+import {
+  editRetroAdminId,
+  endRetrospective,
+  generateAIContent,
+  revalidate,
+} from "@/app/actions";
 import { generateMarkdownFromJSON } from "@/app/utils";
 import { useRealtimeActions } from "@/hooks/useRealtimeActions";
 import { supabase } from "@/supabaseClient";
@@ -69,7 +74,7 @@ export function RetroContextProvider({
   children,
 }: RetroContextProviderProps) {
   const { userSession } = useUserSession();
-  const { endRetroBroadcast } = useRealtimeActions();
+  const { endRetroBroadcast, changeAdminBroadcast } = useRealtimeActions();
 
   if (!userSession) {
     throw new Error("User session is required");
@@ -171,12 +176,24 @@ export function RetroContextProvider({
       })
       .on("presence", { event: "leave" }, ({ leftPresences }) => {
         const leftParticipant = leftPresences[0];
-        debugger;
-        setParticipants((prevParticipants) =>
-          prevParticipants.filter(
-            (participant) => participant.id !== leftParticipant?.userId,
-          ),
-        );
+
+        if (leftParticipant.isAdmin) {
+          const users = channel.presenceState() as RealtimeParticipants;
+
+          const allUsers = Object.values(users).flat();
+
+          const newAdmin = allUsers.find((user) => !user.isAdmin) as any;
+
+          if (newAdmin) {
+            changeAdminBroadcast(retrospectiveData.id, newAdmin.userId);
+          }
+
+          setParticipants((prevParticipants) =>
+            prevParticipants.filter(
+              (participant) => participant.id !== leftParticipant.userId,
+            ),
+          );
+        }
 
         toast({
           title: `${leftParticipant?.username} has left the session`,
@@ -185,17 +202,40 @@ export function RetroContextProvider({
       .on("broadcast", { event: "assign-new-admin" }, async ({ payload }) => {
         const { newAdminId } = payload;
 
+        await editRetroAdminId({
+          retrospectiveId: retrospectiveData.id,
+          newAdminId,
+        });
+
+        // // actualizamos el estado? - // todo: revisar
+        // channel.track({
+        //   userId: userSession.id,
+        //   username: userSession?.name,
+        //   isAdmin: isCurrentUserAdmin,
+        // });
+
+        setParticipants((prevParticipants) =>
+          prevParticipants.map((participant) => ({
+            ...participant,
+            isAdmin: participant.id === newAdminId,
+          })),
+        );
+
         if (newAdminId === userSession.id) {
           toast({
             title: "You are now the host",
           });
         } else {
           const users = channel.presenceState() as RealtimeParticipants;
-          const newAdmin = users[newAdminId][0];
+          const newAdminArray = users[newAdminId];
 
-          toast({
-            title: `${newAdmin?.username} is now the host`,
-          });
+          if (newAdminArray && newAdminArray.length > 0) {
+            const newAdmin = newAdminArray[0];
+
+            toast({
+              title: `${newAdmin.username} is now the host`,
+            });
+          }
         }
       })
       .on("broadcast", { event: "revalidate" }, async () => {

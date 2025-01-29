@@ -17,16 +17,22 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useRetroContext } from "./RetroContextProvider";
 
-export function EndRetroDialog({ onEndRetro }: { onEndRetro: () => void }) {
-  const { isCurrentUserAdmin, adminSettings, setAdminSettings } =
-    useRetroContext();
+export function EndRetroDialog() {
+  const {
+    isCurrentUserAdmin,
+    adminSettings,
+    setAdminSettings,
+    handleEndRetro,
+  } = useRetroContext();
 
   if (!isCurrentUserAdmin) return null;
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive">END RETRO</Button>
+        <Button variant="destructive" size="sm">
+          End meeting
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="transition-none">
         <AlertDialogHeader>
@@ -61,7 +67,7 @@ export function EndRetroDialog({ onEndRetro }: { onEndRetro: () => void }) {
             <AlertDialogCancel asChild>
               <Button variant="secondary">Cancel</Button>
             </AlertDialogCancel>
-            <AlertDialogAction asChild onClick={onEndRetro}>
+            <AlertDialogAction asChild onClick={handleEndRetro}>
               <Button>End Retro</Button>
             </AlertDialogAction>
           </div>

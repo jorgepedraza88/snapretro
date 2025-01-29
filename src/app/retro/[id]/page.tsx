@@ -10,6 +10,7 @@ import { getRetrospetiveData } from "@/app/actions";
 import { EndRetroContainer } from "./components/EndRetroContainer";
 import { AdminMenu } from "./components/AdminMenu";
 import { RetroContextProvider } from "./components/RetroContextProvider";
+import { NavBar } from "@/components/NavBar";
 
 export default async function Page({
   params,
@@ -36,8 +37,9 @@ export default async function Page({
       retroPassword={password}
     >
       <RetroContextProvider retrospectiveData={retrospectiveData}>
+        <NavBar />
         <div className="lg:flex gap-2">
-          <div className="min-w-60">
+          <div className="min-w-60 h-screen">
             <Participants />
           </div>
           <div className="max-w-6xl mx-auto flex flex-col items-center p-8 size-full relative">
@@ -50,8 +52,8 @@ export default async function Page({
             <EndRetroContainer />
             <AdminMenu retrospectiveData={retrospectiveData} />
           </div>
-          {enableChat && <Footer />}
         </div>
+        {enableChat && <Footer />}
       </RetroContextProvider>
     </RetroProtectedWrapper>
   );
