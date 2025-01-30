@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import {
@@ -7,7 +6,6 @@ import {
 } from "react-icons/hi2";
 import { FaCrown as CrownIcon } from "react-icons/fa";
 
-import { editRetroAdminId } from "@/app/actions";
 import { useUserSession } from "@/components/UserSessionContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,13 +14,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useRetroContext } from "./RetroContextProvider";
+import { useRetroContext, UserPresence } from "./RetroContextProvider";
 import { useRealtimeActions } from "@/hooks/useRealtimeActions";
 
-export function Participants() {
+export function OnlineUsers() {
   const { userSession } = useUserSession();
-  const { removeUserBroadcast } = useRealtimeActions();
-  const { retrospectiveId, participants, isCurrentUserAdmin } =
+  const { removeUserBroadcast, changeAdminBroadcast } = useRealtimeActions();
+  const { retrospectiveId, onlineUsers, isCurrentUserAdmin } =
     useRetroContext();
 
   if (!userSession) {
@@ -35,33 +33,34 @@ export function Participants() {
 
   const handleChangeAdmin = async (userId: string) => {
     if (userId !== userSession.id) {
-      await editRetroAdminId({
-        retrospectiveId,
-        newAdminId: userId,
-      });
+      changeAdminBroadcast(retrospectiveId, userId, userSession.id);
     }
   };
+
+  if (onlineUsers.length === 0) {
+    return null;
+  }
 
   return (
     <div className="space-y-1 p-8 max-w-60">
       <TooltipProvider>
         <div className="bg-neutral-200 rounded-lg flex gap-1 items-center text-sm w-fit px-2 py-1">
           <div className="size-2 rounded-full bg-green-500" />
-          <UsersIcon size={16} /> {participants.length}
+          <UsersIcon size={16} /> {onlineUsers.length}
         </div>
-        {participants.map((participant) => (
+        {onlineUsers.map((user, index) => (
           <div
-            key={participant.id}
+            key={`user.id_${index}`}
             className="bg-neutral-100 rounded-lg p-2 text-sm truncate flex items-center justify-between group"
           >
             <div className="flex gap-1">
-              {participant.isAdmin && (
+              {/* {isCurrentUserAdmin && (
                 <CrownIcon size={16} className="mt-px text-yellow-500" />
-              )}
-              <p>{participant.username}</p>
+              )} */}
+              <p>{user.name}</p>
             </div>
 
-            {isCurrentUserAdmin && (
+            {/* {isCurrentUserAdmin && (
               <div className="flex gap-1">
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -69,7 +68,7 @@ export function Participants() {
                       size="icon"
                       variant="ghost"
                       className="invisible size-0 px-4 py-3 group-hover:visible text-yellow-500 hover:text-yellow-600"
-                      onClick={() => handleChangeAdmin(participant.id)}
+                      onClick={() => handleChangeAdmin(user.id)}
                     >
                       <CrownIcon size={16} />
                     </Button>
@@ -84,7 +83,7 @@ export function Participants() {
                       size="icon"
                       variant="ghost"
                       className="invisible size-0 px-4 py-3 group-hover:visible"
-                      onClick={() => handleRemoveUser(participant.id)}
+                      onClick={() => handleRemoveUser(user.id)}
                     >
                       <RemoveIcon size={16} />
                     </Button>
@@ -94,7 +93,7 @@ export function Participants() {
                   </TooltipContent>
                 </Tooltip>
               </div>
-            )}
+            )} */}
           </div>
         ))}
       </TooltipProvider>

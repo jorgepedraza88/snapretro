@@ -3,7 +3,7 @@ import Link from "next/link";
 
 // import { SwitchColorMode } from "./SwitchColorMode";
 
-export function NavBar() {
+export function Navigation() {
   return (
     <div>
       <div className="text-sm py-1 border-b text-center w-full bg-violet-100 text-violet-900">

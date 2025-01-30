@@ -17,7 +17,7 @@ function ChatNotificationDot() {
   );
 }
 
-export function Footer() {
+export function ChatFooter() {
   const { userSession } = useUserSession();
   const { id: retrospectiveId } = useParams<{ id: string }>();
 
@@ -41,7 +41,6 @@ export function Footer() {
         "broadcast",
         { event: REALTIME_EVENT_KEYS.CHAT_NOTIFICATION },
         ({ payload }) => {
-          debugger;
           if (payload.user !== userSession?.id) {
             setChatNotification(true);
           }

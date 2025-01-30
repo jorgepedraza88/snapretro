@@ -1,6 +1,11 @@
 {
-  "name": "open-parabol",
+  "name": "free-retros",
   "version": "0.1.0",
+  "author": {
+    "name": "Jorge Pedraza Mañogil",
+    "email": "jorgepedraza1988@gmail.com",
+    "url": "https://www.jorgepedraza.com"
+  },
   "private": true,
   "type": "module",
   "scripts": {

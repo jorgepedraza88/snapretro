@@ -12,38 +12,36 @@ import {
   AlertDialogDescription,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import { type RetrospectiveData } from "@/types/Retro";
 
 interface RetroProtectedWrapperProps {
-  passwordEnabled: boolean;
-  retroPassword: string | null;
-  adminId: string;
+  data: RetrospectiveData;
   children: React.ReactNode;
 }
 
 export function RetroProtectedWrapper({
-  passwordEnabled,
-  retroPassword,
-  adminId,
+  data,
   children,
 }: RetroProtectedWrapperProps) {
   const { userSession } = useUserSession();
+  const { adminId, enablePassword, password } = data;
 
-  const [password, setPassword] = useState("");
+  const [inputPassword, setInputPassword] = useState("");
   const [accessGranted, setAccessGranted] = useState(
     adminId === userSession?.id,
   );
 
-  if (!passwordEnabled) return children;
-
-  if (passwordEnabled && accessGranted) return children;
-
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (password === retroPassword) {
+    if (inputPassword === password) {
       setAccessGranted(true);
     }
   }
+
+  if (!enablePassword) return children;
+
+  if (enablePassword && accessGranted) return children;
 
   return (
     <AlertDialog open>
@@ -60,7 +58,7 @@ export function RetroProtectedWrapper({
             <Input
               name="password"
               type="password"
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => setInputPassword(e.target.value)}
               tabIndex={0}
               autoFocus
             />

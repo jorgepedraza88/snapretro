@@ -24,6 +24,7 @@ import { useRealtimeActions } from "@/hooks/useRealtimeActions";
 import { supabase } from "@/supabaseClient";
 import { useToast } from "@/hooks/useToast";
 import { RealtimePresenceState } from "@supabase/supabase-js";
+import REALTIME_EVENT_KEYS from "@/constants/realtimeEventKeys";
 
 interface AdminSettings {
   allowMessages: boolean;
@@ -37,7 +38,7 @@ export interface RetroContextValue {
   isCurrentUserAdmin: boolean;
   userSession: UserSession;
   hasRetroEnded: boolean;
-  participants: Participant[];
+  onlineUsers: UserPresence[];
   isLoadingFinalContent: boolean;
   adminSettings: AdminSettings;
   displayedContent: string;
@@ -52,17 +53,21 @@ export interface RetroContextValue {
 const RetroContext = createContext<RetroContextValue | null>(null);
 
 interface RetroContextProviderProps {
-  retrospectiveData: RetrospectiveData;
+  data: RetrospectiveData;
   children: ReactNode;
 }
 
-export interface Participant {
+export type UserPresence = {
   id: string;
-  username: string;
+  name: string;
   isAdmin: boolean;
-}
+};
 
-type RealtimeParticipants = RealtimePresenceState<Participant>;
+export type PresenceState = {
+  [key: string]: UserPresence;
+};
+
+type RealtimeUsers = RealtimePresenceState<UserPresence>;
 
 type TimerState = "on" | "off" | "finished";
 
@@ -70,61 +75,56 @@ const TYPING_EFFECT_SPEED = 5;
 const DEFAULT_SECONDS = 300;
 
 export function RetroContextProvider({
-  retrospectiveData,
+  data,
   children,
 }: RetroContextProviderProps) {
   const { userSession } = useUserSession();
   const { endRetroBroadcast, changeAdminBroadcast } = useRealtimeActions();
+  const { toast } = useToast();
 
   if (!userSession) {
     throw new Error("User session is required");
   }
-
-  const { toast } = useToast();
-
   const [adminSettings, setAdminSettings] = useState({
     allowMessages: true,
     allowVotes: true,
     useSummaryAI: true,
   });
 
-  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<UserPresence[]>([]);
 
   // End Retro State
   const [isLoadingFinalContent, setIsLoadingFinalContent] = useState(false);
   const [finalRetroSummary, setFinalRetroSummary] = useState("");
   const [displayedContent, setDisplayedContent] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-
-  const hasRetroEnded = retrospectiveData.status === "ended";
+  const hasRetroEnded = data.status === "ended";
 
   // Timer state
-  const defaultSeconds = retrospectiveData.timer ?? DEFAULT_SECONDS;
+  const defaultSeconds = data.timer ?? DEFAULT_SECONDS;
   const [timerState, setTimerState] = useState<TimerState>("off");
   const [timeLeft, setTimeLeft] = useState(defaultSeconds);
 
-  const isCurrentUserAdmin = retrospectiveData.adminId === userSession?.id;
+  const isCurrentUserAdmin = data.adminId === userSession?.id;
 
   const handleEndRetro = useCallback(async () => {
     let finalSummaryContent = "";
 
     setIsLoadingFinalContent(true);
 
-    const endResponse = await endRetrospective(retrospectiveData.id);
+    const endResponse = await endRetrospective(data.id);
 
-    const participantsNames = participants.map(
-      (participant) => participant.username,
-    );
+    const onlineUserNames = onlineUsers.map((user) => user.name);
 
     if (endResponse) {
       if (adminSettings.useSummaryAI) {
         finalSummaryContent =
-          (await generateAIContent(endResponse, participantsNames)) ??
+          (await generateAIContent(endResponse, onlineUserNames)) ??
           "An Error has ocurred. No summary generated";
       } else {
         finalSummaryContent = generateMarkdownFromJSON(
           endResponse,
-          participantsNames,
+          onlineUserNames,
         );
 
         setDisplayedContent(finalSummaryContent);
@@ -132,7 +132,7 @@ export function RetroContextProvider({
         return;
       }
 
-      endRetroBroadcast(retrospectiveData.id, finalSummaryContent);
+      endRetroBroadcast(data.id, finalSummaryContent);
 
       setFinalRetroSummary(finalSummaryContent);
       setDisplayedContent(""); // Reset displayed content
@@ -141,15 +141,24 @@ export function RetroContextProvider({
     }
 
     setIsLoadingFinalContent(false);
-  }, [
-    retrospectiveData.id,
-    participants,
-    adminSettings.useSummaryAI,
-    endRetroBroadcast,
-  ]);
+  }, [data.id, onlineUsers, adminSettings.useSummaryAI, endRetroBroadcast]);
+
+  const updateOnlineUsers = (newUsers: UserPresence[]) => {
+    setOnlineUsers((prevUsers) => {
+      const prevIds = prevUsers
+        .map((user) => user.id)
+        .sort()
+        .join(",");
+      const newIds = newUsers
+        .map((user) => user.id)
+        .sort()
+        .join(",");
+      return prevIds !== newIds ? newUsers : prevUsers;
+    });
+  };
 
   useEffect(() => {
-    const channel = supabase.channel(`retrospective:${retrospectiveData.id}`, {
+    const channel = supabase.channel(`retrospective:${data.id}`, {
       config: {
         presence: {
           key: userSession.id,
@@ -158,100 +167,98 @@ export function RetroContextProvider({
     });
 
     channel
+      .on("presence", { event: "sync" }, () => {
+        const presenceUsers = channel.presenceState() as RealtimeUsers;
+        const activeUsers = Object.values(presenceUsers).flat();
+
+        const currentAdmin = activeUsers.find((user) => user.isAdmin);
+
+        if (!currentAdmin && activeUsers.length > 0) {
+          changeAdminBroadcast(data.id, activeUsers[0].id);
+        }
+
+        updateOnlineUsers(activeUsers);
+      })
       .on("presence", { event: "join" }, ({ newPresences }) => {
         const newParticipant = newPresences[0];
 
-        setParticipants((prevParticipants) => [
-          ...prevParticipants,
-          {
-            id: newParticipant.userId,
-            username: newParticipant.username,
-            isAdmin: newParticipant.isAdmin,
-          },
-        ]);
-
         toast({
-          title: `${newParticipant?.username} has joined the session`,
+          title: `${newParticipant.name} has joined the session`,
         });
       })
       .on("presence", { event: "leave" }, ({ leftPresences }) => {
         const leftParticipant = leftPresences[0];
 
-        if (leftParticipant.isAdmin) {
-          const users = channel.presenceState() as RealtimeParticipants;
-
-          const allUsers = Object.values(users).flat();
-
-          const newAdmin = allUsers.find((user) => !user.isAdmin) as any;
-
-          if (newAdmin) {
-            changeAdminBroadcast(retrospectiveData.id, newAdmin.userId);
-          }
-
-          setParticipants((prevParticipants) =>
-            prevParticipants.filter(
-              (participant) => participant.id !== leftParticipant.userId,
-            ),
-          );
-        }
-
         toast({
-          title: `${leftParticipant?.username} has left the session`,
+          title: `${leftParticipant?.name} has left the session`,
         });
       })
-      .on("broadcast", { event: "assign-new-admin" }, async ({ payload }) => {
-        const { newAdminId } = payload;
+      .on(
+        "broadcast",
+        { event: REALTIME_EVENT_KEYS.ASSIGN_NEW_ADMIN },
+        async ({ payload }) => {
+          const { newAdminId, oldAdminId } = payload;
 
-        await editRetroAdminId({
-          retrospectiveId: retrospectiveData.id,
-          newAdminId,
-        });
-
-        // // actualizamos el estado? - // todo: revisar
-        // channel.track({
-        //   userId: userSession.id,
-        //   username: userSession?.name,
-        //   isAdmin: isCurrentUserAdmin,
-        // });
-
-        setParticipants((prevParticipants) =>
-          prevParticipants.map((participant) => ({
-            ...participant,
-            isAdmin: participant.id === newAdminId,
-          })),
-        );
-
-        if (newAdminId === userSession.id) {
-          toast({
-            title: "You are now the host",
+          await editRetroAdminId({
+            retrospectiveId: data.id,
+            newAdminId,
           });
-        } else {
-          const users = channel.presenceState() as RealtimeParticipants;
-          const newAdminArray = users[newAdminId];
 
-          if (newAdminArray && newAdminArray.length > 0) {
-            const newAdmin = newAdminArray[0];
-
-            toast({
-              title: `${newAdmin.username} is now the host`,
+          if (oldAdminId === userSession.id) {
+            await channel.track({
+              id: userSession.id,
+              name: userSession.name,
+              isAdmin: false,
             });
           }
-        }
-      })
-      .on("broadcast", { event: "revalidate" }, async () => {
+
+          if (newAdminId === userSession.id) {
+            await channel.track({
+              id: userSession.id,
+              name: userSession.name,
+              isAdmin: true,
+            });
+            toast({
+              title: "You are now the host",
+            });
+          } else {
+            const presenceUsers = channel.presenceState() as RealtimeUsers;
+            const onlineUsers = Object.values(presenceUsers).flat();
+            const newAdmin = onlineUsers.find((user) => user.id === newAdminId);
+
+            if (newAdmin) {
+              toast({
+                title: `${newAdmin.name} is now the host`,
+              });
+            } else {
+              console.warn("New admin not found in the presence state");
+            }
+          }
+        },
+      )
+      // TODO: Mirar para cambiar
+      .on("broadcast", { event: REALTIME_EVENT_KEYS.REVALIDATE }, async () => {
         await revalidate();
       })
-      .on("broadcast", { event: "end-retro" }, ({ payload }) => {
-        setFinalRetroSummary(payload.finalSummary);
-      })
-      .on("broadcast", { event: "settings" }, ({ payload }) => {
-        setAdminSettings(payload);
-      })
-      .on("broadcast", { event: "timer" }, ({ payload }) => {
+      .on(
+        "broadcast",
+        { event: REALTIME_EVENT_KEYS.END_RETRO },
+        ({ payload }) => {
+          setFinalRetroSummary(payload.finalSummary);
+        },
+      )
+      .on(
+        "broadcast",
+        { event: REALTIME_EVENT_KEYS.SETTINGS },
+        ({ payload }) => {
+          setAdminSettings(payload);
+        },
+      )
+      .on("broadcast", { event: REALTIME_EVENT_KEYS.TIMER }, ({ payload }) => {
         if (isCurrentUserAdmin) return;
         setTimerState(payload.timerState);
       })
-      .on("broadcast", { event: "reset-timer" }, () => {
+      .on("broadcast", { event: REALTIME_EVENT_KEYS.RESET_TIMER }, () => {
         if (isCurrentUserAdmin) return;
 
         setTimerState("off");
@@ -263,8 +270,8 @@ export function RetroContextProvider({
         }
 
         await channel.track({
-          userId: userSession.id,
-          username: userSession?.name,
+          id: userSession.id,
+          name: userSession?.name,
           isAdmin: isCurrentUserAdmin,
         });
       });
@@ -295,12 +302,12 @@ export function RetroContextProvider({
 
   const contextValue = useMemo(
     () => ({
-      retrospectiveId: retrospectiveData.id,
+      retrospectiveId: data.id,
       finalRetroSummary,
       isCurrentUserAdmin,
       userSession,
       hasRetroEnded,
-      participants,
+      onlineUsers,
       isLoadingFinalContent,
       adminSettings,
       displayedContent,
@@ -313,7 +320,7 @@ export function RetroContextProvider({
       setTimeLeft,
     }),
     [
-      retrospectiveData.id,
+      data.id,
       timeLeft,
       timerState,
       defaultSeconds,
@@ -321,7 +328,7 @@ export function RetroContextProvider({
       isCurrentUserAdmin,
       userSession,
       hasRetroEnded,
-      participants,
+      onlineUsers,
       isLoadingFinalContent,
       adminSettings,
       displayedContent,

@@ -13,13 +13,12 @@ import { useRetroContext } from "@/app/retro/[id]/components/RetroContextProvide
 import { useRealtimeActions } from "@/hooks/useRealtimeActions";
 
 interface CountdownTimerProps {
-  adminId: string;
   defaultSeconds?: number;
 }
 
 const DEFAULT_SECONDS = 300;
 
-export function CountdownTimer({
+export function Timer({
   defaultSeconds = DEFAULT_SECONDS,
 }: CountdownTimerProps) {
   const {

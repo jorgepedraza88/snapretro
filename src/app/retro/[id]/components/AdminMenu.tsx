@@ -17,11 +17,7 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import { HiCog8Tooth as AdminSettingsIcon } from "react-icons/hi2";
 import { useRetroContext } from "./RetroContextProvider";
 import { useState } from "react";
-
-import {
-  editAdminSettingsBroadcast,
-  revalidatePageBroadcast,
-} from "@/hooks/useRealtimeActions";
+import { useRealtimeActions } from "@/hooks/useRealtimeActions";
 
 interface AdminMenuData {
   columns: number;
@@ -36,6 +32,8 @@ export function AdminMenu({
 }: {
   retrospectiveData: RetrospectiveData;
 }) {
+  const { revalidatePageBroadcast, editAdminSettingsBroadcast } =
+    useRealtimeActions();
   const { adminSettings, hasRetroEnded, isCurrentUserAdmin, setAdminSettings } =
     useRetroContext();
   const { allowMessages, allowVotes } = adminSettings;
