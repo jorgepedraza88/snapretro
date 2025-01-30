@@ -25,7 +25,7 @@ export default async function Page({
     <RetroProtectedWrapper data={initialData}>
       <RetroContextProvider data={initialData}>
         <Navigation />
-        <div className="lg:flex gap-2">
+        <div className="lg:flex gap-2 bg-neutral-50">
           <OnlineUsers />
           <MainContent data={initialData} />
           <ChatFooter />

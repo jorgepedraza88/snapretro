@@ -107,6 +107,7 @@ export function RetroContextProvider({
 
   const isCurrentUserAdmin = data.adminId === userSession?.id;
 
+  // TODO mejorar esta mierda
   const handleEndRetro = useCallback(async () => {
     let finalSummaryContent = "";
 
@@ -129,6 +130,7 @@ export function RetroContextProvider({
 
         setDisplayedContent(finalSummaryContent);
         setIsLoadingFinalContent(false);
+        endRetroBroadcast(data.id, finalSummaryContent);
         return;
       }
 
@@ -244,7 +246,9 @@ export function RetroContextProvider({
         "broadcast",
         { event: REALTIME_EVENT_KEYS.END_RETRO },
         ({ payload }) => {
-          setFinalRetroSummary(payload.finalSummary);
+          setDisplayedContent(payload.finalSummary);
+          // TODO: Cambiar
+          revalidate();
         },
       )
       .on(

@@ -55,9 +55,9 @@ export function OnlineUsers() {
             className="bg-neutral-100 rounded-lg p-2 text-sm truncate flex items-center justify-between group"
           >
             <div className="flex gap-1">
-              {/* {isCurrentUserAdmin && (
+              {user.isAdmin && (
                 <CrownIcon size={16} className="mt-px text-yellow-500" />
-              )} */}
+              )}
               <p>{user.name}</p>
             </div>
 
