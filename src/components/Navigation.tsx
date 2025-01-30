@@ -7,7 +7,7 @@ export function Navigation() {
   return (
     <div>
       <div className="text-sm py-1 border-b text-center w-full bg-violet-100 text-violet-900">
-        This app is still in development - It may contains some issues
+        This app is still in development - It may contain some issues
       </div>
       <div className="flex justify-between px-4 py-1.5 items-center bg-neutral-50 dark:bg-neutral-900 border-b dark:border-neutral-900">
         <div>

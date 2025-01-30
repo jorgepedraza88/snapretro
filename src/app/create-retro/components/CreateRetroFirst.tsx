@@ -21,7 +21,7 @@ export function CreateRetroFirst() {
       </div> */}
       <div className="w-full text-sm space-y-1">
         <Label htmlFor="name" className="dark:text-neutral-100">
-          Name
+          Your Name
         </Label>
         <Input
           id="name"
