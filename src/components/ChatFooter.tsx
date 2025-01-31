@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { supabase } from "@/supabaseClient";
 import { useParams } from "next/navigation";
-import { useUserSession } from "./UserSessionContext";
-import { AppSidebar } from "./AppSidebar";
+import { ChatSidebar } from "./ChatSidebar";
 import REALTIME_EVENT_KEYS from "@/constants/realtimeEventKeys";
+import { usePresenceStore } from "@/stores/usePresenceStore";
 
 function ChatNotificationDot() {
   return (
@@ -18,8 +18,8 @@ function ChatNotificationDot() {
 }
 
 export function ChatFooter() {
-  const { userSession } = useUserSession();
   const { id: retrospectiveId } = useParams<{ id: string }>();
+  const currentUser = usePresenceStore((state) => state.currentUser);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [chatNotification, setChatNotification] = useState(false);
@@ -41,7 +41,7 @@ export function ChatFooter() {
         "broadcast",
         { event: REALTIME_EVENT_KEYS.CHAT_NOTIFICATION },
         ({ payload }) => {
-          if (payload.user !== userSession?.id) {
+          if (payload.user !== currentUser.id) {
             setChatNotification(true);
           }
         },
@@ -51,7 +51,7 @@ export function ChatFooter() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [retrospectiveId, userSession?.id]);
+  }, [retrospectiveId, currentUser.id]);
 
   return (
     <div className="absolute bottom-8 right-0 hidden justify-end p-4 lg:flex">
@@ -61,7 +61,7 @@ export function ChatFooter() {
         </Button>
         {chatNotification && !isSidebarOpen && <ChatNotificationDot />}
       </div>
-      <AppSidebar
+      <ChatSidebar
         setIsSidebarOpen={setIsSidebarOpen}
         isSidebarOpen={isSidebarOpen}
       />

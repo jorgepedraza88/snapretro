@@ -9,26 +9,16 @@ import {
 } from "react-icons/hi2";
 
 import { Button } from "./ui/button";
-import { useRetroContext } from "@/app/retro/[id]/components/RetroContextProvider";
 import { useRealtimeActions } from "@/hooks/useRealtimeActions";
+import { useAdminStore } from "@/stores/useAdminStore";
+import { useRetroContext } from "@/app/retro/[id]/components/RetroContextProvider";
+import { usePresenceStore } from "@/stores/usePresenceStore";
 
-interface CountdownTimerProps {
-  defaultSeconds?: number;
-}
+export function Timer() {
+  const { retrospectiveId, defaultSeconds } = useRetroContext();
+  const currentUser = usePresenceStore((state) => state.currentUser);
 
-const DEFAULT_SECONDS = 300;
-
-export function Timer({
-  defaultSeconds = DEFAULT_SECONDS,
-}: CountdownTimerProps) {
-  const {
-    isCurrentUserAdmin,
-    retrospectiveId,
-    timerState,
-    timeLeft,
-    setTimerState,
-    setTimeLeft,
-  } = useRetroContext();
+  const { timerState, timeLeft, setTimerState, setTimeLeft } = useAdminStore();
   const { handleTimerBroadcast } = useRealtimeActions();
 
   useEffect(() => {
@@ -39,7 +29,7 @@ export function Timer({
 
     if (timerState === "on") {
       const timer = setInterval(() => {
-        setTimeLeft((prevTime) => prevTime - 1);
+        setTimeLeft(timeLeft - 1);
       }, 1000);
 
       return () => clearInterval(timer);
@@ -74,7 +64,7 @@ export function Timer({
 
   return (
     <div className="flex gap-2 items-center mb-2">
-      {isCurrentUserAdmin && timerState !== "finished" && (
+      {currentUser.isAdmin && timerState !== "finished" && (
         <div>
           {timerState !== "on" && (
             <Button size="sm" variant="outline" onClick={startTimer}>
@@ -91,7 +81,7 @@ export function Timer({
       <div className="bg-violet-600 rounded-lg px-2 py-1.5 flex items-center gap-2 text-neutral-100">
         <TimerIcon size={16} /> {formatTime(timeLeft)}
       </div>
-      {isCurrentUserAdmin && (
+      {currentUser.isAdmin && (
         <Button size="sm" variant="outline" onClick={handleResetTimer}>
           <ArrowIcon size={16} />
           Reset

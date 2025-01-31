@@ -18,6 +18,9 @@ import { HiCog8Tooth as AdminSettingsIcon } from "react-icons/hi2";
 import { useRetroContext } from "./RetroContextProvider";
 import { useState } from "react";
 import { useRealtimeActions } from "@/hooks/useRealtimeActions";
+import { useShallow } from "zustand/shallow";
+import { useAdminStore } from "@/stores/useAdminStore";
+import { usePresenceStore } from "@/stores/usePresenceStore";
 
 interface AdminMenuData {
   columns: number;
@@ -32,11 +35,18 @@ export function AdminMenu({
 }: {
   retrospectiveData: RetrospectiveData;
 }) {
+  const { hasRetroEnded } = useRetroContext();
+  const currentUser = usePresenceStore((state) => state.currentUser);
+  const { allowMessages, allowVotes, setAdminSettings } = useAdminStore(
+    useShallow((state) => ({
+      allowMessages: state.settings.allowMessages,
+      allowVotes: state.settings.allowVotes,
+      setAdminSettings: state.setSettings,
+    })),
+  );
   const { revalidatePageBroadcast, editAdminSettingsBroadcast } =
     useRealtimeActions();
-  const { adminSettings, hasRetroEnded, isCurrentUserAdmin, setAdminSettings } =
-    useRetroContext();
-  const { allowMessages, allowVotes } = adminSettings;
+
   const currentPassword = retrospectiveData.password || "";
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -52,34 +62,32 @@ export function AdminMenu({
   });
 
   const onSubmit = async (data: AdminMenuData) => {
+    const { columns, password: newPassword, ...restData } = data;
     setIsSubmitting(true);
-    if (data.columns !== retrospectiveData.sections.length) {
+
+    if (columns !== retrospectiveData.sections.length) {
       await editRetroSectionsNumber(retrospectiveData.id, data.columns);
     }
 
-    if (data.password !== currentPassword) {
-      await editRetroPassword(retrospectiveData.id, data.password);
+    if (newPassword !== currentPassword) {
+      await editRetroPassword(retrospectiveData.id, newPassword);
     }
 
-    setAdminSettings((prev) => ({
-      ...prev,
-      allowMessages: data.allowMessages,
-      allowVotes: data.allowVotes,
-    }));
+    setAdminSettings({ ...restData });
 
-    await editAdminSettingsBroadcast(
+    editAdminSettingsBroadcast(
       retrospectiveData.id,
       data.allowMessages,
       data.allowVotes,
     );
 
-    await revalidatePageBroadcast(retrospectiveData.id);
+    revalidatePageBroadcast(retrospectiveData.id);
 
     setIsPopoverOpen(false);
     setIsSubmitting(false);
   };
 
-  if (!isCurrentUserAdmin || hasRetroEnded) {
+  if (!currentUser.isAdmin || hasRetroEnded) {
     return null;
   }
 

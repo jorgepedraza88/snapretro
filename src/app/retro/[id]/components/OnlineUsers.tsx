@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import {
@@ -7,7 +6,8 @@ import {
 } from "react-icons/hi2";
 import { FaCrown as CrownIcon } from "react-icons/fa";
 
-import { useUserSession } from "@/components/UserSessionContext";
+import { useShallow } from "zustand/shallow";
+
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -15,26 +15,27 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useRetroContext, UserPresence } from "./RetroContextProvider";
+import { useRetroContext } from "./RetroContextProvider";
 import { useRealtimeActions } from "@/hooks/useRealtimeActions";
+import { usePresenceStore } from "@/stores/usePresenceStore";
 
 export function OnlineUsers() {
-  const { userSession } = useUserSession();
+  const { retrospectiveId } = useRetroContext();
   const { removeUserBroadcast, changeAdminBroadcast } = useRealtimeActions();
-  const { retrospectiveId, onlineUsers, isCurrentUserAdmin } =
-    useRetroContext();
-
-  if (!userSession) {
-    return null;
-  }
+  const { currentUser, onlineUsers } = usePresenceStore(
+    useShallow((state) => ({
+      currentUser: state.currentUser,
+      onlineUsers: state.onlineUsers,
+    })),
+  );
 
   const handleRemoveUser = async (userId: string) => {
     removeUserBroadcast(retrospectiveId, userId);
   };
 
   const handleChangeAdmin = async (userId: string) => {
-    if (userId !== userSession.id) {
-      changeAdminBroadcast(retrospectiveId, userId, userSession.id);
+    if (userId !== currentUser.id) {
+      changeAdminBroadcast(retrospectiveId, userId, currentUser.id);
     }
   };
 
@@ -61,7 +62,7 @@ export function OnlineUsers() {
               <p>{user.name}</p>
             </div>
 
-            {/* {isCurrentUserAdmin && (
+            {currentUser.isAdmin && (
               <div className="flex gap-1">
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -94,7 +95,7 @@ export function OnlineUsers() {
                   </TooltipContent>
                 </Tooltip>
               </div>
-            )} */}
+            )}
           </div>
         ))}
       </TooltipProvider>

@@ -6,15 +6,18 @@ import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/useToast";
 import { useRetroContext } from "./RetroContextProvider";
+import { useRetroSummaryStore } from "@/stores/useRetroSummaryStore";
 
 export function EndRetroContainer() {
   const { toast } = useToast();
-  const { hasRetroEnded, finalRetroSummary, displayedContent } =
-    useRetroContext();
+  const { hasRetroEnded } = useRetroContext();
+  const displayedContent = useRetroSummaryStore(
+    (state) => state.displayedContent,
+  );
 
   const handleCopyContentToClipboard = () => {
     try {
-      navigator.clipboard.writeText(finalRetroSummary);
+      navigator.clipboard.writeText(displayedContent);
       toast({
         title: "Retrospective data copied to the clipboard",
       });

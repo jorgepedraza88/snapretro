@@ -16,16 +16,21 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useRetroContext } from "./RetroContextProvider";
+import { useAdminStore } from "@/stores/useAdminStore";
+import { usePresenceStore } from "@/stores/usePresenceStore";
+import { useShallow } from "zustand/shallow";
 
 export function EndRetroDialog() {
-  const {
-    isCurrentUserAdmin,
-    adminSettings,
-    setAdminSettings,
-    handleEndRetro,
-  } = useRetroContext();
+  const { handleEndRetro } = useRetroContext();
+  const currentUser = usePresenceStore((state) => state.currentUser);
+  const { adminSettings, setAdminSettings } = useAdminStore(
+    useShallow((state) => ({
+      adminSettings: state.settings,
+      setAdminSettings: state.setSettings,
+    })),
+  );
 
-  if (!isCurrentUserAdmin) return null;
+  if (!currentUser.isAdmin) return null;
 
   return (
     <AlertDialog>
@@ -54,10 +59,9 @@ export function EndRetroDialog() {
             <Switch
               checked={adminSettings.useSummaryAI}
               onCheckedChange={(val) =>
-                setAdminSettings((prev) => ({
-                  ...prev,
+                setAdminSettings({
                   useSummaryAI: val,
-                }))
+                })
               }
             />
             <span className="mr-2">Generate Summary with AI</span>

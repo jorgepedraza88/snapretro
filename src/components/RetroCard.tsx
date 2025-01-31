@@ -28,9 +28,10 @@ import { RetrospectiveSection } from "@/types/Retro";
 import { cn } from "@/lib/utils";
 import { decryptMessage, encryptMessage } from "@/app/utils";
 import { nanoid } from "nanoid";
-import { useRetroContext } from "@/app/retro/[id]/components/RetroContextProvider";
 import { supabase } from "@/supabaseClient";
 import { useRealtimeActions } from "@/hooks/useRealtimeActions";
+import { usePresenceStore } from "@/stores/usePresenceStore";
+import { useAdminStore } from "@/stores/useAdminStore";
 
 interface RetroCardProps {
   title: string;
@@ -39,7 +40,8 @@ interface RetroCardProps {
 }
 
 export function RetroCard({ title, description, section }: RetroCardProps) {
-  const { userSession, isCurrentUserAdmin, adminSettings } = useRetroContext();
+  const currentUser = usePresenceStore((state) => state.currentUser);
+  const adminSettings = useAdminStore((state) => state.settings);
   const { writingAction, revalidatePageBroadcast } = useRealtimeActions();
   const postFormRef = useRef<HTMLFormElement>(null);
 
@@ -63,7 +65,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
       .on("broadcast", { event: "writing" }, ({ payload }) => {
         if (
           section.id === payload.sectionId &&
-          userSession.id !== payload.userId
+          currentUser.id !== payload.userId
         ) {
           setIsWriting(true);
         }
@@ -80,11 +82,11 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     if (!isWriting) {
-      writingAction(retrospectiveId, section.id, userSession.id, "start");
+      writingAction(retrospectiveId, section.id, currentUser.id, "start");
     }
 
     if (e.target.value === "") {
-      writingAction(retrospectiveId, section.id, userSession.id, "stop");
+      writingAction(retrospectiveId, section.id, currentUser.id, "stop");
 
       return;
     }
@@ -93,7 +95,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
   const handleSavePost = async (formData: FormData) => {
     const postContent = formData.get("content") as string;
 
-    writingAction(retrospectiveId, section.id, userSession.id, "stop");
+    writingAction(retrospectiveId, section.id, currentUser.id, "stop");
 
     try {
       const temporalId = nanoid(5);
@@ -101,7 +103,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
 
       const newPost = {
         id: temporalId,
-        userId: userSession.id,
+        userId: currentUser.id,
         content: encryptedPostContent,
         votes: [],
       };
@@ -155,14 +157,14 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
             if (post.id === postId) {
               return {
                 ...post,
-                votes: post.votes.filter((id) => id !== userSession.id),
+                votes: post.votes.filter((id) => id !== currentUser.id),
               };
             }
             return post;
           }),
         );
       });
-      await removeVoteFromPost(postId, userSession.id);
+      await removeVoteFromPost(postId, currentUser.id);
 
       revalidatePageBroadcast(retrospectiveId);
     } else {
@@ -172,14 +174,14 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
             if (post.id === postId) {
               return {
                 ...post,
-                votes: [...post.votes, userSession.id],
+                votes: [...post.votes, currentUser.id],
               };
             }
             return post;
           }),
         );
       });
-      await addVoteToPost(postId, userSession.id);
+      await addVoteToPost(postId, currentUser.id);
       revalidatePageBroadcast(retrospectiveId);
     }
   };
@@ -209,7 +211,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
               ) : (
                 optimisticTitle
               )}
-              {isCurrentUserAdmin && !isEditingSectionTitle && (
+              {currentUser.isAdmin && !isEditingSectionTitle && (
                 <Button
                   size="icon"
                   className="bg-invisible text-gray-900 invisible group-hover:visible hover:bg-gray-300"
@@ -224,10 +226,10 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
           <div>
             {sortedPostsByVotes.length > 0 ? (
               sortedPostsByVotes.map((post) => {
-                const hasVoted = post.votes.includes(userSession.id);
+                const hasVoted = post.votes.includes(currentUser.id);
                 const canVote =
-                  userSession.id !== post.userId && adminSettings.allowVotes;
-                const canDetroyPost = userSession.id === post.userId;
+                  currentUser.id !== post.userId && adminSettings.allowVotes;
+                const canDetroyPost = currentUser.id === post.userId;
                 const postContent = decryptMessage(post.content);
 
                 return (

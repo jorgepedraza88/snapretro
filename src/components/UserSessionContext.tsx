@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useMemo } from "react";
 import { nanoid } from "nanoid";
 
 import { Input } from "@/components/ui/input";
@@ -52,44 +52,52 @@ export function UserSessionContextProvider({
     setUserSession(newUser);
   }
 
+  const contextValue = useMemo(
+    () => ({ userSession, setUserSession }),
+    [userSession, setUserSession],
+  );
+
+  if (!userSession && !shouldLoadUserDialog) {
+    return (
+      <AlertDialog open>
+        <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Welcome!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Select your name to join the session
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmitNewUser();
+            }}
+          >
+            <Label>
+              Name
+              <Input
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                tabIndex={0}
+                autoFocus
+              />
+            </Label>
+            <div className="flex justify-end mt-4">
+              <AlertDialogAction
+                type="submit"
+                disabled={userName.trim() === ""}
+              >
+                Join session
+              </AlertDialogAction>
+            </div>
+          </form>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
+
   return (
-    <UserSessionContext.Provider value={{ userSession, setUserSession }}>
-      {!userSession && shouldLoadUserDialog && (
-        <AlertDialog open>
-          <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Welcome!</AlertDialogTitle>
-              <AlertDialogDescription>
-                Select your name to join the session
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSubmitNewUser();
-              }}
-            >
-              <Label>
-                Name
-                <Input
-                  value={userName}
-                  onChange={(e) => setUserName(e.target.value)}
-                  tabIndex={0}
-                  autoFocus
-                />
-              </Label>
-              <div className="flex justify-end mt-4">
-                <AlertDialogAction
-                  type="submit"
-                  disabled={userName.trim() === ""}
-                >
-                  Join session
-                </AlertDialogAction>
-              </div>
-            </form>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+    <UserSessionContext.Provider value={contextValue}>
       {(userSession || (!userSession && !shouldLoadUserDialog)) && children}
     </UserSessionContext.Provider>
   );

@@ -5,11 +5,11 @@ import { nanoid } from "nanoid";
 
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { useUserSession } from "@/components/UserSessionContext";
 import { useParams } from "next/navigation";
 import { supabase } from "@/supabaseClient";
 import REALTIME_EVENT_KEYS from "@/constants/realtimeEventKeys";
 import { Sheet, SheetClose, SheetContent, SheetTitle } from "./ui/sheet";
+import { usePresenceStore } from "@/stores/usePresenceStore";
 
 interface UserMessage {
   id: string | null;
@@ -22,12 +22,12 @@ interface AppSidebarProps {
   setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export function AppSidebar({
+export function ChatSidebar({
   isSidebarOpen,
   setIsSidebarOpen,
 }: AppSidebarProps) {
   const { id: retrospectiveId } = useParams<{ id: string }>();
-  const { userSession } = useUserSession();
+  const currentUser = usePresenceStore((state) => state.currentUser);
 
   const [messages, setMessages] = useState<UserMessage[]>([]);
   const [inputMessage, setInputMessage] = useState("");
@@ -47,7 +47,7 @@ export function AppSidebar({
   }, [retrospectiveId]);
 
   const sendMessage = () => {
-    if (inputMessage.trim() && userSession) {
+    if (inputMessage.trim()) {
       const messageId = nanoid(5);
 
       supabase.channel(`messages:${retrospectiveId}`).send({
@@ -55,7 +55,7 @@ export function AppSidebar({
         event: REALTIME_EVENT_KEYS.CHAT,
         payload: {
           id: messageId,
-          name: userSession.name,
+          name: currentUser.name,
           text: inputMessage,
         },
       });
@@ -63,7 +63,7 @@ export function AppSidebar({
       supabase.channel(`notifications:${retrospectiveId}`).send({
         type: "broadcast",
         event: REALTIME_EVENT_KEYS.CHAT_NOTIFICATION,
-        payload: { user: userSession.id },
+        payload: { user: currentUser.id },
       });
 
       setInputMessage("");
@@ -74,10 +74,6 @@ export function AppSidebar({
     e.preventDefault();
     sendMessage();
   };
-
-  if (!userSession) {
-    return null;
-  }
 
   return (
     <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
@@ -91,11 +87,11 @@ export function AppSidebar({
             <p
               key={msg.id}
               style={{
-                textAlign: msg.name === userSession.name ? "right" : "left",
+                textAlign: msg.name === currentUser.name ? "right" : "left",
               }}
               className="bg-white my-2 p-2 rounded-lg border"
             >
-              {msg.name === userSession.name ? (
+              {msg.name === currentUser.name ? (
                 msg.text
               ) : (
                 <span>
