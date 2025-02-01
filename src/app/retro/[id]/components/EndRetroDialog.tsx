@@ -1,24 +1,25 @@
-"use client";
+'use client';
 
-import { BsStars as AiIcon } from "react-icons/bs";
+import { BsStars as AiIcon } from 'react-icons/bs';
+import { useShallow } from 'zustand/shallow';
+
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
-  AlertDialogCancel,
-  AlertDialogDescription,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { useRetroContext } from "./RetroContextProvider";
-import { useAdminStore } from "@/stores/useAdminStore";
-import { usePresenceStore } from "@/stores/usePresenceStore";
-import { useShallow } from "zustand/shallow";
+  AlertDialogTrigger
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { useAdminStore } from '@/stores/useAdminStore';
+import { usePresenceStore } from '@/stores/usePresenceStore';
+import { useRetroContext } from './RetroContextProvider';
 
 export function EndRetroDialog() {
   const { handleEndRetro } = useRetroContext();
@@ -26,8 +27,8 @@ export function EndRetroDialog() {
   const { adminSettings, setAdminSettings } = useAdminStore(
     useShallow((state) => ({
       adminSettings: state.settings,
-      setAdminSettings: state.setSettings,
-    })),
+      setAdminSettings: state.setSettings
+    }))
   );
 
   if (!currentUser.isAdmin) return null;
@@ -54,13 +55,13 @@ export function EndRetroDialog() {
           </p>
           <p className="text-xs text-red-500">This action is not reversible</p>
         </div>
-        <AlertDialogFooter className="sm:justify-between w-full">
-          <Label className="items-center flex gap-1">
+        <AlertDialogFooter className="w-full sm:justify-between">
+          <Label className="flex items-center gap-1">
             <Switch
               checked={adminSettings.useSummaryAI}
               onCheckedChange={(val) =>
                 setAdminSettings({
-                  useSummaryAI: val,
+                  useSummaryAI: val
                 })
               }
             />

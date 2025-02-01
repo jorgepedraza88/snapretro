@@ -1,18 +1,19 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { Button } from "./ui/button";
-import { supabase } from "@/supabaseClient";
-import { useParams } from "next/navigation";
-import { ChatSidebar } from "./ChatSidebar";
-import REALTIME_EVENT_KEYS from "@/constants/realtimeEventKeys";
-import { usePresenceStore } from "@/stores/usePresenceStore";
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+
+import REALTIME_EVENT_KEYS from '@/constants/realtimeEventKeys';
+import { usePresenceStore } from '@/stores/usePresenceStore';
+import { supabase } from '@/supabaseClient';
+import { ChatSidebar } from './ChatSidebar';
+import { Button } from './ui/button';
 
 function ChatNotificationDot() {
   return (
     <>
-      <span className="animate-ping absolute inline-flex size-[10px] rounded-full bg-red-400 opacity-75 -top-0.5 -left-0.5"></span>
-      <span className="absolute inline-flex rounded-full size-[10px] bg-red-500 -top-0.5 -left-0.5"></span>
+      <span className="absolute -left-0.5 -top-0.5 inline-flex size-[10px] animate-ping rounded-full bg-red-400 opacity-75"></span>
+      <span className="absolute -left-0.5 -top-0.5 inline-flex size-[10px] rounded-full bg-red-500"></span>
     </>
   );
 }
@@ -37,15 +38,11 @@ export function ChatFooter() {
     const channel = supabase.channel(`notifications:${retrospectiveId}`);
 
     channel
-      .on(
-        "broadcast",
-        { event: REALTIME_EVENT_KEYS.CHAT_NOTIFICATION },
-        ({ payload }) => {
-          if (payload.user !== currentUser.id) {
-            setChatNotification(true);
-          }
-        },
-      )
+      .on('broadcast', { event: REALTIME_EVENT_KEYS.CHAT_NOTIFICATION }, ({ payload }) => {
+        if (payload.user !== currentUser.id) {
+          setChatNotification(true);
+        }
+      })
       .subscribe();
 
     return () => {
@@ -61,10 +58,7 @@ export function ChatFooter() {
         </Button>
         {chatNotification && !isSidebarOpen && <ChatNotificationDot />}
       </div>
-      <ChatSidebar
-        setIsSidebarOpen={setIsSidebarOpen}
-        isSidebarOpen={isSidebarOpen}
-      />
+      <ChatSidebar setIsSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} />
     </div>
   );
 }

@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { nanoid } from "nanoid";
+import { useEffect, useState } from 'react';
+import { nanoid } from 'nanoid';
+import { useParams } from 'next/navigation';
 
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { useParams } from "next/navigation";
-import { supabase } from "@/supabaseClient";
-import REALTIME_EVENT_KEYS from "@/constants/realtimeEventKeys";
-import { Sheet, SheetClose, SheetContent, SheetTitle } from "./ui/sheet";
-import { usePresenceStore } from "@/stores/usePresenceStore";
+import REALTIME_EVENT_KEYS from '@/constants/realtimeEventKeys';
+import { usePresenceStore } from '@/stores/usePresenceStore';
+import { supabase } from '@/supabaseClient';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Sheet, SheetClose, SheetContent, SheetTitle } from './ui/sheet';
 
 interface UserMessage {
   id: string | null;
@@ -22,21 +22,18 @@ interface AppSidebarProps {
   setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export function ChatSidebar({
-  isSidebarOpen,
-  setIsSidebarOpen,
-}: AppSidebarProps) {
+export function ChatSidebar({ isSidebarOpen, setIsSidebarOpen }: AppSidebarProps) {
   const { id: retrospectiveId } = useParams<{ id: string }>();
   const currentUser = usePresenceStore((state) => state.currentUser);
 
   const [messages, setMessages] = useState<UserMessage[]>([]);
-  const [inputMessage, setInputMessage] = useState("");
+  const [inputMessage, setInputMessage] = useState('');
 
   useEffect(() => {
     const channel = supabase.channel(`messages:${retrospectiveId}`);
 
     channel
-      .on("broadcast", { event: REALTIME_EVENT_KEYS.CHAT }, ({ payload }) => {
+      .on('broadcast', { event: REALTIME_EVENT_KEYS.CHAT }, ({ payload }) => {
         setMessages((prev) => [...prev, payload]);
       })
       .subscribe();
@@ -51,22 +48,22 @@ export function ChatSidebar({
       const messageId = nanoid(5);
 
       supabase.channel(`messages:${retrospectiveId}`).send({
-        type: "broadcast",
+        type: 'broadcast',
         event: REALTIME_EVENT_KEYS.CHAT,
         payload: {
           id: messageId,
           name: currentUser.name,
-          text: inputMessage,
-        },
+          text: inputMessage
+        }
       });
 
       supabase.channel(`notifications:${retrospectiveId}`).send({
-        type: "broadcast",
+        type: 'broadcast',
         event: REALTIME_EVENT_KEYS.CHAT_NOTIFICATION,
-        payload: { user: currentUser.id },
+        payload: { user: currentUser.id }
       });
 
-      setInputMessage("");
+      setInputMessage('');
     }
   };
 
@@ -78,7 +75,7 @@ export function ChatSidebar({
   return (
     <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
       <SheetContent
-        className="dark:bg-neutral-800 bg-neutral-100 flex flex-col justify-between"
+        className="flex flex-col justify-between bg-neutral-100 dark:bg-neutral-800"
         side="right"
       >
         <SheetTitle className="sr-only">Chat panel</SheetTitle>
@@ -87,9 +84,9 @@ export function ChatSidebar({
             <p
               key={msg.id}
               style={{
-                textAlign: msg.name === currentUser.name ? "right" : "left",
+                textAlign: msg.name === currentUser.name ? 'right' : 'left'
               }}
-              className="bg-white my-2 p-2 rounded-lg border"
+              className="my-2 rounded-lg border bg-white p-2"
             >
               {msg.name === currentUser.name ? (
                 msg.text
@@ -115,7 +112,7 @@ export function ChatSidebar({
             </Button>
           </form>
           <SheetClose asChild>
-            <Button variant="secondary" className="w-full mt-4">
+            <Button variant="secondary" className="mt-4 w-full">
               Close Chat
             </Button>
           </SheetClose>

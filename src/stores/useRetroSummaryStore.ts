@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
 type SummaryState = {
   finalSummary: string;
@@ -12,8 +12,8 @@ type SummaryState = {
 };
 
 export const useRetroSummaryStore = create<SummaryState>((set) => ({
-  finalSummary: "",
-  displayedContent: "",
+  finalSummary: '',
+  displayedContent: '',
   isLoadingFinalContent: false,
   isTyping: false,
 
@@ -22,7 +22,7 @@ export const useRetroSummaryStore = create<SummaryState>((set) => ({
   setLoading: (loading) => set({ isLoadingFinalContent: loading }),
 
   startTypingEffect: (content) => {
-    set({ isTyping: true, displayedContent: "" });
+    set({ isTyping: true, displayedContent: '' });
     let index = 0;
     const interval = setInterval(() => {
       set((state) => {
@@ -31,9 +31,9 @@ export const useRetroSummaryStore = create<SummaryState>((set) => ({
           return { isTyping: false };
         }
         return {
-          displayedContent: state.displayedContent + content.charAt(index++),
+          displayedContent: state.displayedContent + content.charAt(index++)
         };
       });
     }, 5);
-  },
+  }
 }));

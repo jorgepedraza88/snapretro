@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
 type AdminSettings = {
   allowMessages: boolean;
@@ -6,7 +6,7 @@ type AdminSettings = {
   useSummaryAI: boolean;
 };
 
-type TimerStateValues = "on" | "off" | "finished";
+type TimerStateValues = 'on' | 'off' | 'finished';
 
 const DEFAULT_TIMELEFT = 300;
 
@@ -24,16 +24,16 @@ export const useAdminStore = create<AdminState>((set) => ({
   settings: {
     allowMessages: true,
     allowVotes: true,
-    useSummaryAI: true,
+    useSummaryAI: true
   },
-  timerState: "off",
+  timerState: 'off',
   timeLeft: DEFAULT_TIMELEFT,
   defaultSeconds: DEFAULT_TIMELEFT,
 
   setSettings: (newSettings: Partial<AdminSettings>) =>
     set((state) => ({
-      settings: { ...state.settings, ...newSettings },
+      settings: { ...state.settings, ...newSettings }
     })),
   setTimerState: (timerState) => set({ timerState }),
-  setTimeLeft: (timeLeft) => set({ timeLeft }),
+  setTimeLeft: (timeLeft) => set({ timeLeft })
 }));

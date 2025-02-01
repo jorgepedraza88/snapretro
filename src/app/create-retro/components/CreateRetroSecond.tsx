@@ -1,27 +1,27 @@
-import { Controller, useFormContext } from "react-hook-form";
-import { Duration } from "luxon";
+import { Controller, useFormContext } from 'react-hook-form';
+import { ErrorMessage } from '@hookform/error-message';
+import { Duration } from 'luxon';
 
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { ErrorMessage } from "@hookform/error-message";
-import { Slider } from "@/components/ui/slider";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 
 export function CreateRetroSecond() {
   const {
     register,
     watch,
     formState: { errors },
-    setValue,
+    setValue
   } = useFormContext();
 
-  const enablePassword = watch("enablePassword");
-  const timer = watch("timer");
+  const enablePassword = watch('enablePassword');
+  const timer = watch('timer');
 
   const formatTimer = (value: number) => {
     const milliseconds = value * 1000;
     const duration = Duration.fromObject({ milliseconds });
-    const minutes = duration.toFormat("mm:ss");
+    const minutes = duration.toFormat('mm:ss');
 
     return minutes;
   };
@@ -36,11 +36,7 @@ export function CreateRetroSecond() {
           <Controller
             name="enableChat"
             render={({ field }) => (
-              <Switch
-                id="enable-chat"
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
+              <Switch id="enable-chat" checked={field.value} onCheckedChange={field.onChange} />
             )}
           />
           <Label htmlFor="enable-chat">Enable chat</Label>
@@ -72,20 +68,16 @@ export function CreateRetroSecond() {
           <Controller
             name="enablePassword"
             render={({ field }) => (
-              <Switch
-                id="enable-password"
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
+              <Switch id="enable-password" checked={field.value} onCheckedChange={field.onChange} />
             )}
           />
           <Label htmlFor="enable-password">Protect with a secret word</Label>
         </div>
         {enablePassword && (
-          <div className="pt-2 ml-12">
+          <div className="ml-12 pt-2">
             <Label htmlFor="password">Choose your secret word</Label>
-            <Input id="password" {...register("password")} />
-            <div className="text-xs text-red-500 mt-1">
+            <Input id="password" {...register('password')} />
+            <div className="mt-1 text-xs text-red-500">
               <ErrorMessage name="password" errors={errors} />
             </div>
           </div>
@@ -94,17 +86,17 @@ export function CreateRetroSecond() {
       {!!timer && (
         <div className="my-4 ml-12">
           <Label>Select time:</Label>
-          <p className="text-sm text-center w-full dark:text-neutral-100">
+          <p className="w-full text-center text-sm dark:text-neutral-100">
             {formatTimer(timer)} minutes
           </p>
           <Slider
             defaultValue={[300]}
-            max={300}
+            max={600}
             min={60}
             step={30}
             value={[timer]}
             className="mt-1"
-            onValueChange={(val) => setValue("timer", val[0])}
+            onValueChange={(val) => setValue('timer', val[0])}
           />
         </div>
       )}

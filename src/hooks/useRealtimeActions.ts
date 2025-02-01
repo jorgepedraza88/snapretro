@@ -1,86 +1,77 @@
-"use client";
+'use client';
 
-import { useCallback } from "react";
-import { supabase } from "@/supabaseClient";
-import REALTIME_EVENT_KEYS from "@/constants/realtimeEventKeys";
+import { useCallback } from 'react';
+
+import REALTIME_EVENT_KEYS from '@/constants/realtimeEventKeys';
+import { supabase } from '@/supabaseClient';
 
 export function useRealtimeActions() {
-  const sendBroadcast = useCallback(
-    <T>(retrospectiveId: string, event: string, payload: T) => {
-      supabase.channel(`retrospective:${retrospectiveId}`).send({
-        type: "broadcast",
-        event,
-        payload,
-      });
-    },
-    [],
-  );
+  const sendBroadcast = useCallback(<T>(retrospectiveId: string, event: string, payload: T) => {
+    supabase.channel(`retrospective:${retrospectiveId}`).send({
+      type: 'broadcast',
+      event,
+      payload
+    });
+  }, []);
 
   const writingAction = useCallback(
-    (
-      retroId: string,
-      sectionId: string,
-      userId: string,
-      action: "start" | "stop",
-    ) => {
+    (retroId: string, sectionId: string, userId: string, action: 'start' | 'stop') => {
       const event =
-        action === "start"
-          ? REALTIME_EVENT_KEYS.WRITING
-          : REALTIME_EVENT_KEYS.STOP_WRITING;
+        action === 'start' ? REALTIME_EVENT_KEYS.WRITING : REALTIME_EVENT_KEYS.STOP_WRITING;
       sendBroadcast(retroId, event, { sectionId, userId });
     },
-    [sendBroadcast],
+    [sendBroadcast]
   );
 
   const revalidatePageBroadcast = useCallback(
     (retroId: string) => {
       sendBroadcast(retroId, REALTIME_EVENT_KEYS.REVALIDATE, {});
     },
-    [sendBroadcast],
+    [sendBroadcast]
   );
 
   const endRetroBroadcast = useCallback(
     (retroId: string, finalSummary: string) => {
       sendBroadcast(retroId, REALTIME_EVENT_KEYS.END_RETRO, { finalSummary });
     },
-    [sendBroadcast],
+    [sendBroadcast]
   );
 
   const changeAdminBroadcast = useCallback(
     (retroId: string, newAdminId: string, oldAdminId?: string) => {
       sendBroadcast(retroId, REALTIME_EVENT_KEYS.ASSIGN_NEW_ADMIN, {
         newAdminId,
-        oldAdminId,
+        oldAdminId
       });
     },
-    [sendBroadcast],
+    [sendBroadcast]
   );
 
   const removeUserBroadcast = useCallback(
     (retroId: string, userId: string) => {
       sendBroadcast(retroId, REALTIME_EVENT_KEYS.DISCONNECT_USER, { userId });
     },
-    [sendBroadcast],
+    [sendBroadcast]
   );
 
   const handleTimerBroadcast = useCallback(
-    (retroId: string, timerState: "on" | "off" | "reset") => {
-      if (timerState === "reset") {
+    (retroId: string, timerState: 'on' | 'off' | 'reset') => {
+      if (timerState === 'reset') {
         sendBroadcast(retroId, REALTIME_EVENT_KEYS.RESET_TIMER, {});
       }
       sendBroadcast(retroId, REALTIME_EVENT_KEYS.TIMER, { timerState });
     },
-    [sendBroadcast],
+    [sendBroadcast]
   );
 
   const editAdminSettingsBroadcast = useCallback(
     (retroId: string, allowMessages: boolean, allowVotes: boolean) => {
       sendBroadcast(retroId, REALTIME_EVENT_KEYS.SETTINGS, {
         allowMessages,
-        allowVotes,
+        allowVotes
       });
     },
-    [sendBroadcast],
+    [sendBroadcast]
   );
 
   return {
@@ -90,6 +81,6 @@ export function useRealtimeActions() {
     changeAdminBroadcast,
     removeUserBroadcast,
     handleTimerBroadcast,
-    editAdminSettingsBroadcast,
+    editAdminSettingsBroadcast
   };
 }

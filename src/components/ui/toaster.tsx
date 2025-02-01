@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useToast } from "@/hooks/useToast";
+import { useToast } from '@/hooks/useToast';
 import {
   Toast,
   ToastClose,
   ToastDescription,
   ToastProvider,
   ToastTitle,
-  ToastViewport,
-} from "@/components/ui/toast";
+  ToastViewport
+} from '@/components/ui/toast';
 
 export function Toaster() {
   const { toasts } = useToast();
@@ -20,13 +20,11 @@ export function Toaster() {
           <Toast
             key={id}
             {...props}
-            className="bg-violet-100 text-violet-900 hover:bg-violet-100 dark:bg-violet-800 dark:text-violet-50 dark:hover:bg-violet-800 z-50 w-fit"
+            className="z-50 w-fit bg-violet-100 text-violet-900 hover:bg-violet-100 dark:bg-violet-800 dark:text-violet-50 dark:hover:bg-violet-800"
           >
             <div className="grid gap-1">
               {title && <ToastTitle>{title}</ToastTitle>}
-              {description && (
-                <ToastDescription>{description}</ToastDescription>
-              )}
+              {description && <ToastDescription>{description}</ToastDescription>}
             </div>
             {action}
             <ToastClose />

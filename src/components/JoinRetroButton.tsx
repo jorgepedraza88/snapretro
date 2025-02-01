@@ -1,19 +1,17 @@
-"use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+'use client';
+
+import { useState } from 'react';
+import { HiArrowRight as GoRetroIcon, HiOutlineUserPlus as JoinIcon } from 'react-icons/hi2';
+import { ImSpinner as SpinnerIcon } from 'react-icons/im';
+import { useRouter } from 'next/navigation';
 
 // Components
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import {
-  HiOutlineUserPlus as JoinIcon,
-  HiArrowRight as GoRetroIcon,
-} from "react-icons/hi2";
-import { ImSpinner as SpinnerIcon } from "react-icons/im";
+import { Button } from './ui/button';
+import { Input } from './ui/input';
 
 export function JoinRetroButton() {
   const router = useRouter();
-  const [retroId, setRetroId] = useState("");
+  const [retroId, setRetroId] = useState('');
   const [isAddingId, setIsAddingId] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -25,7 +23,7 @@ export function JoinRetroButton() {
   };
 
   const onBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value.trim() === "") {
+    if (e.target.value.trim() === '') {
       setIsAddingId(false);
     }
   };
@@ -42,18 +40,19 @@ export function JoinRetroButton() {
           autoFocus
         />
         <Button type="submit" variant="secondary" disabled={isLoading}>
-          {isLoading ? (
-            <SpinnerIcon className="animate-spin" />
-          ) : (
-            <GoRetroIcon size={24} />
-          )}
+          {isLoading ? <SpinnerIcon className="animate-spin" /> : <GoRetroIcon size={24} />}
         </Button>
       </form>
     );
   }
 
   return (
-    <Button variant="outline" size="lg" className="w-full lg:w-auto" onClick={() => setIsAddingId(true)}>
+    <Button
+      variant="outline"
+      size="lg"
+      className="w-full lg:w-auto"
+      onClick={() => setIsAddingId(true)}
+    >
       <JoinIcon size={24} />
       Join into a retrospective
     </Button>

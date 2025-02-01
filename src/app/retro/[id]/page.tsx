@@ -1,36 +1,35 @@
-import { redirect } from "next/navigation";
+import { redirect } from 'next/navigation';
 
-import { getRetrospetiveData } from "@/app/actions";
-import { RetroContextProvider } from "./components/RetroContextProvider";
-import { ChatFooter } from "@/components/ChatFooter";
+import { ChatFooter } from '@/components/ChatFooter';
+import { Navigation } from '@/components/Navigation';
+import { UserSessionWrapper } from '@/components/UserSessionWrapper';
+import { getRetrospetiveData } from '@/app/actions';
+import { OnlineUsers } from './components/OnlineUsers';
+import { RetroContextProvider } from './components/RetroContextProvider';
+import { MainContent } from './MainContent';
 
-import { MainContent } from "./MainContent";
-import { RetroProtectedWrapper } from "./RetroProtectedWrapper";
-import { Navigation } from "@/components/Navigation";
-import { OnlineUsers } from "./components/OnlineUsers";
-
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const retrospectiveId = (await params).id;
   const initialData = await getRetrospetiveData(retrospectiveId);
 
   if (!initialData) {
-    redirect("/not-found");
+    redirect('/not-found');
   }
 
   return (
-    <RetroProtectedWrapper data={initialData}>
+    <UserSessionWrapper data={initialData}>
       <RetroContextProvider data={initialData}>
         <Navigation />
-        <div className="lg:flex gap-2 bg-neutral-50">
+        <div className="gap-2 bg-neutral-50 lg:flex">
           <OnlineUsers />
           <MainContent data={initialData} />
           <ChatFooter />
         </div>
       </RetroContextProvider>
-    </RetroProtectedWrapper>
+    </UserSessionWrapper>
   );
 }
+
+// "@ianvs/prettier-plugin-sort-imports": "4.3.1",
+// "prettier": "3.3.3",
+// "prettier-plugin-tailwindcss": "0.6.8"

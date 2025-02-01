@@ -1,20 +1,18 @@
-import { EndRetroDialog } from "@/app/retro/[id]/components/EndRetroDialog";
-import Link from "next/link";
+import Link from 'next/link';
+
+import { EndRetroDialog } from '@/app/retro/[id]/components/EndRetroDialog';
 
 // import { SwitchColorMode } from "./SwitchColorMode";
 
 export function Navigation() {
   return (
     <div>
-      <div className="text-sm py-1 border-b text-center w-full bg-violet-100 text-violet-900">
+      <div className="w-full border-b bg-violet-100 py-1 text-center text-sm text-violet-900">
         This app is still in development - It may contain some issues
       </div>
-      <div className="flex justify-between px-4 py-1.5 items-center bg-neutral-50 dark:bg-neutral-900 border-b dark:border-neutral-900">
+      <div className="flex items-center justify-between border-b bg-neutral-50 px-4 py-1.5 dark:border-neutral-900 dark:bg-neutral-900">
         <div>
-          <Link
-            className="font-black text-lg text-violet-600 dark:text-neutral-100"
-            href="/"
-          >
+          <Link className="text-lg font-black text-violet-600 dark:text-neutral-100" href="/">
             FreeRetros
           </Link>
         </div>

@@ -1,37 +1,31 @@
-"use client";
+'use client';
 
+import { startTransition, useEffect, useOptimistic, useRef, useState } from 'react';
 import {
-  startTransition,
-  useEffect,
-  useOptimistic,
-  useRef,
-  useState,
-} from "react";
-import { Card, CardTitle, CardDescription } from "./ui/card";
-import {
-  HiOutlineChatBubbleOvalLeftEllipsis as WritingIcon,
-  HiTrash as RemoveIcon,
   HiPencil as EditIcon,
+  HiTrash as RemoveIcon,
   HiHandThumbUp as VoteIcon,
-} from "react-icons/hi2";
+  HiOutlineChatBubbleOvalLeftEllipsis as WritingIcon
+} from 'react-icons/hi2';
+import { nanoid } from 'nanoid';
 
+import { RetrospectiveSection } from '@/types/Retro';
+import { useRealtimeActions } from '@/hooks/useRealtimeActions';
 import {
   addVoteToPost,
   createPost,
   destroyPost,
   editRetroSectionTitle,
-  removeVoteFromPost,
-} from "@/app/actions";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { RetrospectiveSection } from "@/types/Retro";
-import { cn } from "@/lib/utils";
-import { decryptMessage, encryptMessage } from "@/app/utils";
-import { nanoid } from "nanoid";
-import { supabase } from "@/supabaseClient";
-import { useRealtimeActions } from "@/hooks/useRealtimeActions";
-import { usePresenceStore } from "@/stores/usePresenceStore";
-import { useAdminStore } from "@/stores/useAdminStore";
+  removeVoteFromPost
+} from '@/app/actions';
+import { decryptMessage, encryptMessage } from '@/app/utils';
+import { cn } from '@/lib/utils';
+import { useAdminStore } from '@/stores/useAdminStore';
+import { usePresenceStore } from '@/stores/usePresenceStore';
+import { supabase } from '@/supabaseClient';
+import { Button } from './ui/button';
+import { Card, CardDescription, CardTitle } from './ui/card';
+import { Input } from './ui/input';
 
 interface RetroCardProps {
   title: string;
@@ -54,23 +48,18 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
 
   const retrospectiveId = section.retrospectiveId;
 
-  const sortedPostsByVotes = optimisticPosts.sort(
-    (a, b) => b.votes.length - a.votes.length,
-  );
+  const sortedPostsByVotes = optimisticPosts.sort((a, b) => b.votes.length - a.votes.length);
 
   useEffect(() => {
     const channel = supabase.channel(`retrospective:${retrospectiveId}`);
 
     channel
-      .on("broadcast", { event: "writing" }, ({ payload }) => {
-        if (
-          section.id === payload.sectionId &&
-          currentUser.id !== payload.userId
-        ) {
+      .on('broadcast', { event: 'writing' }, ({ payload }) => {
+        if (section.id === payload.sectionId && currentUser.id !== payload.userId) {
           setIsWriting(true);
         }
       })
-      .on("broadcast", { event: "stop-writing" }, ({ payload }) => {
+      .on('broadcast', { event: 'stop-writing' }, ({ payload }) => {
         if (section.id === payload.sectionId) {
           setIsWriting(false);
         }
@@ -78,24 +67,22 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleNewPostChange = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleNewPostChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!isWriting) {
-      writingAction(retrospectiveId, section.id, currentUser.id, "start");
+      writingAction(retrospectiveId, section.id, currentUser.id, 'start');
     }
 
-    if (e.target.value === "") {
-      writingAction(retrospectiveId, section.id, currentUser.id, "stop");
+    if (e.target.value === '') {
+      writingAction(retrospectiveId, section.id, currentUser.id, 'stop');
 
       return;
     }
   };
 
   const handleSavePost = async (formData: FormData) => {
-    const postContent = formData.get("content") as string;
+    const postContent = formData.get('content') as string;
 
-    writingAction(retrospectiveId, section.id, currentUser.id, "stop");
+    writingAction(retrospectiveId, section.id, currentUser.id, 'stop');
 
     try {
       const temporalId = nanoid(5);
@@ -105,24 +92,21 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
         id: temporalId,
         userId: currentUser.id,
         content: encryptedPostContent,
-        votes: [],
+        votes: []
       };
 
-      addOptimisticPosts((prev) => [
-        ...prev,
-        { ...newPost, content: encryptedPostContent },
-      ]);
+      addOptimisticPosts((prev) => [...prev, { ...newPost, content: encryptedPostContent }]);
 
       postFormRef.current?.reset();
 
       await createPost({
         sectionId: section.id,
-        newPost,
+        newPost
       });
 
       revalidatePageBroadcast(retrospectiveId);
     } catch (error) {
-      console.error("Error creating post:", error);
+      console.error('Error creating post:', error);
     }
   };
 
@@ -141,7 +125,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
 
     await editRetroSectionTitle({
       title: newSectionTitle,
-      sectionId: section.id,
+      sectionId: section.id
     });
 
     revalidatePageBroadcast(retrospectiveId);
@@ -157,11 +141,11 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
             if (post.id === postId) {
               return {
                 ...post,
-                votes: post.votes.filter((id) => id !== currentUser.id),
+                votes: post.votes.filter((id) => id !== currentUser.id)
               };
             }
             return post;
-          }),
+          })
         );
       });
       await removeVoteFromPost(postId, currentUser.id);
@@ -174,11 +158,11 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
             if (post.id === postId) {
               return {
                 ...post,
-                votes: [...post.votes, currentUser.id],
+                votes: [...post.votes, currentUser.id]
               };
             }
             return post;
-          }),
+          })
         );
       });
       await addVoteToPost(postId, currentUser.id);
@@ -188,10 +172,10 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
 
   return (
     <div className="h-full">
-      <Card className="bg-gray-100 dark:bg-neutral-900 flex flex-col justify-between h-full pb-4">
+      <Card className="flex h-full flex-col justify-between bg-gray-100 pb-4 dark:bg-neutral-900">
         <div>
-          <div className="p-4 bg-gray-200 dark:bg-neutral-700 rounded-t-lg mb-2 group">
-            <CardTitle className="flex justify-between items-center">
+          <div className="group mb-2 rounded-t-lg bg-gray-200 p-4 dark:bg-neutral-700">
+            <CardTitle className="flex items-center justify-between">
               {isEditingSectionTitle ? (
                 <form action={handleChangeSectionTitle}>
                   <Input
@@ -201,7 +185,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
                     onChange={(e) => setNewSectionTitle(e.target.value)}
                     onBlur={() => setIsEditingSectionTitle(false)}
                     onKeyDown={(e) => {
-                      if (e.key === "Escape") {
+                      if (e.key === 'Escape') {
                         setIsEditingSectionTitle(false);
                       }
                     }}
@@ -214,7 +198,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
               {currentUser.isAdmin && !isEditingSectionTitle && (
                 <Button
                   size="icon"
-                  className="bg-invisible text-gray-900 invisible group-hover:visible hover:bg-gray-300"
+                  className="bg-invisible invisible text-gray-900 hover:bg-gray-300 group-hover:visible"
                   onClick={() => setIsEditingSectionTitle(true)}
                 >
                   <EditIcon size={24} className="shrink-0" />
@@ -227,28 +211,24 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
             {sortedPostsByVotes.length > 0 ? (
               sortedPostsByVotes.map((post) => {
                 const hasVoted = post.votes.includes(currentUser.id);
-                const canVote =
-                  currentUser.id !== post.userId && adminSettings.allowVotes;
+                const canVote = currentUser.id !== post.userId && adminSettings.allowVotes;
                 const canDetroyPost = currentUser.id === post.userId;
                 const postContent = decryptMessage(post.content);
 
                 return (
-                  <Card key={post.id} className="mx-2 my-2 group">
-                    <div className="p-2 text-sm flex justify-between items-center gap-2">
+                  <Card key={post.id} className="group mx-2 my-2">
+                    <div className="flex items-center justify-between gap-2 p-2 text-sm">
                       <p>{postContent}</p>
-                      <div className="flex gap-2 items-center">
-                        <div className="text-xs mt-px">
+                      <div className="flex items-center gap-2">
+                        <div className="mt-px text-xs">
                           {post.votes.length !== 0 && `+${post.votes.length}`}
                         </div>
                         {canVote && (
                           <Button
                             variant="ghost"
-                            className={cn(
-                              "p-1.5 h-auto invisible group-hover:visible",
-                              {
-                                "text-violet-500 visible": hasVoted,
-                              },
-                            )}
+                            className={cn('invisible h-auto p-1.5 group-hover:visible', {
+                              'visible text-violet-500': hasVoted
+                            })}
                             onClick={() => handlePostVoting(post.id, hasVoted)}
                           >
                             <VoteIcon className="shrink-0" />
@@ -257,7 +237,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
                         {canDetroyPost && (
                           <Button
                             variant="ghost"
-                            className="p-1.5 h-auto "
+                            className="h-auto p-1.5"
                             onClick={() => handleDestroyPost(post.id)}
                           >
                             <RemoveIcon className="shrink-0" />
@@ -287,7 +267,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
         </form>
       </Card>
       {isWriting && (
-        <div className="mt-2 flex gap-1 mb-2">
+        <div className="mb-2 mt-2 flex gap-1">
           <WritingIcon className="text-gray-500" />
           <span className="text-xs text-gray-500">Someone is writing...</span>
         </div>

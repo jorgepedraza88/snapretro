@@ -1,35 +1,31 @@
-"use client";
-import { useState } from "react";
+'use client';
 
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { useUserSession } from "@/components/UserSessionContext";
+import { useState } from 'react';
+
+import { type RetrospectiveData } from '@/types/Retro';
 import {
-  AlertDialogHeader,
   AlertDialog,
-  AlertDialogContent,
-  AlertDialogTitle,
-  AlertDialogDescription,
   AlertDialogAction,
-} from "@/components/ui/alert-dialog";
-import { type RetrospectiveData } from "@/types/Retro";
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useUserSession } from '@/components/UserSessionWrapper';
 
 interface RetroProtectedWrapperProps {
   data: RetrospectiveData;
   children: React.ReactNode;
 }
 
-export function RetroProtectedWrapper({
-  data,
-  children,
-}: RetroProtectedWrapperProps) {
+export function RetroProtectedWrapper({ data, children }: RetroProtectedWrapperProps) {
   const { userSession } = useUserSession();
   const { adminId, enablePassword, password } = data;
 
-  const [inputPassword, setInputPassword] = useState("");
-  const [accessGranted, setAccessGranted] = useState(
-    adminId === userSession?.id,
-  );
+  const [inputPassword, setInputPassword] = useState('');
+  const [accessGranted, setAccessGranted] = useState(adminId === userSession?.id);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

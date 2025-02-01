@@ -1,26 +1,23 @@
-"use client";
+'use client';
 
-import { editRetroPassword, editRetroSectionsNumber } from "@/app/actions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Switch } from "@/components/ui/switch";
-import { cn } from "@/lib/utils";
-import { RetrospectiveData } from "@/types/Retro";
-import { PopoverClose } from "@radix-ui/react-popover";
-import { Controller, FormProvider, useForm } from "react-hook-form";
-import { HiCog8Tooth as AdminSettingsIcon } from "react-icons/hi2";
-import { useRetroContext } from "./RetroContextProvider";
-import { useState } from "react";
-import { useRealtimeActions } from "@/hooks/useRealtimeActions";
-import { useShallow } from "zustand/shallow";
-import { useAdminStore } from "@/stores/useAdminStore";
-import { usePresenceStore } from "@/stores/usePresenceStore";
+import { useState } from 'react';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { HiCog8Tooth as AdminSettingsIcon } from 'react-icons/hi2';
+import { PopoverClose } from '@radix-ui/react-popover';
+import { useShallow } from 'zustand/shallow';
+
+import { RetrospectiveData } from '@/types/Retro';
+import { useRealtimeActions } from '@/hooks/useRealtimeActions';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Switch } from '@/components/ui/switch';
+import { editRetroPassword, editRetroSectionsNumber } from '@/app/actions';
+import { cn } from '@/lib/utils';
+import { useAdminStore } from '@/stores/useAdminStore';
+import { usePresenceStore } from '@/stores/usePresenceStore';
+import { useRetroContext } from './RetroContextProvider';
 
 interface AdminMenuData {
   columns: number;
@@ -30,24 +27,19 @@ interface AdminMenuData {
   allowVotes: boolean;
 }
 
-export function AdminMenu({
-  retrospectiveData,
-}: {
-  retrospectiveData: RetrospectiveData;
-}) {
+export function AdminMenu({ retrospectiveData }: { retrospectiveData: RetrospectiveData }) {
   const { hasRetroEnded } = useRetroContext();
   const currentUser = usePresenceStore((state) => state.currentUser);
   const { allowMessages, allowVotes, setAdminSettings } = useAdminStore(
     useShallow((state) => ({
       allowMessages: state.settings.allowMessages,
       allowVotes: state.settings.allowVotes,
-      setAdminSettings: state.setSettings,
-    })),
+      setAdminSettings: state.setSettings
+    }))
   );
-  const { revalidatePageBroadcast, editAdminSettingsBroadcast } =
-    useRealtimeActions();
+  const { revalidatePageBroadcast, editAdminSettingsBroadcast } = useRealtimeActions();
 
-  const currentPassword = retrospectiveData.password || "";
+  const currentPassword = retrospectiveData.password || '';
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,10 +47,10 @@ export function AdminMenu({
   const form = useForm<AdminMenuData>({
     defaultValues: {
       columns: retrospectiveData.sections.length,
-      password: currentPassword || "",
+      password: currentPassword || '',
       allowMessages: allowMessages,
-      allowVotes: allowVotes,
-    },
+      allowVotes: allowVotes
+    }
   });
 
   const onSubmit = async (data: AdminMenuData) => {
@@ -75,11 +67,7 @@ export function AdminMenu({
 
     setAdminSettings({ ...restData });
 
-    editAdminSettingsBroadcast(
-      retrospectiveData.id,
-      data.allowMessages,
-      data.allowVotes,
-    );
+    editAdminSettingsBroadcast(retrospectiveData.id, data.allowMessages, data.allowVotes);
 
     revalidatePageBroadcast(retrospectiveData.id);
 
@@ -94,17 +82,12 @@ export function AdminMenu({
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          className="absolute top-20 -right-8"
-          size="icon"
-        >
+        <Button type="button" variant="outline" className="absolute -right-8 top-20" size="icon">
           <AdminSettingsIcon size={16} />
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent align="start" className="text-sm bg-neutral-50 w-fit ">
+      <PopoverContent align="start" className="w-fit bg-neutral-50 text-sm">
         <FormProvider {...form}>
           <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
             <Label>Number of columns:</Label>
@@ -117,8 +100,8 @@ export function AdminMenu({
                     type="button"
                     variant="outline"
                     size="icon"
-                    className={cn("border rounded-r-none", {
-                      "bg-violet-500 text-white": field.value === 2,
+                    className={cn('rounded-r-none border', {
+                      'bg-violet-500 text-white': field.value === 2
                     })}
                     onClick={() => field.onChange(2)}
                   >
@@ -128,8 +111,8 @@ export function AdminMenu({
                     type="button"
                     variant="outline"
                     size="icon"
-                    className={cn("border rounded-none", {
-                      "bg-violet-500 text-white": field.value === 3,
+                    className={cn('rounded-none border', {
+                      'bg-violet-500 text-white': field.value === 3
                     })}
                     onClick={() => field.onChange(3)}
                   >
@@ -139,8 +122,8 @@ export function AdminMenu({
                     type="button"
                     variant="outline"
                     size="icon"
-                    className={cn("border rounded-l-none", {
-                      "bg-violet-500 text-white": field.value === 4,
+                    className={cn('rounded-l-none border', {
+                      'bg-violet-500 text-white': field.value === 4
                     })}
                     onClick={() => field.onChange(4)}
                   >
@@ -152,32 +135,26 @@ export function AdminMenu({
 
             <div>
               <Label>Secret word:</Label>
-              <Input {...form.register("password")} />
+              <Input {...form.register('password')} />
             </div>
             <div>
               <Label>During meeting:</Label>
-              <div className="flex items-center gap-2 mt-2">
+              <div className="mt-2 flex items-center gap-2">
                 <Controller
                   name="allowMessages"
                   control={form.control}
                   render={({ field }) => (
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
                   )}
                 />
                 <Label>Allow messages</Label>
               </div>
-              <div className="flex items-center gap-2 mt-2">
+              <div className="mt-2 flex items-center gap-2">
                 <Controller
                   name="allowVotes"
                   control={form.control}
                   render={({ field }) => (
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
                   )}
                 />
                 <Label>Allow votes</Label>

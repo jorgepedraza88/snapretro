@@ -1,9 +1,10 @@
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import Link from 'next/link';
+
+import { Button } from '@/components/ui/button';
 
 export default async function Page() {
   return (
-    <div className="max-w-5xl mx-auto flex flex-col justify-center items-center w-full p-16 h-screen">
+    <div className="mx-auto flex h-screen w-full max-w-5xl flex-col items-center justify-center p-16">
       <p className="mb-2">😓 Ups! This retrospective session does not exist.</p>
       <Button asChild>
         <Link href="/">Back</Link>

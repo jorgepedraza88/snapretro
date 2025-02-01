@@ -1,23 +1,14 @@
-"use client";
+'use client';
 
-import {
-  HiUserGroup as UsersIcon,
-  HiTrash as RemoveIcon,
-} from "react-icons/hi2";
-import { FaCrown as CrownIcon } from "react-icons/fa";
+import { FaCrown as CrownIcon } from 'react-icons/fa';
+import { HiTrash as RemoveIcon, HiUserGroup as UsersIcon } from 'react-icons/hi2';
+import { useShallow } from 'zustand/shallow';
 
-import { useShallow } from "zustand/shallow";
-
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useRetroContext } from "./RetroContextProvider";
-import { useRealtimeActions } from "@/hooks/useRealtimeActions";
-import { usePresenceStore } from "@/stores/usePresenceStore";
+import { useRealtimeActions } from '@/hooks/useRealtimeActions';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { usePresenceStore } from '@/stores/usePresenceStore';
+import { useRetroContext } from './RetroContextProvider';
 
 export function OnlineUsers() {
   const { retrospectiveId } = useRetroContext();
@@ -25,8 +16,8 @@ export function OnlineUsers() {
   const { currentUser, onlineUsers } = usePresenceStore(
     useShallow((state) => ({
       currentUser: state.currentUser,
-      onlineUsers: state.onlineUsers,
-    })),
+      onlineUsers: state.onlineUsers
+    }))
   );
 
   const handleRemoveUser = async (userId: string) => {
@@ -44,21 +35,19 @@ export function OnlineUsers() {
   }
 
   return (
-    <div className="space-y-1 p-8 max-w-60">
+    <div className="max-w-60 space-y-1 p-8">
       <TooltipProvider>
-        <div className="bg-neutral-200 rounded-lg flex gap-1 items-center text-sm w-fit px-2 py-1">
+        <div className="flex w-fit items-center gap-1 rounded-lg bg-neutral-200 px-2 py-1 text-sm">
           <div className="size-2 rounded-full bg-green-500" />
           <UsersIcon size={16} /> {onlineUsers.length}
         </div>
         {onlineUsers.map((user, index) => (
           <div
             key={`user.id_${index}`}
-            className="bg-neutral-100 rounded-lg p-2 text-sm truncate flex items-center justify-between group"
+            className="group flex items-center justify-between truncate rounded-lg bg-neutral-100 p-2 text-sm"
           >
             <div className="flex gap-1">
-              {user.isAdmin && (
-                <CrownIcon size={16} className="mt-px text-yellow-500" />
-              )}
+              {user.isAdmin && <CrownIcon size={16} className="mt-px text-yellow-500" />}
               <p>{user.name}</p>
             </div>
 
@@ -69,13 +58,13 @@ export function OnlineUsers() {
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="invisible size-0 px-4 py-3 group-hover:visible text-yellow-500 hover:text-yellow-600"
+                      className="invisible size-0 px-4 py-3 text-yellow-500 hover:text-yellow-600 group-hover:visible"
                       onClick={() => handleChangeAdmin(user.id)}
                     >
                       <CrownIcon size={16} />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent className="bg-violet-100 text-violet-900 hover:bg-violet-100/80 dark:bg-violet-800 dark:text-violet-50 dark:hover:bg-violet-800/80 border-0 text-xs">
+                  <TooltipContent className="border-0 bg-violet-100 text-xs text-violet-900 hover:bg-violet-100/80 dark:bg-violet-800 dark:text-violet-50 dark:hover:bg-violet-800/80">
                     Assign as host
                   </TooltipContent>
                 </Tooltip>
@@ -90,7 +79,7 @@ export function OnlineUsers() {
                       <RemoveIcon size={16} />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent className="bg-violet-100 text-violet-900 hover:bg-violet-100/80 dark:bg-violet-800 dark:text-violet-50 dark:hover:bg-violet-800/80 border-0 text-xs">
+                  <TooltipContent className="border-0 bg-violet-100 text-xs text-violet-900 hover:bg-violet-100/80 dark:bg-violet-800 dark:text-violet-50 dark:hover:bg-violet-800/80">
                     Remove user
                   </TooltipContent>
                 </Tooltip>

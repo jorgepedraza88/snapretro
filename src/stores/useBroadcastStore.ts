@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
 type BroadcastMessage = {
   id: string;
@@ -23,6 +23,6 @@ export const useBroadcastStore = create<BroadcastState>((set) => ({
 
   receiveMessage: (message) =>
     set((state) => ({
-      messages: [...state.messages, message].slice(-100), // Keep last 100 messages
-    })),
+      messages: [...state.messages, message].slice(-100) // Keep last 100 messages
+    }))
 }));

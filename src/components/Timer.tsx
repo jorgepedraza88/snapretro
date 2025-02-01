@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { HiClock as TimerIcon } from "react-icons/hi2";
-import { useEffect } from "react";
+import { useEffect } from 'react';
 import {
-  HiMiniPlay as PlayIcon,
-  HiMiniPause as PauseIcon,
   HiArrowPathRoundedSquare as ArrowIcon,
-} from "react-icons/hi2";
+  HiMiniPause as PauseIcon,
+  HiMiniPlay as PlayIcon,
+  HiClock as TimerIcon
+} from 'react-icons/hi2';
 
-import { Button } from "./ui/button";
-import { useRealtimeActions } from "@/hooks/useRealtimeActions";
-import { useAdminStore } from "@/stores/useAdminStore";
-import { useRetroContext } from "@/app/retro/[id]/components/RetroContextProvider";
-import { usePresenceStore } from "@/stores/usePresenceStore";
+import { useRealtimeActions } from '@/hooks/useRealtimeActions';
+import { useRetroContext } from '@/app/retro/[id]/components/RetroContextProvider';
+import { useAdminStore } from '@/stores/useAdminStore';
+import { usePresenceStore } from '@/stores/usePresenceStore';
+import { Button } from './ui/button';
 
 export function Timer() {
   const { retrospectiveId, defaultSeconds } = useRetroContext();
@@ -23,11 +23,11 @@ export function Timer() {
 
   useEffect(() => {
     if (timeLeft <= 0) {
-      setTimerState("finished");
+      setTimerState('finished');
       return;
     }
 
-    if (timerState === "on") {
+    if (timerState === 'on') {
       const timer = setInterval(() => {
         setTimeLeft(timeLeft - 1);
       }, 1000);
@@ -40,45 +40,45 @@ export function Timer() {
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
   const startTimer = async () => {
-    setTimerState("on");
+    setTimerState('on');
 
-    handleTimerBroadcast(retrospectiveId, "on");
+    handleTimerBroadcast(retrospectiveId, 'on');
   };
 
   const pauseTimer = async () => {
-    setTimerState("off");
+    setTimerState('off');
 
-    handleTimerBroadcast(retrospectiveId, "off");
+    handleTimerBroadcast(retrospectiveId, 'off');
   };
 
   const handleResetTimer = async () => {
-    setTimerState("off");
+    setTimerState('off');
     setTimeLeft(defaultSeconds);
 
-    handleTimerBroadcast(retrospectiveId, "reset");
+    handleTimerBroadcast(retrospectiveId, 'reset');
   };
 
   return (
-    <div className="flex gap-2 items-center mb-2">
-      {currentUser.isAdmin && timerState !== "finished" && (
+    <div className="mb-2 flex items-center gap-2">
+      {currentUser.isAdmin && timerState !== 'finished' && (
         <div>
-          {timerState !== "on" && (
+          {timerState !== 'on' && (
             <Button size="sm" variant="outline" onClick={startTimer}>
               <PlayIcon size={16} />
             </Button>
           )}
-          {timerState === "on" && (
+          {timerState === 'on' && (
             <Button size="sm" variant="outline" onClick={pauseTimer}>
               <PauseIcon size={16} />
             </Button>
           )}
         </div>
       )}
-      <div className="bg-violet-600 rounded-lg px-2 py-1.5 flex items-center gap-2 text-neutral-100">
+      <div className="flex items-center gap-2 rounded-lg bg-violet-600 px-2 py-1.5 text-neutral-100">
         <TimerIcon size={16} /> {formatTime(timeLeft)}
       </div>
       {currentUser.isAdmin && (

@@ -1,10 +1,12 @@
-import { create } from "zustand";
-import { supabase } from "@/supabaseClient";
-import { useAdminStore } from "./useAdminStore";
+import { create } from 'zustand';
+
+import { supabase } from '@/supabaseClient';
+import { useAdminStore } from './useAdminStore';
 
 export type UserPresence = {
   id: string;
   name: string;
+  avatarUrl?: string;
   isAdmin: boolean;
 };
 
@@ -14,16 +16,12 @@ type PresenceState = {
   setCurrentUser: (user: UserPresence) => void;
   getCurrentUser: () => UserPresence;
   updateOnlineUsers: (users: UserPresence[]) => void;
-  handleAdminChange: (
-    newAdminId: string,
-    oldAdminId: string,
-    retroId: string,
-  ) => Promise<void>;
+  handleAdminChange: (newAdminId: string, oldAdminId: string, retroId: string) => Promise<void>;
 };
 
 export const usePresenceStore = create<PresenceState>((set, get) => ({
   onlineUsers: [],
-  currentUser: { id: "guest", name: "Guest", isAdmin: false },
+  currentUser: { id: 'guest', name: 'Guest', isAdmin: false },
 
   getCurrentUser: () => get().currentUser,
 
@@ -45,8 +43,8 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
           ? { ...user, isAdmin: false }
           : user.id === newAdminId
             ? { ...user, isAdmin: true }
-            : user,
-      ),
+            : user
+      )
     });
 
     // Sync with server
@@ -65,8 +63,8 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
       setSettings({
         useSummaryAI: true,
         allowMessages: true,
-        allowVotes: true,
+        allowVotes: true
       });
     }
-  },
+  }
 }));

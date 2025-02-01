@@ -1,41 +1,41 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { HiArrowRight as ArrowRightIcon } from "react-icons/hi2";
-import { ImSpinner as SpinnerIcon } from "react-icons/im";
-import { FormProvider, useForm } from "react-hook-form";
-import { nanoid } from "nanoid";
+import { useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { HiArrowRight as ArrowRightIcon } from 'react-icons/hi2';
+import { ImSpinner as SpinnerIcon } from 'react-icons/im';
+import { nanoid } from 'nanoid';
+import { useRouter } from 'next/navigation';
 
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { CreateRetroFirst } from "./CreateRetroFirst";
-import { CreateRetroSecond } from "./CreateRetroSecond";
-import { createRetro, CreateRetrospectiveData } from "@/app/actions";
-import { useUserSession } from "@/components/UserSessionContext";
-import { useRouter } from "next/navigation";
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { createRetro, CreateRetrospectiveData } from '@/app/actions';
+import { usePresenceStore } from '@/stores/usePresenceStore';
+import { CreateRetroFirst } from './CreateRetroFirst';
+import { CreateRetroSecond } from './CreateRetroSecond';
 
 const defaultFormValues: CreateRetrospectiveData = {
   adminId: nanoid(5),
-  avatarUrl: "",
-  adminName: "",
+  avatarUrl: '',
+  adminName: '',
   timer: 300,
   allowVotes: false,
   enableChat: true,
   enablePassword: false,
   password: null,
-  sectionsNumber: 3,
+  sectionsNumber: 3
 };
 
 export function CreateRetroForm() {
   const router = useRouter();
-  const { setUserSession } = useUserSession();
+  const setCurrentUser = usePresenceStore((state) => state.setCurrentUser);
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const progressPercentage = (step / 3) * 100;
 
   const form = useForm<CreateRetrospectiveData>({
-    defaultValues: defaultFormValues,
+    defaultValues: defaultFormValues
   });
 
   const onSubmit = async (data: CreateRetrospectiveData) => {
@@ -53,10 +53,11 @@ export function CreateRetroForm() {
   const handleChangeStep = () => {
     const retroData = form.getValues();
     if (step === 1) {
-      setUserSession({
+      setCurrentUser({
         id: retroData.adminId,
         name: retroData.adminName,
         avatarUrl: retroData.avatarUrl,
+        isAdmin: true
       });
 
       setStep(2);
@@ -66,9 +67,9 @@ export function CreateRetroForm() {
 
     // Validate manually if the password is empty
     if (retroData.enablePassword && !retroData.password) {
-      form.setError("password", {
-        type: "required",
-        message: "Secret word is required",
+      form.setError('password', {
+        type: 'required',
+        message: 'Secret word is required'
       });
       return;
     }
@@ -81,7 +82,7 @@ export function CreateRetroForm() {
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         onKeyDown={(e) => {
-          if (e.key === "Enter") {
+          if (e.key === 'Enter') {
             if (step !== 2) {
               e.preventDefault();
               handleChangeStep();
@@ -110,11 +111,7 @@ export function CreateRetroForm() {
             </Button>
           )}
           {step !== 2 && (
-            <Button
-              variant="secondary"
-              type="button"
-              onClick={handleChangeStep}
-            >
+            <Button variant="secondary" type="button" onClick={handleChangeStep}>
               Next
             </Button>
           )}

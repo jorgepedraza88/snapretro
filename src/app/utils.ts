@@ -1,5 +1,6 @@
-import { RetrospectiveData } from "@/types/Retro";
-import crypto from "crypto";
+import crypto from 'crypto';
+
+import { RetrospectiveData } from '@/types/Retro';
 
 export function generateDefaultSections(numberOfSections: number) {
   function generateDefaultSection(title: string, index: number) {
@@ -7,13 +8,13 @@ export function generateDefaultSections(numberOfSections: number) {
       title,
       sortOrder: index, // Set the order explicitly
       posts: {
-        create: [],
-      },
+        create: []
+      }
     };
   }
 
   const defaultSections = Array.from({ length: numberOfSections }, (_, index) =>
-    generateDefaultSection(`Untitled Section`, index),
+    generateDefaultSection(`Untitled Section`, index)
   );
 
   return defaultSections;
@@ -21,53 +22,50 @@ export function generateDefaultSections(numberOfSections: number) {
 
 export const encryptMessage = (message: string) => {
   const key = process.env.NEXT_PUBLIC_ENCRYPTION_KEY
-    ? Buffer.from(process.env.NEXT_PUBLIC_ENCRYPTION_KEY, "base64")
+    ? Buffer.from(process.env.NEXT_PUBLIC_ENCRYPTION_KEY, 'base64')
     : null;
   const iv = process.env.NEXT_PUBLIC_ENCRYPTION_IV
-    ? Buffer.from(process.env.NEXT_PUBLIC_ENCRYPTION_IV, "base64")
+    ? Buffer.from(process.env.NEXT_PUBLIC_ENCRYPTION_IV, 'base64')
     : null;
 
   if (!key || !iv) {
-    throw new Error("Encryption fails");
+    throw new Error('Encryption fails');
   }
 
-  const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
-  let encrypted = cipher.update(message, "utf8", "hex");
-  encrypted += cipher.final("hex");
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+  let encrypted = cipher.update(message, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
 
   return encrypted;
 };
 
 export const decryptMessage = (encryptedMessage: string) => {
   const key = process.env.NEXT_PUBLIC_ENCRYPTION_KEY
-    ? Buffer.from(process.env.NEXT_PUBLIC_ENCRYPTION_KEY, "base64")
+    ? Buffer.from(process.env.NEXT_PUBLIC_ENCRYPTION_KEY, 'base64')
     : null;
   const iv = process.env.NEXT_PUBLIC_ENCRYPTION_IV
-    ? Buffer.from(process.env.NEXT_PUBLIC_ENCRYPTION_IV, "base64")
+    ? Buffer.from(process.env.NEXT_PUBLIC_ENCRYPTION_IV, 'base64')
     : null;
 
   if (!key || !iv) {
-    throw new Error("Encryption fails");
+    throw new Error('Encryption fails');
   }
 
-  const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
-  let decrypted = decipher.update(encryptedMessage, "hex", "utf8");
-  decrypted += decipher.final("utf8");
+  const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+  let decrypted = decipher.update(encryptedMessage, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
 
   return decrypted;
 };
 
-export function generateMarkdownFromJSON(
-  json: RetrospectiveData,
-  participants: string[],
-): string {
+export function generateMarkdownFromJSON(json: RetrospectiveData, participants: string[]): string {
   let markdownTemplate = `# Retrospective\n\n`;
 
   // Add header details
   markdownTemplate += `**Retrospective Meeting:**\n\n`;
-  markdownTemplate += `* **Host**: ${json.adminName || "Not specified"}\n`;
+  markdownTemplate += `* **Host**: ${json.adminName || 'Not specified'}\n`;
   markdownTemplate += `* **Date**: ${new Date(json.date).toLocaleString()}\n`;
-  markdownTemplate += `* **Participants**: ${participants?.join(", ") || "Not specified"}\n\n`;
+  markdownTemplate += `* **Participants**: ${participants?.join(', ') || 'Not specified'}\n\n`;
 
   json.sections.forEach((section) => {
     markdownTemplate += `- **${section.title}:**\n`;
