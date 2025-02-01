@@ -7,19 +7,27 @@ import {
   HiMiniPlay as PlayIcon,
   HiClock as TimerIcon
 } from 'react-icons/hi2';
+import { useParams } from 'next/navigation';
+import { useShallow } from 'zustand/shallow';
 
 import { useRealtimeActions } from '@/hooks/useRealtimeActions';
-import { useRetroContext } from '@/app/retro/[id]/components/RetroContextProvider';
 import { useAdminStore } from '@/stores/useAdminStore';
 import { usePresenceStore } from '@/stores/usePresenceStore';
 import { Button } from './ui/button';
 
-export function Timer() {
-  const { retrospectiveId, defaultSeconds } = useRetroContext();
-  const currentUser = usePresenceStore((state) => state.currentUser);
-
+export function Timer({ defaultSeconds }: { defaultSeconds: number }) {
+  const { id: retrospectiveId } = useParams<{ id: string }>();
+  const { currentUser, adminId } = usePresenceStore(
+    useShallow((state) => ({
+      adminId: state.adminId,
+      currentUser: state.currentUser
+    }))
+  );
   const { timerState, timeLeft, setTimerState, setTimeLeft } = useAdminStore();
+
   const { handleTimerBroadcast } = useRealtimeActions();
+
+  const isCurrentUserAdmin = adminId === currentUser.id;
 
   useEffect(() => {
     if (timeLeft <= 0) {
@@ -64,7 +72,7 @@ export function Timer() {
 
   return (
     <div className="mb-2 flex items-center gap-2">
-      {currentUser.isAdmin && timerState !== 'finished' && (
+      {isCurrentUserAdmin && timerState !== 'finished' && (
         <div>
           {timerState !== 'on' && (
             <Button size="sm" variant="outline" onClick={startTimer}>
@@ -81,7 +89,7 @@ export function Timer() {
       <div className="flex items-center gap-2 rounded-lg bg-violet-600 px-2 py-1.5 text-neutral-100">
         <TimerIcon size={16} /> {formatTime(timeLeft)}
       </div>
-      {currentUser.isAdmin && (
+      {isCurrentUserAdmin && (
         <Button size="sm" variant="outline" onClick={handleResetTimer}>
           <ArrowIcon size={16} />
           Reset

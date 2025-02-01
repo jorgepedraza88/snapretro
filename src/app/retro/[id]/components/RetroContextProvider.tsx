@@ -7,7 +7,6 @@ import { useShallow } from 'zustand/shallow';
 import { RetrospectiveData } from '@/types/Retro';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 import { useToast } from '@/hooks/useToast';
-import { useUserSession } from '@/components/UserSessionWrapper';
 import { endRetrospective, generateAIContent } from '@/app/actions';
 import { generateMarkdownFromJSON } from '@/app/utils';
 import { useAdminStore } from '@/stores/useAdminStore';
@@ -20,7 +19,6 @@ interface RetroContextProviderProps {
 }
 
 interface RetroContextValue {
-  retrospectiveId: string;
   defaultSeconds: number;
   hasRetroEnded: boolean;
   handleEndRetro: () => void;
@@ -29,17 +27,10 @@ interface RetroContextValue {
 export const RetroContext = React.createContext<RetroContextValue | null>(null);
 
 export function RetroContextProvider({ data, children }: RetroContextProviderProps) {
-  const { userSession } = useUserSession();
   const { toast } = useToast();
 
   const adminSettings = useAdminStore((state) => state.settings);
-  const { onlineUsers, currentUser, setCurrentUser } = usePresenceStore(
-    useShallow((state) => ({
-      onlineUsers: state.onlineUsers,
-      currentUser: state.getCurrentUser(),
-      setCurrentUser: state.setCurrentUser
-    }))
-  );
+  const onlineUsers = usePresenceStore((state) => state.onlineUsers);
   const { isLoadingFinalContent, startTypingEffect, setLoading } = useRetroSummaryStore(
     useShallow((state) => ({
       isLoadingFinalContent: state.isLoadingFinalContent,
@@ -48,20 +39,8 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
     }))
   );
 
-  // Initialize current user
-  useEffect(() => {
-    if (userSession) {
-      setCurrentUser({
-        id: userSession.id,
-        name: userSession.name,
-        isAdmin: data.adminId === userSession.id
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userSession, data.adminId]);
-
   // Initialize realtime
-  useRealtimeSubscription(data.id, userSession?.id);
+  useRealtimeSubscription(data.id);
 
   const generateFinalContent = useCallback(
     async (endResponse: RetrospectiveData) => {
@@ -111,7 +90,6 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
 
   const contextValue = useMemo(
     () => ({
-      retrospectiveId: data.id,
       defaultSeconds: data.timer,
       hasRetroEnded: data.status === 'ended',
       handleEndRetro
@@ -126,11 +104,6 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
         <SpinnerIcon size={50} className="animate-spin text-violet-700" />
       </div>
     );
-  }
-
-  // If the user has not been initialized properly (e.g. guest user) then do not render the page
-  if (currentUser.id === 'guest') {
-    return null;
   }
 
   return <RetroContext.Provider value={contextValue}>{children}</RetroContext.Provider>;

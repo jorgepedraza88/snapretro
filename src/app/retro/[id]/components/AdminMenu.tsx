@@ -29,7 +29,12 @@ interface AdminMenuData {
 
 export function AdminMenu({ retrospectiveData }: { retrospectiveData: RetrospectiveData }) {
   const { hasRetroEnded } = useRetroContext();
-  const currentUser = usePresenceStore((state) => state.currentUser);
+  const { currentUser, adminId } = usePresenceStore(
+    useShallow((state) => ({
+      adminId: state.adminId,
+      currentUser: state.currentUser
+    }))
+  );
   const { allowMessages, allowVotes, setAdminSettings } = useAdminStore(
     useShallow((state) => ({
       allowMessages: state.settings.allowMessages,
@@ -40,6 +45,7 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
   const { revalidatePageBroadcast, editAdminSettingsBroadcast } = useRealtimeActions();
 
   const currentPassword = retrospectiveData.password || '';
+  const isCurrentUserAdmin = adminId === currentUser.id;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,7 +81,7 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
     setIsSubmitting(false);
   };
 
-  if (!currentUser.isAdmin || hasRetroEnded) {
+  if (!isCurrentUserAdmin || hasRetroEnded) {
     return null;
   }
 

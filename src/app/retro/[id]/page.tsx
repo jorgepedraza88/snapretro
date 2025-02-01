@@ -29,7 +29,3 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     </UserSessionWrapper>
   );
 }
-
-// "@ianvs/prettier-plugin-sort-imports": "4.3.1",
-// "prettier": "3.3.3",
-// "prettier-plugin-tailwindcss": "0.6.8"

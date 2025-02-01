@@ -2,23 +2,27 @@
 
 import { FaCrown as CrownIcon } from 'react-icons/fa';
 import { HiTrash as RemoveIcon, HiUserGroup as UsersIcon } from 'react-icons/hi2';
+import { useParams } from 'next/navigation';
 import { useShallow } from 'zustand/shallow';
 
 import { useRealtimeActions } from '@/hooks/useRealtimeActions';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { usePresenceStore } from '@/stores/usePresenceStore';
-import { useRetroContext } from './RetroContextProvider';
 
 export function OnlineUsers() {
-  const { retrospectiveId } = useRetroContext();
+  const { id: retrospectiveId } = useParams<{ id: string }>();
   const { removeUserBroadcast, changeAdminBroadcast } = useRealtimeActions();
-  const { currentUser, onlineUsers } = usePresenceStore(
+  const { currentUser, onlineUsers, adminId } = usePresenceStore(
     useShallow((state) => ({
+      adminId: state.adminId,
       currentUser: state.currentUser,
       onlineUsers: state.onlineUsers
     }))
   );
+
+  const adminUserId = onlineUsers.find((user) => user.id === adminId)?.id;
+  const isCurrentUserAdmin = adminId === currentUser.id;
 
   const handleRemoveUser = async (userId: string) => {
     removeUserBroadcast(retrospectiveId, userId);
@@ -26,7 +30,7 @@ export function OnlineUsers() {
 
   const handleChangeAdmin = async (userId: string) => {
     if (userId !== currentUser.id) {
-      changeAdminBroadcast(retrospectiveId, userId, currentUser.id);
+      changeAdminBroadcast(retrospectiveId, userId);
     }
   };
 
@@ -47,11 +51,11 @@ export function OnlineUsers() {
             className="group flex items-center justify-between truncate rounded-lg bg-neutral-100 p-2 text-sm"
           >
             <div className="flex gap-1">
-              {user.isAdmin && <CrownIcon size={16} className="mt-px text-yellow-500" />}
+              {user.id === adminUserId && <CrownIcon size={16} className="mt-px text-yellow-500" />}
               <p>{user.name}</p>
             </div>
 
-            {currentUser.isAdmin && (
+            {isCurrentUserAdmin && (
               <div className="flex gap-1">
                 <Tooltip>
                   <TooltipTrigger asChild>

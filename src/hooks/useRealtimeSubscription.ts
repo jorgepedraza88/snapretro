@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import { useShallow } from 'zustand/shallow';
 
 import { editRetroAdminId, revalidate } from '@/app/actions';
@@ -10,66 +11,115 @@ import { useRetroSummaryStore } from '@/stores/useRetroSummaryStore';
 import { supabase } from '@/supabaseClient';
 import { useToast } from './useToast';
 
-export const useRealtimeSubscription = (retroId: string, userId?: string) => {
-  const { currentUser, updateOnlineUsers, handleAdminChange } = usePresenceStore(
-    useShallow((state) => ({
-      currentUser: state.currentUser,
-      updateOnlineUsers: state.updateOnlineUsers,
-      handleAdminChange: state.handleAdminChange
-    }))
-  );
-
-  const { setDisplayedContent } = useRetroSummaryStore();
-
+export const useRealtimeSubscription = (retrospectiveId: string) => {
   const { toast } = useToast();
+  const { setDisplayedContent } = useRetroSummaryStore();
+  const { currentUser, setCurrentUser, updateOnlineUsers, handleAdminChange, setChannel, adminId } =
+    usePresenceStore(
+      useShallow((state) => ({
+        currentUser: state.currentUser,
+        adminId: state.adminId,
+        setCurrentUser: state.setCurrentUser,
+        updateOnlineUsers: state.updateOnlineUsers,
+        handleAdminChange: state.handleAdminChange,
+        setChannel: state.setChannel
+      }))
+    );
+
+  function getPresenceActiveUsers(channel: RealtimeChannel) {
+    const presenceState = channel.presenceState<UserPresence>();
+    return Object.values(presenceState).flat();
+  }
+
+  function displayNewAdminToast(channel: RealtimeChannel, newAdminId: string) {
+    const activeUsers = getPresenceActiveUsers(channel);
+    const newAdmin = activeUsers.find((user) => user.id === newAdminId);
+
+    const isCurrentUserAdmin = newAdmin?.id === currentUser.id;
+    const toastMessage = isCurrentUserAdmin
+      ? 'You are now the host'
+      : `${newAdmin?.name} is now the host`;
+
+    toast({ title: toastMessage });
+  }
 
   useEffect(() => {
-    if (!userId) return;
-
-    const channel = supabase.channel(`retrospective:${retroId}`, {
-      config: { presence: { key: userId } }
+    const channel = supabase.channel(`retrospective:${retrospectiveId}`, {
+      config: { presence: { key: currentUser.id } }
     });
 
     channel
       .on('presence', { event: 'sync' }, () => {
-        const presenceState = channel.presenceState<UserPresence>();
-        const activeUsers = Object.values(presenceState).flat();
+        const activeUsers = getPresenceActiveUsers(channel);
         updateOnlineUsers(activeUsers);
 
-        // Handle admin change logic
-        const currentAdmin = activeUsers.find((user) => user.isAdmin);
+        const currentAdmin = activeUsers.find((user) => user.id === adminId);
+
+        // If there are users in the retrospective and there is no admin, assign the first user as admin
         if (!currentAdmin && activeUsers.length > 0) {
-          handleAdminChange(activeUsers[0].id, '', retroId);
+          handleAdminChange(activeUsers[0].id);
         }
       })
-      .on('presence', { event: 'join' }, ({ newPresences }) => {
+      .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+        const isCurrentUser = key === currentUser.id;
+
+        if (isCurrentUser) {
+          return;
+        }
+
         toast({ title: `${newPresences[0]?.name} joined` });
       })
-      .on('presence', { event: 'leave' }, ({ leftPresences }) => {
+      .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+        const isCurrentUser = key === currentUser.id;
+
+        if (isCurrentUser) {
+          return;
+        }
+
         toast({ title: `${leftPresences[0]?.name} left` });
       })
       .on('broadcast', { event: REALTIME_EVENT_KEYS.ASSIGN_NEW_ADMIN }, async ({ payload }) => {
-        await handleAdminChange(payload.newAdminId, payload.oldAdminId, retroId);
+        const { newAdminId } = payload;
+        await handleAdminChange(newAdminId);
         await editRetroAdminId({
-          retrospectiveId: retroId,
-          newAdminId: payload.newAdminId
+          retrospectiveId,
+          newAdminId
         });
+
+        displayNewAdminToast(channel, newAdminId);
       })
       .on('broadcast', { event: REALTIME_EVENT_KEYS.REVALIDATE }, revalidate)
       .on('broadcast', { event: REALTIME_EVENT_KEYS.END_RETRO }, ({ payload }) => {
         setDisplayedContent(payload.finalSummary);
         revalidate();
+      })
+      .on('broadcast', { event: REALTIME_EVENT_KEYS.DISCONNECT_USER }, async ({ payload }) => {
+        const { userId } = payload;
+        const activeUsers = getPresenceActiveUsers(channel);
+        const user = activeUsers.find((user) => user.id === userId);
+
+        if (userId === currentUser.id) {
+          setCurrentUser({ ...currentUser, hasBeenDisconnected: true });
+          channel.untrack(user);
+          return;
+        }
+
+        const filteredUsers = activeUsers.filter((user) => user.id !== userId);
+        updateOnlineUsers(filteredUsers);
+        toast({ title: `${user?.name} has been kicked from the session`, variant: 'destructive' });
       });
 
     channel.subscribe(async (status) => {
-      if (status === 'SUBSCRIBED' && currentUser) {
+      if (status === 'SUBSCRIBED') {
         // Track current user presence to the channel
         await channel.track(currentUser);
+        setChannel(channel);
       }
     });
 
     return () => {
       supabase.removeChannel(channel).catch((err) => console.error('Cleanup error:', err));
+      setChannel(null);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

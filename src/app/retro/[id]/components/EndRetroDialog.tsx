@@ -23,7 +23,12 @@ import { useRetroContext } from './RetroContextProvider';
 
 export function EndRetroDialog() {
   const { handleEndRetro } = useRetroContext();
-  const currentUser = usePresenceStore((state) => state.currentUser);
+  const { currentUser, adminId } = usePresenceStore(
+    useShallow((state) => ({
+      adminId: state.adminId,
+      currentUser: state.currentUser
+    }))
+  );
   const { adminSettings, setAdminSettings } = useAdminStore(
     useShallow((state) => ({
       adminSettings: state.settings,
@@ -31,7 +36,7 @@ export function EndRetroDialog() {
     }))
   );
 
-  if (!currentUser.isAdmin) return null;
+  if (currentUser.id !== adminId) return null;
 
   return (
     <AlertDialog>

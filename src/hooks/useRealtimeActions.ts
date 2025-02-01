@@ -38,10 +38,9 @@ export function useRealtimeActions() {
   );
 
   const changeAdminBroadcast = useCallback(
-    (retroId: string, newAdminId: string, oldAdminId?: string) => {
+    (retroId: string, newAdminId: string) => {
       sendBroadcast(retroId, REALTIME_EVENT_KEYS.ASSIGN_NEW_ADMIN, {
-        newAdminId,
-        oldAdminId
+        newAdminId
       });
     },
     [sendBroadcast]
