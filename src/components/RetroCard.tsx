@@ -8,6 +8,7 @@ import {
   HiOutlineChatBubbleOvalLeftEllipsis as WritingIcon
 } from 'react-icons/hi2';
 import { nanoid } from 'nanoid';
+import { useShallow } from 'zustand/shallow';
 
 import { RetrospectiveSection } from '@/types/Retro';
 import { useRealtimeActions } from '@/hooks/useRealtimeActions';
@@ -34,7 +35,12 @@ interface RetroCardProps {
 }
 
 export function RetroCard({ title, description, section }: RetroCardProps) {
-  const currentUser = usePresenceStore((state) => state.currentUser);
+  const { currentUser, adminId } = usePresenceStore(
+    useShallow((state) => ({
+      adminId: state.adminId,
+      currentUser: state.currentUser
+    }))
+  );
   const adminSettings = useAdminStore((state) => state.settings);
   const { writingAction, revalidatePageBroadcast } = useRealtimeActions();
   const postFormRef = useRef<HTMLFormElement>(null);
@@ -47,6 +53,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
   const [optimisticPosts, addOptimisticPosts] = useOptimistic(section.posts);
 
   const retrospectiveId = section.retrospectiveId;
+  const isCurrentUserAdmin = adminId === currentUser.id;
 
   const sortedPostsByVotes = optimisticPosts.sort((a, b) => b.votes.length - a.votes.length);
 
@@ -195,7 +202,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
               ) : (
                 optimisticTitle
               )}
-              {currentUser.isAdmin && !isEditingSectionTitle && (
+              {isCurrentUserAdmin && !isEditingSectionTitle && (
                 <Button
                   size="icon"
                   className="bg-invisible invisible text-gray-900 hover:bg-gray-300 group-hover:visible"
