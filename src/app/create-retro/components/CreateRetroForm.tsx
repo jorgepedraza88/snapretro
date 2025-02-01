@@ -29,6 +29,7 @@ const defaultFormValues: CreateRetrospectiveData = {
 export function CreateRetroForm() {
   const router = useRouter();
   const setCurrentUser = usePresenceStore((state) => state.setCurrentUser);
+  const setAdminId = usePresenceStore((state) => state.setAdminId);
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,6 +43,7 @@ export function CreateRetroForm() {
     setIsSubmitting(true);
     try {
       const retrospective = await createRetro(data);
+      setAdminId(data.adminId);
 
       router.push(`/retro/${retrospective.id}`);
     } catch (error) {
@@ -56,8 +58,7 @@ export function CreateRetroForm() {
       setCurrentUser({
         id: retroData.adminId,
         name: retroData.adminName,
-        avatarUrl: retroData.avatarUrl,
-        isAdmin: true
+        avatarUrl: retroData.avatarUrl
       });
 
       setStep(2);

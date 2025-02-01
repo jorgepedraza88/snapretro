@@ -54,9 +54,9 @@ export function useRealtimeActions() {
   );
 
   const handleTimerBroadcast = useCallback(
-    (retroId: string, timerState: 'on' | 'off' | 'reset') => {
+    (retroId: string, timerState: 'on' | 'off' | 'reset', defaultTime?: number) => {
       if (timerState === 'reset') {
-        sendBroadcast(retroId, REALTIME_EVENT_KEYS.RESET_TIMER, {});
+        sendBroadcast(retroId, REALTIME_EVENT_KEYS.RESET_TIMER, { defaultTime });
       }
       sendBroadcast(retroId, REALTIME_EVENT_KEYS.TIMER, { timerState });
     },

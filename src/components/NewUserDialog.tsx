@@ -45,14 +45,13 @@ export function NewUserDialog({ data }: Readonly<{ data: RetrospectiveData }>) {
     const newUser = {
       id: `user_${nanoid()}`,
       name: userName,
-      avatarUrl: '',
-      isAdmin: false
+      avatarUrl: ''
     };
 
     setCurrentUser(newUser);
   }
 
-  console.log(errors);
+  // TODO: Añadir errores
 
   return (
     <AlertDialog open>
@@ -74,7 +73,7 @@ export function NewUserDialog({ data }: Readonly<{ data: RetrospectiveData }>) {
             />
           </Label>
           {shouldDisplayPassword && (
-            <Label>
+            <Label className="mt-2">
               Secret word
               <Input
                 {...register('password', {

@@ -15,7 +15,7 @@ import { useAdminStore } from '@/stores/useAdminStore';
 import { usePresenceStore } from '@/stores/usePresenceStore';
 import { Button } from './ui/button';
 
-export function Timer({ defaultSeconds }: { defaultSeconds: number }) {
+export function Timer({ defaultTime }: { defaultTime: number }) {
   const { id: retrospectiveId } = useParams<{ id: string }>();
   const { currentUser, adminId } = usePresenceStore(
     useShallow((state) => ({
@@ -65,9 +65,9 @@ export function Timer({ defaultSeconds }: { defaultSeconds: number }) {
 
   const handleResetTimer = async () => {
     setTimerState('off');
-    setTimeLeft(defaultSeconds);
+    setTimeLeft(defaultTime);
 
-    handleTimerBroadcast(retrospectiveId, 'reset');
+    handleTimerBroadcast(retrospectiveId, 'reset', defaultTime);
   };
 
   return (

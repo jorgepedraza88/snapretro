@@ -12,7 +12,7 @@ export function MainContent({ data }: { data: RetrospectiveData }) {
 
   return (
     <div className="relative mx-auto flex size-full max-w-6xl flex-col items-center p-8">
-      {shouldDisplayTimer && <Timer defaultSeconds={timer} />}
+      {shouldDisplayTimer && <Timer defaultTime={timer} />}
       {shouldDiplayRetroCards && <RetroCardGroup retrospectiveData={data} />}
       <EndRetroContainer />
       <AdminMenu retrospectiveData={data} />

@@ -6,6 +6,7 @@ import { useShallow } from 'zustand/shallow';
 
 import { editRetroAdminId, revalidate } from '@/app/actions';
 import REALTIME_EVENT_KEYS from '@/constants/realtimeEventKeys';
+import { useAdminStore } from '@/stores/useAdminStore';
 import { usePresenceStore, UserPresence } from '@/stores/usePresenceStore';
 import { useRetroSummaryStore } from '@/stores/useRetroSummaryStore';
 import { supabase } from '@/supabaseClient';
@@ -25,6 +26,12 @@ export const useRealtimeSubscription = (retrospectiveId: string) => {
         setChannel: state.setChannel
       }))
     );
+  const { setTimerState, setTimeLeft } = useAdminStore(
+    useShallow((state) => ({
+      setTimerState: state.setTimerState,
+      setTimeLeft: state.setTimeLeft
+    }))
+  );
 
   function getPresenceActiveUsers(channel: RealtimeChannel) {
     const presenceState = channel.presenceState<UserPresence>();
@@ -107,6 +114,13 @@ export const useRealtimeSubscription = (retrospectiveId: string) => {
         const filteredUsers = activeUsers.filter((user) => user.id !== userId);
         updateOnlineUsers(filteredUsers);
         toast({ title: `${user?.name} has been kicked from the session`, variant: 'destructive' });
+      })
+      .on('broadcast', { event: REALTIME_EVENT_KEYS.TIMER }, async ({ payload }) => {
+        setTimerState(payload.timerState);
+      })
+      .on('broadcast', { event: REALTIME_EVENT_KEYS.RESET_TIMER }, async ({ payload }) => {
+        setTimerState('off');
+        setTimeLeft(payload.defaultTime);
       });
 
     channel.subscribe(async (status) => {
@@ -121,6 +135,5 @@ export const useRealtimeSubscription = (retrospectiveId: string) => {
       supabase.removeChannel(channel).catch((err) => console.error('Cleanup error:', err));
       setChannel(null);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 };
