@@ -76,7 +76,13 @@ export function CreateRetroSecond() {
         {enablePassword && (
           <div className="ml-12 pt-2">
             <Label htmlFor="password">Choose your secret word</Label>
-            <Input id="password" {...register('password')} />
+            <Input
+              id="password"
+              {...register('password', {
+                required: true,
+                minLength: 3
+              })}
+            />
             <div className="mt-1 text-xs text-red-500">
               <ErrorMessage name="password" errors={errors} />
             </div>

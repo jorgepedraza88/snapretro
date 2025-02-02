@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/constants/routes';
 import { CreateRetroForm } from './components/CreateRetroForm';
 
 export default function Page() {
@@ -13,7 +14,7 @@ export default function Page() {
           <div className="mt-8 text-xs text-gray-500">
             Don&apos;t want to create a retrospective?
             <Button variant="link" className="text-sm" asChild>
-              <Link href="/">Go to main</Link>
+              <Link href={ROUTES.HOME}>Back to main</Link>
             </Button>
           </div>
         </main>

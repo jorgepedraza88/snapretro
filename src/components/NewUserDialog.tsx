@@ -28,7 +28,8 @@ export function NewUserDialog({ data }: Readonly<{ data: RetrospectiveData }>) {
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
+    setError
   } = useForm<UserFormData>({
     defaultValues: {
       userName: '',
@@ -38,7 +39,12 @@ export function NewUserDialog({ data }: Readonly<{ data: RetrospectiveData }>) {
 
   function handleSubmitNewUser(formData: UserFormData) {
     const { userName, password } = formData;
+    if (shouldDisplayPassword && !password) {
+      setError('password', { message: 'The secret word is required' });
+      return;
+    }
     if (shouldDisplayPassword && password !== data.password) {
+      setError('password', { message: 'The secret word is incorrect' });
       return;
     }
 
@@ -51,7 +57,7 @@ export function NewUserDialog({ data }: Readonly<{ data: RetrospectiveData }>) {
     setCurrentUser(newUser);
   }
 
-  // TODO: Añadir errores
+  console.log(errors.password);
 
   return (
     <AlertDialog open>
@@ -73,14 +79,15 @@ export function NewUserDialog({ data }: Readonly<{ data: RetrospectiveData }>) {
             />
           </Label>
           {shouldDisplayPassword && (
-            <Label className="mt-2">
-              Secret word
-              <Input
-                {...register('password', {
-                  required: shouldDisplayPassword
-                })}
-              />
-            </Label>
+            <div className="pt-2">
+              <Label>
+                Secret word
+                <Input {...register('password')} />
+                {errors.password && (
+                  <span className="text-xs text-red-500">{errors.password.message}</span>
+                )}
+              </Label>
+            </div>
           )}
           <div className="mt-4 flex justify-end">
             <AlertDialogAction type="submit">Join session</AlertDialogAction>

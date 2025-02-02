@@ -8,14 +8,14 @@ import { nanoid } from 'nanoid';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { createRetro, CreateRetrospectiveData } from '@/app/actions';
+import { ROUTES } from '@/constants/routes';
 import { usePresenceStore } from '@/stores/usePresenceStore';
 import { CreateRetroFirst } from './CreateRetroFirst';
 import { CreateRetroSecond } from './CreateRetroSecond';
 
 const defaultFormValues: CreateRetrospectiveData = {
-  adminId: nanoid(5),
+  adminId: `user_${nanoid(10)}`,
   avatarUrl: '',
   adminName: '',
   timer: 300,
@@ -31,9 +31,7 @@ export function CreateRetroForm() {
   const setCurrentUser = usePresenceStore((state) => state.setCurrentUser);
   const setAdminId = usePresenceStore((state) => state.setAdminId);
 
-  const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const progressPercentage = (step / 3) * 100;
 
   const form = useForm<CreateRetrospectiveData>({
     defaultValues: defaultFormValues
@@ -43,91 +41,39 @@ export function CreateRetroForm() {
     setIsSubmitting(true);
     try {
       const retrospective = await createRetro(data);
-      setAdminId(data.adminId);
 
-      router.push(`/retro/${retrospective.id}`);
+      setAdminId(data.adminId);
+      setCurrentUser({
+        id: data.adminId,
+        name: data.adminName,
+        avatarUrl: data.avatarUrl
+      });
+
+      router.push(`${ROUTES.RETRO}/${retrospective.id}`);
     } catch (error) {
       console.log(error);
       setIsSubmitting(false);
     }
   };
 
-  const handleChangeStep = () => {
-    const retroData = form.getValues();
-    if (step === 1) {
-      setCurrentUser({
-        id: retroData.adminId,
-        name: retroData.adminName,
-        avatarUrl: retroData.avatarUrl
-      });
-
-      setStep(2);
-
-      return;
-    }
-
-    // Validate manually if the password is empty
-    if (retroData.enablePassword && !retroData.password) {
-      form.setError('password', {
-        type: 'required',
-        message: 'Secret word is required'
-      });
-      return;
-    }
-
-    setStep(3);
-  };
-
   return (
     <FormProvider {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            if (step !== 2) {
-              e.preventDefault();
-              handleChangeStep();
-            }
-          }
-        }}
-        className="w-full"
-      >
-        <div className="mt-4">
-          <Progress value={progressPercentage} className="h-2" />
-        </div>
-        <div className="mt-16">
-          {step === 1 && <CreateRetroFirst />}
-          {step === 2 && <CreateRetroSecond />}
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
+        <div className="mt-16 space-y-4">
+          <CreateRetroFirst />
+          <CreateRetroSecond />
         </div>
         <div className="mt-4 flex w-full justify-end gap-4">
-          {step > 1 && (
-            <Button
-              type="button"
-              onClick={() => {
-                form.clearErrors();
-                setStep(step - 1);
-              }}
-            >
-              Back
-            </Button>
-          )}
-          {step !== 2 && (
-            <Button variant="secondary" type="button" onClick={handleChangeStep}>
-              Next
-            </Button>
-          )}
-          {step === 2 && (
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <SpinnerIcon className="animate-spin" />
-              ) : (
-                <>
-                  Let&apos;s begin
-                  <ArrowRightIcon size={24} />
-                </>
-              )}
-            </Button>
-          )}
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <SpinnerIcon className="animate-spin" />
+            ) : (
+              <>
+                Let&apos;s begin
+                <ArrowRightIcon size={24} />
+              </>
+            )}
+          </Button>
         </div>
       </form>
     </FormProvider>

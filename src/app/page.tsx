@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 import { JoinRetroButton } from '@/components/JoinRetroButton';
 import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/constants/routes';
 
 // import { SwitchColorMode } from "@/components/SwitchColorMode";
 
@@ -21,7 +22,7 @@ export default function Home() {
         </h2>
         <div className="mt-8 max-w-96 items-center justify-center gap-4 lg:flex">
           <Button size="lg" className="mb-2 w-full lg:mb-0 lg:w-auto" asChild>
-            <Link href="/create-retro">
+            <Link href={ROUTES.CREATE_RETRO}>
               <CreateRetroIcon size={24} />
               Start a new retrospective
             </Link>

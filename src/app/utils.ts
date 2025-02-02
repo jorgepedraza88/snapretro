@@ -4,8 +4,10 @@ import { RetrospectiveData } from '@/types/Retro';
 
 export function generateDefaultSections(numberOfSections: number) {
   function generateDefaultSection(title: string, index: number) {
+    const defaultNames = ['What went well?', 'What could be improved?', 'Action items'];
+
     return {
-      title,
+      title: defaultNames[index] || title,
       sortOrder: index, // Set the order explicitly
       posts: {
         create: []
