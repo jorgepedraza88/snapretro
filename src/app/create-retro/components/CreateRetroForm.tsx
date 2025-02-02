@@ -51,8 +51,8 @@ export function CreateRetroForm() {
 
       router.push(`${ROUTES.RETRO}/${retrospective.id}`);
     } catch (error) {
-      console.log(error);
       setIsSubmitting(false);
+      throw new Error('Error creating retrospective');
     }
   };
 
