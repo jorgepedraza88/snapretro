@@ -11,7 +11,7 @@ export function MainContent({ data }: { data: RetrospectiveData }) {
   const shouldDiplayRetroCards = status === 'active';
 
   return (
-    <div className="relative mx-auto flex size-full max-w-6xl flex-col items-center p-8">
+    <div className="relative mx-auto flex size-full flex-col items-center p-8">
       {shouldDisplayTimer && <Timer defaultTime={timer} />}
       {shouldDiplayRetroCards && <RetroCardGroup retrospectiveData={data} />}
       <EndRetroContainer />
