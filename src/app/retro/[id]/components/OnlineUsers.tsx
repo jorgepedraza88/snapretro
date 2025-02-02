@@ -21,7 +21,6 @@ export function OnlineUsers() {
     }))
   );
 
-  const adminUserId = onlineUsers.find((user) => user.id === adminId)?.id;
   const isCurrentUserAdmin = adminId === currentUser.id;
 
   const handleRemoveUser = async (userId: string) => {
@@ -35,11 +34,12 @@ export function OnlineUsers() {
   };
 
   if (onlineUsers.length === 0) {
-    return null;
+    // TODO: Añadir un skeleton loader
+    return 'Loading...';
   }
 
   return (
-    <div className="max-w-60 space-y-1 p-8">
+    <div className="absolute right-0 top-0 flex w-full min-w-full max-w-60 items-center justify-end gap-2 space-y-1 px-4 py-2">
       <TooltipProvider>
         <div className="flex w-fit items-center gap-1 rounded-lg bg-neutral-200 px-2 py-1 text-sm">
           <div className="size-2 rounded-full bg-green-500" />
@@ -48,10 +48,10 @@ export function OnlineUsers() {
         {onlineUsers.map((user, index) => (
           <div
             key={`user.id_${index}`}
-            className="group flex items-center justify-between truncate rounded-lg bg-neutral-100 p-2 text-sm"
+            className="group flex min-w-20 items-center justify-between truncate rounded-lg bg-neutral-100 px-2 py-1 text-sm"
           >
             <div className="flex gap-1">
-              {user.id === adminUserId && <CrownIcon size={16} className="mt-px text-yellow-500" />}
+              {user.id === adminId && <CrownIcon size={16} className="mt-px text-yellow-500" />}
               <p>{user.name}</p>
             </div>
 

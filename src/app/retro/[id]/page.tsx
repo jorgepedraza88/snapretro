@@ -20,7 +20,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     <UserSessionWrapper data={initialData}>
       <RetroContextProvider data={initialData}>
         <Navigation />
-        <div className="gap-2 bg-neutral-50 lg:flex">
+        <div className="relative h-full gap-2 bg-neutral-50">
           <OnlineUsers />
           <MainContent data={initialData} />
           <ChatFooter />

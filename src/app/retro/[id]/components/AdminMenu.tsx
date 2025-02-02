@@ -88,7 +88,7 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" className="absolute -right-8 top-20" size="icon">
+        <Button type="button" variant="outline" size="icon">
           <AdminSettingsIcon size={16} />
         </Button>
       </PopoverTrigger>

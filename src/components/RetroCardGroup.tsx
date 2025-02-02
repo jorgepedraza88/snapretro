@@ -11,11 +11,11 @@ export async function RetroCardGroup({
 
   return (
     <div
-      className={cn('block w-full gap-4 space-y-4 md:grid lg:space-y-0', {
+      className={cn('w-full gap-4 space-y-4 sm:grid lg:max-w-5xl lg:space-y-0 xl:max-w-7xl', {
         'grid-cols-1': sectionsNumber === 1,
         'grid-cols-2': sectionsNumber === 2,
         'grid-cols-3': sectionsNumber === 3,
-        'grid-cols-4': sectionsNumber === 4
+        'lg:grid-cols-4': sectionsNumber === 4
       })}
     >
       {retrospectiveData.sections.map((section) => (

@@ -57,8 +57,6 @@ export function NewUserDialog({ data }: Readonly<{ data: RetrospectiveData }>) {
     setCurrentUser(newUser);
   }
 
-  console.log(errors.password);
-
   return (
     <AlertDialog open>
       <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
