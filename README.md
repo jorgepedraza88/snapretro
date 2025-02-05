@@ -82,13 +82,12 @@ The project uses Supabase as the backend and database. To install it locally, fo
     npm install --force
    ```
 
-````
 2. **Run Prisma Migration**
 
- To copy the schema to the Supabase database, run:
+To copy the schema to the Supabase database, run:
 
- ```bash
- npm run migrate:development --name init
+```bash
+npm run migrate:development --name init
 ```
 
 Wait until the schema is created in the database.
@@ -100,4 +99,3 @@ Wait until the schema is created in the database.
    ```bash
    npm run dev
    ```
-````
