@@ -75,15 +75,23 @@ The project uses Supabase as the backend and database. To install it locally, fo
 
    Clone the FreeRetros repository to your local machine.
 
-2. **Run Prisma Migration**
-
-   To copy the schema to the Supabase database, run:
+   **Important:**
+   When installing dependencies, you need to add the following due some issues with shadcn and React 19
 
    ```bash
-   npm run migrate:development --name init
+    npm install --force
    ```
 
-   Wait until the schema is created in the database.
+````
+2. **Run Prisma Migration**
+
+ To copy the schema to the Supabase database, run:
+
+ ```bash
+ npm run migrate:development --name init
+````
+
+Wait until the schema is created in the database.
 
 3. **Start the Project**
 
