@@ -1,38 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FreeRetros
 
-## Getting Started
+FreeRetros is a free tool to create and manage retrospective meetings. It is an alternative to Parabol and is built with Next.js, Supabase, and Tailwind CSS.
 
-First, run the development server:
+## How to Install the Project Locally
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+The project uses Supabase as the backend and database. To install it locally, follow these steps:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. **Choose a Folder for Supabase**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   Select a folder where you will host Supabase.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. **Get the Code**
 
-## Learn More
+   Clone the Supabase repository:
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   git clone --depth 1 https://github.com/supabase/supabase
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. **Copy Configuration Files**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   After installation (this may take a few minutes), copy the following files into the `/supabase/docker` folder:
 
-## Deploy on Vercel
+   - `.env-copy-supabase`
+   - `docker-compose.yml`
+   - `docker-compose.s3.yml`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. **Navigate to the Docker Folder**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   Open your terminal and go to the docker folder:
 
-# OpenRetros
+   ```bash
+   cd supabase/docker
+   ```
+
+5. **Copy the Fake Environment Variables**
+
+   Run the following command:
+
+   ```bash
+   cp .env-copy-supabase .env
+   ```
+
+6. **Pull the Latest Docker Images**
+
+   Execute:
+
+   ```bash
+   docker compose pull
+   ```
+
+7. **Start the Services**
+
+   Before starting, ensure that no other instances are running on the required ports. Then, start the services in detached mode:
+
+   ```bash
+   docker compose up -d
+   ```
+
+   With these steps, your local environment with Supabase is ready.
+
+8. **Access the Supabase Dashboard**
+
+   - Visit: [http://localhost:8000](http://localhost:8000)
+   - Login using the following credentials:
+     - **User:** supabase
+     - **Password:** password
+
+   From the dashboard, you can manage your database and other Supabase functionalities. For more details, visit the [Supabase Documentation](https://supabase.com/docs).
+
+## Cloning FreeRetros and Setting Up the Next.js Project
+
+1. **Clone this Repository**
+
+   Clone the FreeRetros repository to your local machine.
+
+2. **Run Prisma Migration**
+
+   To copy the schema to the Supabase database, run:
+
+   ```bash
+   npm run migrate:development --name init
+   ```
+
+   Wait until the schema is created in the database.
+
+3. **Start the Project**
+
+   Finally, start the project with:
+
+   ```bash
+   npm run dev
+
+   ```
