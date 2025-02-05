@@ -89,7 +89,7 @@ The project uses Supabase as the backend and database. To install it locally, fo
 
  ```bash
  npm run migrate:development --name init
-````
+```
 
 Wait until the schema is created in the database.
 
@@ -99,5 +99,5 @@ Wait until the schema is created in the database.
 
    ```bash
    npm run dev
-
    ```
+````
