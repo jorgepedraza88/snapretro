@@ -24,7 +24,6 @@ The project uses Supabase as the backend and database. To install it locally, fo
 
    - `.env-copy-supabase`
    - `docker-compose.yml`
-   - `docker-compose.s3.yml`
 
 4. **Navigate to the Docker Folder**
 
@@ -79,7 +78,7 @@ The project uses Supabase as the backend and database. To install it locally, fo
    When installing dependencies, you need to add the following due some issues with shadcn and React 19
 
    ```bash
-    npm install --force
+    pnpm install
    ```
 
 2. **Run Prisma Migration**
@@ -87,7 +86,7 @@ The project uses Supabase as the backend and database. To install it locally, fo
 To copy the schema to the Supabase database, run:
 
 ```bash
-npm run migrate:development --name init
+pnpm run migrate:development --name init
 ```
 
 Wait until the schema is created in the database.
@@ -97,5 +96,5 @@ Wait until the schema is created in the database.
    Finally, start the project with:
 
    ```bash
-   npm run dev
+   pnpm run dev
    ```
