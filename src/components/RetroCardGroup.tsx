@@ -11,7 +11,7 @@ export async function RetroCardGroup({
 
   return (
     <div
-      className={cn('block w-full gap-4 space-y-4 md:grid lg:space-y-0', {
+      className={cn('block w-full gap-4 space-y-4 lg:grid lg:space-y-0', {
         'grid-cols-1': sectionsNumber === 1,
         'grid-cols-2': sectionsNumber === 2,
         'grid-cols-3': sectionsNumber === 3,

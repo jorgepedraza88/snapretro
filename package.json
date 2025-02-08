@@ -13,8 +13,8 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "migrate:development": "dotenv -e .env.development -- npx prisma migrate",
-    "migrate:production": "dotenv -e .env.production -- npx prisma migrate"
+    "migrate:development": "dotenv -e .env.development -- npx prisma migrate dev",
+    "migrate:production": "dotenv -e .env.production -- npx prisma migrate dev"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",

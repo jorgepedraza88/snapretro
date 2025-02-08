@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { EndRetroDialog } from '@/app/retro/[id]/components/EndRetroDialog';
+import { OnlineUsers } from '@/app/retro/[id]/components/OnlineUsers';
 
 // import { SwitchColorMode } from "./SwitchColorMode";
 
@@ -17,6 +18,7 @@ export function Navigation() {
           </Link>
         </div>
         <div className="flex items-center gap-2">
+          <OnlineUsers />
           <EndRetroDialog />
           {/* <SwitchColorMode /> */}
           {/* <p className="text-sm font-semibold dark:text-neutral-100">

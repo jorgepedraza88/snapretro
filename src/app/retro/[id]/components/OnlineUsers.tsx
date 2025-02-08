@@ -1,19 +1,20 @@
 'use client';
 
 import { FaCrown as CrownIcon } from 'react-icons/fa';
-import { HiTrash as RemoveIcon, HiUserGroup as UsersIcon } from 'react-icons/hi2';
-import { useParams } from 'next/navigation';
+// import { HiTrash as RemoveIcon, HiUserGroup as UsersIcon } from 'react-icons/hi2';
+// import { useParams } from 'next/navigation';
 import { useShallow } from 'zustand/shallow';
 
-import { useRealtimeActions } from '@/hooks/useRealtimeActions';
-import { Button } from '@/components/ui/button';
+// import { useRealtimeActions } from '@/hooks/useRealtimeActions';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+// import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { usePresenceStore } from '@/stores/usePresenceStore';
 
 export function OnlineUsers() {
-  const { id: retrospectiveId } = useParams<{ id: string }>();
-  const { removeUserBroadcast, changeAdminBroadcast } = useRealtimeActions();
-  const { currentUser, onlineUsers, adminId } = usePresenceStore(
+  // const { id: retrospectiveId } = useParams<{ id: string }>();
+  // const { removeUserBroadcast, changeAdminBroadcast } = useRealtimeActions();
+  const { onlineUsers, adminId } = usePresenceStore(
     useShallow((state) => ({
       adminId: state.adminId,
       currentUser: state.currentUser,
@@ -22,75 +23,133 @@ export function OnlineUsers() {
   );
 
   const adminUserId = onlineUsers.find((user) => user.id === adminId)?.id;
-  const isCurrentUserAdmin = adminId === currentUser.id;
+  // const isCurrentUserAdmin = adminId === currentUser.id;
 
-  const handleRemoveUser = async (userId: string) => {
-    removeUserBroadcast(retrospectiveId, userId);
-  };
+  // const handleRemoveUser = async (userId: string) => {
+  //   removeUserBroadcast(retrospectiveId, userId);
+  // };
 
-  const handleChangeAdmin = async (userId: string) => {
-    if (userId !== currentUser.id) {
-      changeAdminBroadcast(retrospectiveId, userId);
-    }
-  };
+  // const handleChangeAdmin = async (userId: string) => {
+  //   if (userId !== currentUser.id) {
+  //     changeAdminBroadcast(retrospectiveId, userId);
+  //   }
+  // };
 
   if (onlineUsers.length === 0) {
     return null;
   }
 
-  return (
-    <div className="max-w-60 space-y-1 p-8">
-      <TooltipProvider>
-        <div className="flex w-fit items-center gap-1 rounded-lg bg-neutral-200 px-2 py-1 text-sm">
-          <div className="size-2 rounded-full bg-green-500" />
-          <UsersIcon size={16} /> {onlineUsers.length}
-        </div>
-        {onlineUsers.map((user, index) => (
-          <div
-            key={`user.id_${index}`}
-            className="group flex items-center justify-between truncate rounded-lg bg-neutral-100 p-2 text-sm"
-          >
-            <div className="flex gap-1">
-              {user.id === adminUserId && <CrownIcon size={16} className="mt-px text-yellow-500" />}
-              <p>{user.name}</p>
-            </div>
+  const sortedOnlineUsersByAdmin = onlineUsers.sort((a, b) => {
+    if (a.id === adminUserId) {
+      return -1;
+    }
+    if (b.id === adminUserId) {
+      return 1;
+    }
+    return 0;
+  });
 
-            {isCurrentUserAdmin && (
-              <div className="flex gap-1">
+  return (
+    <div>
+      <TooltipProvider>
+        <div className="flex">
+          {sortedOnlineUsersByAdmin.map((user, index) => (
+            <div
+              key={`user.id_${index}`}
+              className="group -ml-3 flex items-center justify-between text-sm"
+            >
+              <div className="relative">
+                {user.id === adminUserId && (
+                  <CrownIcon
+                    size={14}
+                    className="absolute -top-1 left-[13px] z-10 text-yellow-500"
+                  />
+                )}
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="invisible size-0 px-4 py-3 text-yellow-500 hover:text-yellow-600 group-hover:visible"
-                      onClick={() => handleChangeAdmin(user.id)}
-                    >
-                      <CrownIcon size={16} />
-                    </Button>
+                  <TooltipTrigger>
+                    <Avatar>
+                      <AvatarImage src="" />
+                      <AvatarFallback className="cursor-pointer border-2 border-violet-200 bg-violet-100 text-violet-900">
+                        {user.name.slice(0, 1).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
                   </TooltipTrigger>
-                  <TooltipContent className="border-0 bg-violet-100 text-xs text-violet-900 hover:bg-violet-100/80 dark:bg-violet-800 dark:text-violet-50 dark:hover:bg-violet-800/80">
-                    Assign as host
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="invisible size-0 px-4 py-3 group-hover:visible"
-                      onClick={() => handleRemoveUser(user.id)}
-                    >
-                      <RemoveIcon size={16} />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="border-0 bg-violet-100 text-xs text-violet-900 hover:bg-violet-100/80 dark:bg-violet-800 dark:text-violet-50 dark:hover:bg-violet-800/80">
-                    Remove user
+                  <TooltipContent>
+                    <p>{user.name}</p>
+                    {/* {isCurrentUserAdmin && (
+                      <div className="flex gap-1">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="invisible size-0 px-4 py-3 text-yellow-500 hover:text-yellow-600 group-hover:visible"
+                              onClick={() => handleChangeAdmin(user.id)}
+                            >
+                              <CrownIcon size={16} />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent className="border-0 bg-violet-100 text-xs text-violet-900 hover:bg-violet-100/80 dark:bg-violet-800 dark:text-violet-50 dark:hover:bg-violet-800/80">
+                            Assign as host
+                          </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="invisible size-0 px-4 py-3 group-hover:visible"
+                              onClick={() => handleRemoveUser(user.id)}
+                            >
+                              <RemoveIcon size={16} />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent className="border-0 bg-violet-100 text-xs text-violet-900 hover:bg-violet-100/80 dark:bg-violet-800 dark:text-violet-50 dark:hover:bg-violet-800/80">
+                            Remove user
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                    )} */}
                   </TooltipContent>
                 </Tooltip>
               </div>
-            )}
-          </div>
-        ))}
+              {/* {isCurrentUserAdmin && (
+                <div className="flex gap-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="invisible size-0 px-4 py-3 text-yellow-500 hover:text-yellow-600 group-hover:visible"
+                        onClick={() => handleChangeAdmin(user.id)}
+                      >
+                        <CrownIcon size={16} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="border-0 bg-violet-100 text-xs text-violet-900 hover:bg-violet-100/80 dark:bg-violet-800 dark:text-violet-50 dark:hover:bg-violet-800/80">
+                      Assign as host
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="invisible size-0 px-4 py-3 group-hover:visible"
+                        onClick={() => handleRemoveUser(user.id)}
+                      >
+                        <RemoveIcon size={16} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="border-0 bg-violet-100 text-xs text-violet-900 hover:bg-violet-100/80 dark:bg-violet-800 dark:text-violet-50 dark:hover:bg-violet-800/80">
+                      Remove user
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              )} */}
+            </div>
+          ))}
+        </div>
       </TooltipProvider>
     </div>
   );

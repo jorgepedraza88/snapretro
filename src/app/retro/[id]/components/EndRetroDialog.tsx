@@ -42,7 +42,7 @@ export function EndRetroDialog() {
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button variant="destructive" size="sm">
-          End meeting
+          End Retrospective
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="transition-none">

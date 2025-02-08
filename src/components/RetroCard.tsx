@@ -7,6 +7,7 @@ import {
   HiHandThumbUp as VoteIcon,
   HiOutlineChatBubbleOvalLeftEllipsis as WritingIcon
 } from 'react-icons/hi2';
+import { MdKeyboardReturn as EnterIcon } from 'react-icons/md';
 import { nanoid } from 'nanoid';
 import { useShallow } from 'zustand/shallow';
 
@@ -181,8 +182,8 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
     <div className="h-full">
       <Card className="flex h-full flex-col justify-between bg-gray-100 pb-4 dark:bg-neutral-900">
         <div>
-          <div className="group mb-2 rounded-t-lg bg-gray-200 p-4 dark:bg-neutral-700">
-            <CardTitle className="flex items-center justify-between">
+          <div className="group mb-2 rounded-t-lg bg-gray-200 p-2 dark:bg-neutral-700">
+            <CardTitle className="flex items-center justify-between text-lg">
               {isEditingSectionTitle ? (
                 <form action={handleChangeSectionTitle}>
                   <Input
@@ -215,6 +216,23 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
             <CardDescription>{description}</CardDescription>
           </div>
           <div>
+            <form
+              ref={postFormRef}
+              action={handleSavePost}
+              className="group mx-2 mb-4 flex items-center rounded-md border bg-white pr-2 focus-within:outline-[1px] focus-within:outline-offset-0 focus-within:ring-[1px] focus-within:ring-violet-500 dark:bg-neutral-800"
+            >
+              <Input
+                disabled={!adminSettings.allowMessages}
+                name="content"
+                className="border-0 p-2 text-sm focus:outline-none focus-visible:outline-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                placeholder="Write something..."
+                onChange={handleNewPostChange}
+              />
+              <Button type="submit" size="sm" variant="secondary" className="h-8 p-1.5 text-xs">
+                <EnterIcon className="shrink-0" size={14} />
+              </Button>
+            </form>
+
             {sortedPostsByVotes.length > 0 ? (
               sortedPostsByVotes.map((post) => {
                 const hasVoted = post.votes.includes(currentUser.id);
@@ -260,18 +278,6 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
             )}
           </div>
         </div>
-        <form
-          ref={postFormRef}
-          action={handleSavePost}
-          className="mx-2 mt-10 flex flex-col justify-end"
-        >
-          <Input
-            disabled={!adminSettings.allowMessages}
-            name="content"
-            className="p-2 text-sm"
-            onChange={handleNewPostChange}
-          />
-        </form>
       </Card>
       {isWriting && (
         <div className="mb-2 mt-2 flex gap-1">

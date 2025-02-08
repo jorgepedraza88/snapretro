@@ -21,7 +21,6 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       <RetroContextProvider data={initialData}>
         <Navigation />
         <div className="gap-2 bg-neutral-50 lg:flex">
-          <OnlineUsers />
           <MainContent data={initialData} />
           <ChatFooter />
         </div>
