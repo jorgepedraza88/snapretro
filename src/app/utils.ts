@@ -23,12 +23,10 @@ export function generateDefaultSections(numberOfSections: number) {
 }
 
 export const encryptMessage = (message: string) => {
-  const key = process.env.NEXT_PUBLIC_ENCRYPTION_KEY
-    ? Buffer.from(process.env.NEXT_PUBLIC_ENCRYPTION_KEY, 'base64')
+  const key = process.env.ENCRYPTION_KEY
+    ? Buffer.from(process.env.ENCRYPTION_KEY, 'base64')
     : null;
-  const iv = process.env.NEXT_PUBLIC_ENCRYPTION_IV
-    ? Buffer.from(process.env.NEXT_PUBLIC_ENCRYPTION_IV, 'base64')
-    : null;
+  const iv = process.env.ENCRYPTION_IV ? Buffer.from(process.env.ENCRYPTION_IV, 'base64') : null;
 
   if (!key || !iv) {
     throw new Error('Encryption fails');
@@ -42,12 +40,10 @@ export const encryptMessage = (message: string) => {
 };
 
 export const decryptMessage = (encryptedMessage: string) => {
-  const key = process.env.NEXT_PUBLIC_ENCRYPTION_KEY
-    ? Buffer.from(process.env.NEXT_PUBLIC_ENCRYPTION_KEY, 'base64')
+  const key = process.env.ENCRYPTION_KEY
+    ? Buffer.from(process.env.ENCRYPTION_KEY, 'base64')
     : null;
-  const iv = process.env.NEXT_PUBLIC_ENCRYPTION_IV
-    ? Buffer.from(process.env.NEXT_PUBLIC_ENCRYPTION_IV, 'base64')
-    : null;
+  const iv = process.env.ENCRYPTION_IV ? Buffer.from(process.env.ENCRYPTION_IV, 'base64') : null;
 
   if (!key || !iv) {
     throw new Error('Encryption fails');

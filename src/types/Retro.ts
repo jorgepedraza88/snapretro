@@ -18,6 +18,8 @@ export interface RetrospectiveData {
   adminName: string;
   date: Date;
   enablePassword: boolean;
+  allowMessages: boolean;
+  allowVotes: boolean;
   password: string | null;
   timer: number;
   enableChat: boolean;

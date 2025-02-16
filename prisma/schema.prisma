@@ -21,7 +21,8 @@ model Retrospective {
   avatarUrl      String? // Optional avatar URL for the admin
   date           DateTime // Creation or start date of the retrospective
   timer          Int // Timer value in seconds
-  allowVotes     Boolean // Whether voting is allowed
+  allowVotes     Boolean                @default(true) // Whether voting is allowed
+  allowMessages  Boolean                @default(true) // Whether messages are allowed
   enableChat     Boolean // Whether chat is enabled
   enablePassword Boolean // Whether a password is required
   password       String? // Optional password

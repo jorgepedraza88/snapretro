@@ -29,10 +29,10 @@ export function EndRetroDialog() {
       currentUser: state.currentUser
     }))
   );
-  const { adminSettings, setAdminSettings } = useAdminStore(
+  const { useSummaryAI, setUseSummaryAI } = useAdminStore(
     useShallow((state) => ({
-      adminSettings: state.settings,
-      setAdminSettings: state.setSettings
+      useSummaryAI: state.useSummaryAI,
+      setUseSummaryAI: state.setUseSummaryAI
     }))
   );
 
@@ -62,14 +62,7 @@ export function EndRetroDialog() {
         </div>
         <AlertDialogFooter className="w-full sm:justify-between">
           <Label className="flex items-center gap-1">
-            <Switch
-              checked={adminSettings.useSummaryAI}
-              onCheckedChange={(val) =>
-                setAdminSettings({
-                  useSummaryAI: val
-                })
-              }
-            />
+            <Switch checked={useSummaryAI} onCheckedChange={setUseSummaryAI} />
             <span className="mr-2">Generate Summary with AI</span>
             <AiIcon size={16} className="text-violet-700" />
           </Label>

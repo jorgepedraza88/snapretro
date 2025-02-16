@@ -182,6 +182,23 @@ export async function editRetroSectionsNumber(retrospectiveId: string, newNumber
   revalidatePath('/retro/[id]', 'page');
 }
 
+export async function editRetroSettings(
+  retrospectiveId: string,
+  newSettings: { allowVotes: boolean; allowMessages: boolean }
+) {
+  try {
+    await prisma.retrospective.update({
+      where: { id: retrospectiveId },
+      data: newSettings
+    });
+  } catch (error) {
+    console.log(error);
+    throw new Error('Failed to edit settings');
+  }
+
+  revalidatePath('/retro/[id]', 'page');
+}
+
 export async function editRetroPassword(retrospectiveId: string, newPassword: string) {
   try {
     await prisma.retrospective.update({
@@ -277,7 +294,7 @@ export async function endRetrospective(retrospectiveId: string) {
 export async function generateAIContent(data: RetrospectiveData, participants: string[]) {
   const { adminName, date, sections } = data;
   try {
-    const geminiAPIKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    const geminiAPIKey = process.env.GEMINI_API_KEY;
 
     if (!geminiAPIKey) {
       throw new Error('Missing GEMINI_API_KEY');

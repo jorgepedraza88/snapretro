@@ -13,16 +13,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
-import { editRetroPassword, editRetroSectionsNumber } from '@/app/actions';
+import { editRetroPassword, editRetroSectionsNumber, editRetroSettings } from '@/app/actions';
 import { cn } from '@/lib/utils';
-import { useAdminStore } from '@/stores/useAdminStore';
 import { usePresenceStore } from '@/stores/usePresenceStore';
 import { useRetroContext } from './RetroContextProvider';
 
 interface AdminMenuData {
   columns: number;
   password: string;
-  allowNewParticipants: boolean;
   allowMessages: boolean;
   allowVotes: boolean;
 }
@@ -35,14 +33,8 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
       currentUser: state.currentUser
     }))
   );
-  const { allowMessages, allowVotes, setAdminSettings } = useAdminStore(
-    useShallow((state) => ({
-      allowMessages: state.settings.allowMessages,
-      allowVotes: state.settings.allowVotes,
-      setAdminSettings: state.setSettings
-    }))
-  );
-  const { revalidatePageBroadcast, editAdminSettingsBroadcast } = useRealtimeActions();
+
+  const { revalidatePageBroadcast } = useRealtimeActions();
 
   const currentPassword = retrospectiveData.password || '';
   const isCurrentUserAdmin = adminId === currentUser.id;
@@ -54,8 +46,8 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
     defaultValues: {
       columns: retrospectiveData.sections.length,
       password: currentPassword || '',
-      allowMessages: allowMessages,
-      allowVotes: allowVotes
+      allowMessages: retrospectiveData.allowMessages,
+      allowVotes: retrospectiveData.allowVotes
     }
   });
 
@@ -71,9 +63,12 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
       await editRetroPassword(retrospectiveData.id, newPassword);
     }
 
-    setAdminSettings({ ...restData });
-
-    editAdminSettingsBroadcast(retrospectiveData.id, data.allowMessages, data.allowVotes);
+    if (
+      retrospectiveData.allowMessages !== restData.allowMessages ||
+      retrospectiveData.allowVotes !== restData.allowVotes
+    ) {
+      await editRetroSettings(retrospectiveData.id, restData);
+    }
 
     revalidatePageBroadcast(retrospectiveData.id);
 

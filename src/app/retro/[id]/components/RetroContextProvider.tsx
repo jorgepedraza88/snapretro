@@ -29,7 +29,7 @@ export const RetroContext = React.createContext<RetroContextValue | null>(null);
 export function RetroContextProvider({ data, children }: RetroContextProviderProps) {
   const { toast } = useToast();
 
-  const adminSettings = useAdminStore((state) => state.settings);
+  const useSummaryAI = useAdminStore((state) => state.useSummaryAI);
   const onlineUsers = usePresenceStore((state) => state.onlineUsers);
   const { isLoadingFinalContent, startTypingEffect, setLoading } = useRetroSummaryStore(
     useShallow((state) => ({
@@ -44,7 +44,7 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
 
   const generateFinalContent = useCallback(
     async (endResponse: RetrospectiveData) => {
-      if (!adminSettings.useSummaryAI) {
+      if (!useSummaryAI) {
         return generateMarkdownFromJSON(
           endResponse,
           onlineUsers.map((user) => user.name)
@@ -65,7 +65,7 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [onlineUsers, adminSettings.useSummaryAI]
+    [onlineUsers, useSummaryAI]
   );
 
   const handleEndRetro = useCallback(async () => {

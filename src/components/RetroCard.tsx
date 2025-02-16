@@ -11,7 +11,7 @@ import { MdKeyboardReturn as EnterIcon } from 'react-icons/md';
 import { nanoid } from 'nanoid';
 import { useShallow } from 'zustand/shallow';
 
-import { RetrospectiveSection } from '@/types/Retro';
+import { RetrospectiveData, RetrospectiveSection } from '@/types/Retro';
 import { useRealtimeActions } from '@/hooks/useRealtimeActions';
 import {
   addVoteToPost,
@@ -22,7 +22,6 @@ import {
 } from '@/app/actions';
 import { decryptMessage, encryptMessage } from '@/app/utils';
 import { cn } from '@/lib/utils';
-import { useAdminStore } from '@/stores/useAdminStore';
 import { usePresenceStore } from '@/stores/usePresenceStore';
 import { supabase } from '@/supabaseClient';
 import { Button } from './ui/button';
@@ -33,16 +32,17 @@ interface RetroCardProps {
   title: string;
   description?: string;
   section: RetrospectiveSection;
+  retrospectiveData: RetrospectiveData;
 }
 
-export function RetroCard({ title, description, section }: RetroCardProps) {
+export function RetroCard({ title, description, section, retrospectiveData }: RetroCardProps) {
   const { currentUser, adminId } = usePresenceStore(
     useShallow((state) => ({
       adminId: state.adminId,
       currentUser: state.currentUser
     }))
   );
-  const adminSettings = useAdminStore((state) => state.settings);
+
   const { writingAction, revalidatePageBroadcast } = useRealtimeActions();
   const postFormRef = useRef<HTMLFormElement>(null);
 
@@ -222,7 +222,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
               className="group mx-2 mb-4 flex items-center rounded-md border bg-white pr-2 focus-within:outline-[1px] focus-within:outline-offset-0 focus-within:ring-[1px] focus-within:ring-violet-500 dark:bg-neutral-800"
             >
               <Input
-                disabled={!adminSettings.allowMessages}
+                disabled={!retrospectiveData.allowMessages}
                 name="content"
                 className="border-0 p-2 text-sm focus:outline-none focus-visible:outline-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                 placeholder="Write something..."
@@ -236,7 +236,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
             {sortedPostsByVotes.length > 0 ? (
               sortedPostsByVotes.map((post) => {
                 const hasVoted = post.votes.includes(currentUser.id);
-                const canVote = currentUser.id !== post.userId && adminSettings.allowVotes;
+                const canVote = currentUser.id !== post.userId && retrospectiveData.allowVotes;
                 const canDetroyPost = currentUser.id === post.userId;
                 const postContent = decryptMessage(post.content);
 
@@ -274,7 +274,7 @@ export function RetroCard({ title, description, section }: RetroCardProps) {
                 );
               })
             ) : (
-              <div className="p-2 text-sm text-gray-400">Write anything</div>
+              <div className="p-3 text-sm text-gray-400">Share your thoughts...</div>
             )}
           </div>
         </div>
