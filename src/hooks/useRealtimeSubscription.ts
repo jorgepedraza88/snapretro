@@ -10,22 +10,34 @@ import { useAdminStore } from '@/stores/useAdminStore';
 import { usePresenceStore, UserPresence } from '@/stores/usePresenceStore';
 import { useRetroSummaryStore } from '@/stores/useRetroSummaryStore';
 import { supabase } from '@/supabaseClient';
+import { useRealtimeActions } from './useRealtimeActions';
 import { useToast } from './useToast';
 
 export const useRealtimeSubscription = (retrospectiveId: string) => {
   const { toast } = useToast();
   const { setDisplayedContent } = useRetroSummaryStore();
-  const { currentUser, setCurrentUser, updateOnlineUsers, handleAdminChange, setChannel, adminId } =
-    usePresenceStore(
-      useShallow((state) => ({
-        currentUser: state.currentUser,
-        adminId: state.adminId,
-        setCurrentUser: state.setCurrentUser,
-        updateOnlineUsers: state.updateOnlineUsers,
-        handleAdminChange: state.handleAdminChange,
-        setChannel: state.setChannel
-      }))
-    );
+  const { sendSymmetricKeyBroadcast } = useRealtimeActions();
+  const {
+    adminId,
+    currentUser,
+    symmetricKey,
+    setCurrentUser,
+    updateOnlineUsers,
+    handleAdminChange,
+    setChannel,
+    setSymmetricKey
+  } = usePresenceStore(
+    useShallow((state) => ({
+      currentUser: state.currentUser,
+      adminId: state.adminId,
+      symmetricKey: state.symmetricKey,
+      setSymmetricKey: state.setSymmetricKey,
+      setCurrentUser: state.setCurrentUser,
+      updateOnlineUsers: state.updateOnlineUsers,
+      handleAdminChange: state.handleAdminChange,
+      setChannel: state.setChannel
+    }))
+  );
   const { setTimerState, setTimeLeft } = useAdminStore(
     useShallow((state) => ({
       setTimerState: state.setTimerState,
@@ -62,13 +74,19 @@ export const useRealtimeSubscription = (retrospectiveId: string) => {
 
         const currentAdmin = activeUsers.find((user) => user.id === adminId);
 
-        // If there are users in the retrospective and there is no admin, assign the first user as admin
+        // TODO: Cambiar, porque la retro no existirá cuando no haya usuarios
         if (!currentAdmin && activeUsers.length > 0) {
+          // If there are users in the retrospective and there is no admin, assign the first user as admin
           handleAdminChange(activeUsers[0].id);
         }
       })
       .on('presence', { event: 'join' }, ({ key, newPresences }) => {
         const isCurrentUser = key === currentUser.id;
+        const isCurrentUserAdmin = adminId === currentUser.id;
+
+        if (symmetricKey && isCurrentUserAdmin) {
+          sendSymmetricKeyBroadcast(retrospectiveId, symmetricKey);
+        }
 
         if (isCurrentUser) {
           return;
@@ -121,6 +139,11 @@ export const useRealtimeSubscription = (retrospectiveId: string) => {
       .on('broadcast', { event: REALTIME_EVENT_KEYS.RESET_TIMER }, async ({ payload }) => {
         setTimerState('off');
         setTimeLeft(payload.defaultTime);
+      })
+      .on('broadcast', { event: REALTIME_EVENT_KEYS.DISTRIBUTE_KEY }, async ({ payload }) => {
+        if (!symmetricKey) {
+          setSymmetricKey(payload.symmetricKey);
+        }
       });
 
     channel.subscribe(async (status) => {

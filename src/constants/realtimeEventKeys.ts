@@ -9,7 +9,8 @@ const REALTIME_EVENT_KEYS = {
   RESET_TIMER: 'reset-timer',
   SETTINGS: 'settings',
   CHAT: 'chat',
-  CHAT_NOTIFICATION: 'chat-notification'
+  CHAT_NOTIFICATION: 'chat-notification',
+  DISTRIBUTE_KEY: 'destribute-key'
 } as const;
 
 export default REALTIME_EVENT_KEYS;

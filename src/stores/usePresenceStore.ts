@@ -6,6 +6,7 @@ export type UserPresence = {
   name: string;
   avatarUrl?: string;
   hasBeenDisconnected?: boolean;
+  symmetricKey?: string;
 };
 
 type PresenceState = {
@@ -13,6 +14,8 @@ type PresenceState = {
   currentUser: UserPresence;
   channel: RealtimeChannel | null;
   adminId: string | null;
+  symmetricKey?: string;
+  setSymmetricKey: (key: string) => void;
   setAdminId: (adminId: string) => void;
   setChannel: (channel: RealtimeChannel | null) => void;
   setCurrentUser: (user: UserPresence) => void;
@@ -26,7 +29,9 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
   currentUser: { id: 'guest', name: 'Guest', isAdmin: false },
   channel: null,
   adminId: null,
+  symmetricKey: undefined,
 
+  setSymmetricKey: (symmetricKey: string) => set({ symmetricKey }),
   setAdminId: (adminId) => set({ adminId }),
   setChannel: (channel) => set({ channel }),
   getCurrentUser: () => get().currentUser,

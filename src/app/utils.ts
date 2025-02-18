@@ -22,27 +22,8 @@ export function generateDefaultSections(numberOfSections: number) {
   return defaultSections;
 }
 
-export const encryptMessage = (message: string) => {
-  const key = process.env.ENCRYPTION_KEY
-    ? Buffer.from(process.env.ENCRYPTION_KEY, 'base64')
-    : null;
-  const iv = process.env.ENCRYPTION_IV ? Buffer.from(process.env.ENCRYPTION_IV, 'base64') : null;
-
-  if (!key || !iv) {
-    throw new Error('Encryption fails');
-  }
-
-  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-  let encrypted = cipher.update(message, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-
-  return encrypted;
-};
-
 export const decryptMessage = (encryptedMessage: string) => {
-  const key = process.env.ENCRYPTION_KEY
-    ? Buffer.from(process.env.ENCRYPTION_KEY, 'base64')
-    : null;
+  const key = process.env.ENCRYPTION_KEY ? Buffer.from(process.env.ENCRYPTION_KEY, 'base64') : null;
   const iv = process.env.ENCRYPTION_IV ? Buffer.from(process.env.ENCRYPTION_IV, 'base64') : null;
 
   if (!key || !iv) {

@@ -1,4 +1,7 @@
-import { RetrospectiveData } from '@/types/Retro';
+import { Suspense } from 'react';
+
+import { RetrospectiveData, RetrospectiveSection } from '@/types/Retro';
+import { decryptMessage, importKey } from '@/app/cryptoClient';
 import { cn } from '@/lib/utils';
 import { RetroCard } from './RetroCard';
 
@@ -8,6 +11,20 @@ export async function RetroCardGroup({
   retrospectiveData: RetrospectiveData;
 }) {
   const sectionsNumber = retrospectiveData.sections.length;
+
+  // // Un helper asíncrono que devuelve la lista de posts descifrados.
+  // async function getDecryptedPosts(posts: RetrospectiveSection['posts'], symmetricKey?: string) {
+  //   if (!symmetricKey) return [];
+
+  //   const cryptoKey = await importKey(symmetricKey);
+  //   const postsDecrypted = await Promise.all(
+  //     posts.map(async (post) => ({
+  //       ...post,
+  //       content: await decryptMessage(post.content, cryptoKey)
+  //     }))
+  //   );
+  //   return postsDecrypted;
+  // }
 
   return (
     <div
@@ -19,12 +36,7 @@ export async function RetroCardGroup({
       })}
     >
       {retrospectiveData.sections.map((section) => (
-        <RetroCard
-          key={section.id}
-          title={section.title}
-          section={section}
-          retrospectiveData={retrospectiveData}
-        />
+        <RetroCard title={section.title} section={section} retrospectiveData={retrospectiveData} />
       ))}
     </div>
   );

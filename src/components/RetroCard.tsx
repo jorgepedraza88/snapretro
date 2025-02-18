@@ -1,6 +1,6 @@
 'use client';
 
-import { startTransition, useEffect, useOptimistic, useRef, useState } from 'react';
+import { startTransition, use, useEffect, useOptimistic, useRef, useState } from 'react';
 import {
   HiPencil as EditIcon,
   HiTrash as RemoveIcon,
@@ -20,7 +20,7 @@ import {
   editRetroSectionTitle,
   removeVoteFromPost
 } from '@/app/actions';
-import { decryptMessage, encryptMessage } from '@/app/utils';
+import { decryptMessage, encryptMessage, importKey } from '@/app/cryptoClient';
 import { cn } from '@/lib/utils';
 import { usePresenceStore } from '@/stores/usePresenceStore';
 import { supabase } from '@/supabaseClient';
@@ -36,8 +36,9 @@ interface RetroCardProps {
 }
 
 export function RetroCard({ title, description, section, retrospectiveData }: RetroCardProps) {
-  const { currentUser, adminId } = usePresenceStore(
+  const { currentUser, adminId, symmetricKey } = usePresenceStore(
     useShallow((state) => ({
+      symmetricKey: state.symmetricKey,
       adminId: state.adminId,
       currentUser: state.currentUser
     }))
@@ -49,6 +50,8 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
   const [isWriting, setIsWriting] = useState(false);
   const [isEditingSectionTitle, setIsEditingSectionTitle] = useState(false);
   const [newSectionTitle, setNewSectionTitle] = useState(title);
+
+  // const decryptedPosts = use(getDecryptedPosts(section.posts, symmetricKey));
 
   const [optimisticTitle, addOptimisticTitle] = useOptimistic(section.title);
   const [optimisticPosts, addOptimisticPosts] = useOptimistic(section.posts);
@@ -94,16 +97,19 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
 
     try {
       const temporalId = nanoid(5);
-      const encryptedPostContent = encryptMessage(postContent);
+
+      const cryptoKey = await importKey(symmetricKey);
+
+      const encryptedContent = await encryptMessage(postContent, cryptoKey);
 
       const newPost = {
         id: temporalId,
         userId: currentUser.id,
-        content: encryptedPostContent,
+        content: encryptedContent,
         votes: []
       };
 
-      addOptimisticPosts((prev) => [...prev, { ...newPost, content: encryptedPostContent }]);
+      addOptimisticPosts((prev) => [...prev, { ...newPost, content: postContent }]);
 
       postFormRef.current?.reset();
 
@@ -238,12 +244,11 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
                 const hasVoted = post.votes.includes(currentUser.id);
                 const canVote = currentUser.id !== post.userId && retrospectiveData.allowVotes;
                 const canDetroyPost = currentUser.id === post.userId;
-                const postContent = decryptMessage(post.content);
 
                 return (
                   <Card key={post.id} className="group mx-2 my-2">
                     <div className="flex items-center justify-between gap-2 p-2 text-sm">
-                      <p>{postContent}</p>
+                      <p>{post.content}</p>
                       <div className="flex items-center gap-2">
                         <div className="mt-px text-xs">
                           {post.votes.length !== 0 && `+${post.votes.length}`}
