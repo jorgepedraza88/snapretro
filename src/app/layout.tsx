@@ -5,14 +5,11 @@ import { Toaster } from '@/components/ui/toaster';
 
 import './globals.css';
 
-const geistSans = localFont({
-  src: './fonts/GeistVF.woff',
-  variable: '--font-geist-sans',
-  weight: '100 900'
-});
-const geistMono = localFont({
-  src: './fonts/GeistMonoVF.woff',
-  variable: '--font-geist-mono',
+const clashSans = localFont({
+  src: './fonts/clash.woff2',
+  variable: '--font-clash-sans',
+  style: 'normal',
+  display: 'swap',
   weight: '100 900'
 });
 
@@ -28,7 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased lg:overflow-auto`}>
+      <body
+        className={`${clashSans.variable} ${clashSans.variable} subpixel-antialiased lg:overflow-auto`}
+      >
         {children}
         <Toaster />
       </body>
