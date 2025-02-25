@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
 
-import { ChatFooter } from '@/components/ChatFooter';
 import { Navigation } from '@/components/Navigation';
 import { UserSessionWrapper } from '@/components/UserSessionWrapper';
 import { getRetrospetiveData } from '@/app/actions';
@@ -22,7 +21,6 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         <Navigation />
         <div className="gap-2 bg-neutral-50 lg:flex">
           <MainContent data={initialData} />
-          <ChatFooter />
         </div>
       </RetroContextProvider>
     </UserSessionWrapper>

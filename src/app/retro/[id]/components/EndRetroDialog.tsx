@@ -1,6 +1,7 @@
 'use client';
 
 import { BsStars as AiIcon } from 'react-icons/bs';
+import { PiFlagCheckeredFill as FinishRetroIcon } from 'react-icons/pi';
 import { useShallow } from 'zustand/shallow';
 
 import {
@@ -22,7 +23,7 @@ import { usePresenceStore } from '@/stores/usePresenceStore';
 import { useRetroContext } from './RetroContextProvider';
 
 export function EndRetroDialog() {
-  const { handleEndRetro } = useRetroContext();
+  const { handleEndRetro, hasRetroEnded } = useRetroContext();
   const { currentUser, adminId } = usePresenceStore(
     useShallow((state) => ({
       adminId: state.adminId,
@@ -36,14 +37,18 @@ export function EndRetroDialog() {
     }))
   );
 
-  if (currentUser.id !== adminId) return null;
+  if (currentUser.id !== adminId || hasRetroEnded) return null;
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm">
-          End Retrospective
-        </Button>
+        <div className="flex flex-col items-center">
+          <Button variant="ghost" size="sm">
+            <FinishRetroIcon size={20} />
+          </Button>
+
+          <Label className="text-xs">End</Label>
+        </div>
       </AlertDialogTrigger>
       <AlertDialogContent className="transition-none">
         <AlertDialogHeader>

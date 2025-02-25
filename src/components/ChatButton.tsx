@@ -1,24 +1,24 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { HiChatBubbleLeftRight } from 'react-icons/hi2';
 import { useParams } from 'next/navigation';
 
 import REALTIME_EVENT_KEYS from '@/constants/realtimeEventKeys';
 import { usePresenceStore } from '@/stores/usePresenceStore';
 import { supabase } from '@/supabaseClient';
 import { ChatSidebar } from './ChatSidebar';
-import { Button } from './ui/button';
 
 function ChatNotificationDot() {
   return (
     <>
-      <span className="absolute -left-0.5 -top-0.5 inline-flex size-[10px] animate-ping rounded-full bg-red-400 opacity-75"></span>
-      <span className="absolute -left-0.5 -top-0.5 inline-flex size-[10px] rounded-full bg-red-500"></span>
+      <span className="absolute right-1 top-1 inline-flex size-2 animate-ping rounded-full bg-red-400 opacity-75"></span>
+      <span className="absolute right-1 top-1 inline-flex size-2 rounded-full bg-red-500"></span>
     </>
   );
 }
 
-export function ChatFooter() {
+export function ChatButton() {
   const { id: retrospectiveId } = useParams<{ id: string }>();
   const currentUser = usePresenceStore((state) => state.currentUser);
 
@@ -51,11 +51,14 @@ export function ChatFooter() {
   }, [retrospectiveId, currentUser.id]);
 
   return (
-    <div className="absolute bottom-8 right-0 hidden justify-end p-4 lg:flex">
-      <div className="relative">
-        <Button onClick={handleToogleSidebar} variant="secondary">
-          Open Chat
-        </Button>
+    <div>
+      <div className="relative mr-2 mt-1 px-2">
+        <button type="button" onClick={handleToogleSidebar}>
+          <HiChatBubbleLeftRight
+            size={24}
+            className="mt-1 shrink-0 cursor-pointer text-violet-500 transition-colors hover:text-violet-600"
+          />
+        </button>
         {chatNotification && !isSidebarOpen && <ChatNotificationDot />}
       </div>
       <ChatSidebar setIsSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} />

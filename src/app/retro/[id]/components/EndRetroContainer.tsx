@@ -36,9 +36,9 @@ export function EndRetroContainer() {
       <div className="w-full p-4">
         <h1 className="text-5xl font-bold">Congratulations!</h1>
         <h2 className="mt-1 text-xl font-medium text-neutral-500">
-          This Retrospective meeting is finish
+          This Retrospective meeting is finished
         </h2>
-        <div className="group relative mb-4 rounded-lg border border-transparent p-4 hover:border-neutral-200 hover:bg-neutral-100">
+        <div className="group relative mb-4 rounded-lg border border-transparent p-4 hover:border-neutral-200 hover:bg-neutral-100 mt-4">
           <ReactMarkdown className="markdown">{displayedContent}</ReactMarkdown>
           <Button
             variant="outline"

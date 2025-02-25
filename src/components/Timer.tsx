@@ -86,7 +86,7 @@ export function Timer({ defaultTime }: { defaultTime: number }) {
           )}
         </div>
       )}
-      <div className="flex items-center gap-2 rounded-lg bg-violet-600 px-2 py-1.5 text-neutral-100">
+      <div className="flex items-center gap-2 rounded-lg bg-violet-200 px-2 py-1.5 text-violet-900">
         <TimerIcon size={16} /> {formatTime(timeLeft)}
       </div>
       {isCurrentUserAdmin && (

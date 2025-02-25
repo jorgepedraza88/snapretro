@@ -1,9 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { Controller, FormProvider, useForm } from 'react-hook-form';
-import { HiCog8Tooth as AdminSettingsIcon } from 'react-icons/hi2';
-import { PopoverClose } from '@radix-ui/react-popover';
+import { useEffect } from 'react';
+import { Controller, FormProvider, useForm, useWatch } from 'react-hook-form';
+import {
+  HiAdjustmentsHorizontal as AdminSettingsIcon,
+  HiBars4 as ColumnIcons,
+  HiLockClosed as PasswordIcon
+} from 'react-icons/hi2';
 import { useShallow } from 'zustand/shallow';
 
 import { RetrospectiveData } from '@/types/Retro';
@@ -16,6 +19,7 @@ import { Switch } from '@/components/ui/switch';
 import { editRetroPassword, editRetroSectionsNumber, editRetroSettings } from '@/app/actions';
 import { cn } from '@/lib/utils';
 import { usePresenceStore } from '@/stores/usePresenceStore';
+import { EndRetroDialog } from './EndRetroDialog';
 import { useRetroContext } from './RetroContextProvider';
 
 interface AdminMenuData {
@@ -39,9 +43,6 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
   const currentPassword = retrospectiveData.password || '';
   const isCurrentUserAdmin = adminId === currentUser.id;
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const form = useForm<AdminMenuData>({
     defaultValues: {
       columns: retrospectiveData.sections.length,
@@ -52,8 +53,9 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
   });
 
   const onSubmit = async (data: AdminMenuData) => {
+    if (form.formState.isSubmitting) return;
+
     const { columns, password: newPassword, ...restData } = data;
-    setIsSubmitting(true);
 
     if (columns !== retrospectiveData.sections.length) {
       await editRetroSectionsNumber(retrospectiveData.id, data.columns);
@@ -71,107 +73,146 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
     }
 
     revalidatePageBroadcast(retrospectiveData.id);
-
-    setIsPopoverOpen(false);
-    setIsSubmitting(false);
   };
+
+  const formValues = useWatch({
+    control: form.control
+  }) as AdminMenuData;
+
+  // TODO: Optimizar cambio de settings - hacer llamadas independientes, quizá no usar react hook forms
+  useEffect(() => {
+    onSubmit(formValues);
+  }, [formValues]);
 
   if (!isCurrentUserAdmin || hasRetroEnded) {
     return null;
   }
 
   return (
-    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-      <PopoverTrigger asChild>
-        <Button type="button" variant="outline" className="absolute -right-8 top-20" size="icon">
-          <AdminSettingsIcon size={16} />
-        </Button>
-      </PopoverTrigger>
-
-      <PopoverContent align="start" className="w-fit bg-neutral-50 text-sm">
+    <div className="fixed bottom-8 rounded-lg border px-3 py-2 shadow-md">
+      <div className="w-fit bg-neutral-50 text-sm">
         <FormProvider {...form}>
-          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-            <Label>Number of columns:</Label>
+          <form className="flex items-center gap-4" onSubmit={form.handleSubmit(onSubmit)}>
             <Controller
               name="columns"
               control={form.control}
               render={({ field }) => (
-                <div className="mt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className={cn('rounded-r-none border', {
-                      'bg-violet-500 text-white': field.value === 2
-                    })}
-                    onClick={() => field.onChange(2)}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex flex-col items-center">
+                      <Button variant="ghost" size="icon">
+                        <ColumnIcons size={20} />
+                      </Button>
+                      <Label className="text-xs">Columns</Label>
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    sideOffset={4}
+                    side="top"
+                    align="center"
+                    className="w-fit bg-neutral-100"
                   >
-                    2
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className={cn('rounded-none border', {
-                      'bg-violet-500 text-white': field.value === 3
-                    })}
-                    onClick={() => field.onChange(3)}
-                  >
-                    3
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className={cn('rounded-l-none border', {
-                      'bg-violet-500 text-white': field.value === 4
-                    })}
-                    onClick={() => field.onChange(4)}
-                  >
-                    4
-                  </Button>
-                </div>
+                    <div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className={cn('rounded-r-none border', {
+                          'bg-violet-500 text-white': field.value === 2
+                        })}
+                        onClick={() => field.onChange(2)}
+                      >
+                        2
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className={cn('rounded-none border', {
+                          'bg-violet-500 text-white': field.value === 3
+                        })}
+                        onClick={() => field.onChange(3)}
+                      >
+                        3
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className={cn('rounded-l-none border', {
+                          'bg-violet-500 text-white': field.value === 4
+                        })}
+                        onClick={() => field.onChange(4)}
+                      >
+                        4
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               )}
             />
 
-            <div>
-              <Label>Secret word:</Label>
-              <Input {...form.register('password')} />
-            </div>
-            <div>
-              <Label>During meeting:</Label>
-              <div className="mt-2 flex items-center gap-2">
-                <Controller
-                  name="allowMessages"
-                  control={form.control}
-                  render={({ field }) => (
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
-                  )}
-                />
-                <Label>Allow messages</Label>
-              </div>
-              <div className="mt-2 flex items-center gap-2">
-                <Controller
-                  name="allowVotes"
-                  control={form.control}
-                  render={({ field }) => (
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
-                  )}
-                />
-                <Label>Allow votes</Label>
-              </div>
-            </div>
-            <div className="flex justify-end gap-2">
-              <PopoverClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </PopoverClose>
-              <Button type="submit" disabled={isSubmitting}>
-                Apply
-              </Button>
-            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="flex flex-col items-center">
+                  <Button variant="ghost" size="icon">
+                    <PasswordIcon size={16} />
+                  </Button>
+                  <Label className="text-xs">Secret</Label>
+                </div>
+              </PopoverTrigger>
+              <PopoverContent
+                sideOffset={4}
+                side="top"
+                align="center"
+                className="w-fit bg-neutral-100"
+              >
+                <Input placeholder="Add a secret word" {...form.register('password')} />
+              </PopoverContent>
+            </Popover>
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="flex flex-col items-center">
+                  <Button variant="ghost" size="icon">
+                    <AdminSettingsIcon size={16} />
+                  </Button>
+                  <Label className="text-xs">Settings</Label>
+                </div>
+              </PopoverTrigger>
+              <PopoverContent
+                sideOffset={4}
+                side="top"
+                align="center"
+                className="w-fit bg-neutral-100"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <Controller
+                      name="allowMessages"
+                      control={form.control}
+                      render={({ field }) => (
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      )}
+                    />
+                    <Label className="text-xs">Messages</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Controller
+                      name="allowVotes"
+                      control={form.control}
+                      render={({ field }) => (
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      )}
+                    />
+                    <Label className="text-xs">Voting</Label>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <EndRetroDialog />
           </form>
         </FormProvider>
-      </PopoverContent>
-    </Popover>
+      </div>
+    </div>
   );
 }
