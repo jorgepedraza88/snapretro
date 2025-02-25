@@ -15,7 +15,7 @@ type AdminState = {
 };
 
 export const useAdminStore = create<AdminState>((set) => ({
-  useSummaryAI: true,
+  useSummaryAI: false,
   timerState: 'off',
   timeLeft: DEFAULT_TIMELEFT,
   defaultSeconds: DEFAULT_TIMELEFT,

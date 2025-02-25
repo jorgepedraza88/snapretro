@@ -1,13 +1,12 @@
 'use server';
 
-import crypto from 'crypto';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+// import { GoogleGenerativeAI } from '@google/generative-ai';
 import { DateTime } from 'luxon';
 import { revalidatePath } from 'next/cache';
 
-import { RetrospectiveData } from '@/types/Retro';
+// import { RetrospectiveData } from '@/types/Retro';
 import { prisma } from '@/lib/prisma';
-import { decryptMessage, generateDefaultSections } from './utils';
+import { generateDefaultSections } from './utils';
 
 interface CreatePostParams {
   sectionId: string;
@@ -292,81 +291,81 @@ export async function endRetrospective(retrospectiveId: string) {
   }
 }
 
-export async function generateAIContent(data: RetrospectiveData, participants: string[]) {
-  const { adminName, date, sections } = data;
-  try {
-    const geminiAPIKey = process.env.GEMINI_API_KEY;
+// export async function generateAIContent(data: RetrospectiveData, participants: string[]) {
+//   const { adminName, date, sections } = data;
+//   try {
+//     const geminiAPIKey = process.env.GEMINI_API_KEY;
 
-    if (!geminiAPIKey) {
-      throw new Error('Missing GEMINI_API_KEY');
-    }
+//     if (!geminiAPIKey) {
+//       throw new Error('Missing GEMINI_API_KEY');
+//     }
 
-    const decryptedPostsSections = sections.map((section) => {
-      const newPosts = section.posts.map((post) => {
-        const decryptedPostContent = decryptMessage(post.content);
-        return { ...post, content: decryptedPostContent };
-      });
-      return { ...section, posts: newPosts };
-    });
+//     const decryptedPostsSections = sections.map((section) => {
+//       const newPosts = section.posts.map((post) => {
+//         const decryptedPostContent = decryptMessage(post.content);
+//         return { ...post, content: decryptedPostContent };
+//       });
+//       return { ...section, posts: newPosts };
+//     });
 
-    const formattedBody = {
-      adminName: adminName,
-      date: DateTime.fromJSDate(date).toFormat('MM/dd/yyyy'),
-      sections: decryptedPostsSections,
-      participants
-    };
+//     const formattedBody = {
+//       adminName: adminName,
+//       date: DateTime.fromJSDate(date).toFormat('MM/dd/yyyy'),
+//       sections: decryptedPostsSections,
+//       participants
+//     };
 
-    const genAI = new GoogleGenerativeAI(geminiAPIKey);
+//     const genAI = new GoogleGenerativeAI(geminiAPIKey);
 
-    const generationConfig = {
-      temperature: 1.5,
-      responseMimeType: 'text/plain'
-    };
+//     const generationConfig = {
+//       temperature: 1.5,
+//       responseMimeType: 'text/plain'
+//     };
 
-    // Ininitalise a generative model
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
-      systemInstruction: 'casual tone, natural output in a well formatted text',
-      generationConfig
-    });
+//     // Ininitalise a generative model
+//     const model = genAI.getGenerativeModel({
+//       model: 'gemini-1.5-flash',
+//       systemInstruction: 'casual tone, natural output in a well formatted text',
+//       generationConfig
+//     });
 
-    const prompt = `Generate a structured summary in Markdown format for the following information:
+//     const prompt = `Generate a structured summary in Markdown format for the following information:
 
-${JSON.stringify(formattedBody)}
+// ${JSON.stringify(formattedBody)}
 
-* **Retrospective Meeting:** - use h2 font size
-    * *Host*: [adminName] - use normal text size
-    * *Date*: [date] - use normal text size
-    * *Participants*: [participants] - use normal text size
-    *
-        * [sectionName - use h2]: (only include section name)
-        * [use list format - Make a summary of the section - don't use summary word - give importance to the most relevant information and format it to a clear and concise summary]
-        * [sectionName - use h2]: (only include section name)
-        * [use list format - Make a summary of the section - don't use summary word - give importance to the most relevant information and format it to a clear and concise summary]
-        * (repeat with the rest of the sections)
+// * **Retrospective Meeting:** - use h2 font size
+//     * *Host*: [adminName] - use normal text size
+//     * *Date*: [date] - use normal text size
+//     * *Participants*: [participants] - use normal text size
+//     *
+//         * [sectionName - use h2]: (only include section name)
+//         * [use list format - Make a summary of the section - don't use summary word - give importance to the most relevant information and format it to a clear and concise summary]
+//         * [sectionName - use h2]: (only include section name)
+//         * [use list format - Make a summary of the section - don't use summary word - give importance to the most relevant information and format it to a clear and concise summary]
+//         * (repeat with the rest of the sections)
 
-**Markdown format:**
+// **Markdown format:**
 
-* Use headings (H2, H3, H4) for titles and subtitles.
-* Use bold to emphatize the important parts, inside the sections.
-* Use bold for Host, Date and Participants tags
+// * Use headings (H2, H3, H4) for titles and subtitles.
+// * Use bold to emphatize the important parts, inside the sections.
+// * Use bold for Host, Date and Participants tags
 
-**Important**:
-* Make sure the summary is clear and concise.
-* Avoid including personal information or sensitive data.
-* Make sure the summary is well formatted and easy to read.
-* Organize and give importance to the most relevant information, taking in account the number of votes but do not include the number of votes in the summary.
-* Do not include users ids or personal information in the summary.
-`;
+// **Important**:
+// * Make sure the summary is clear and concise.
+// * Avoid including personal information or sensitive data.
+// * Make sure the summary is well formatted and easy to read.
+// * Organize and give importance to the most relevant information, taking in account the number of votes but do not include the number of votes in the summary.
+// * Do not include users ids or personal information in the summary.
+// `;
 
-    // Pass the prompt to the model and retrieve the output
-    const result = await model.generateContent(prompt);
+//     // Pass the prompt to the model and retrieve the output
+//     const result = await model.generateContent(prompt);
 
-    const response = result.response;
-    const output = response.text();
+//     const response = result.response;
+//     const output = response.text();
 
-    return output;
-  } catch (error) {
-    console.error(error);
-  }
-}
+//     return output;
+//   } catch (error) {
+//     console.error(error);
+//   }
+// }

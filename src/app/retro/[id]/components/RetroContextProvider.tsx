@@ -7,7 +7,7 @@ import { useShallow } from 'zustand/shallow';
 import { RetrospectiveData } from '@/types/Retro';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 import { useToast } from '@/hooks/useToast';
-import { endRetrospective, generateAIContent } from '@/app/actions';
+import { endRetrospective } from '@/app/actions';
 import { generateMarkdownFromJSON } from '@/app/utils';
 import { useAdminStore } from '@/stores/useAdminStore';
 import { usePresenceStore } from '@/stores/usePresenceStore';
@@ -31,6 +31,7 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
 
   const useSummaryAI = useAdminStore((state) => state.useSummaryAI);
   const onlineUsers = usePresenceStore((state) => state.onlineUsers);
+  const symmetricKey = usePresenceStore((state) => state.symmetricKey);
   const { isLoadingFinalContent, startTypingEffect, setIsLoadingFinalContent } =
     useRetroSummaryStore(
       useShallow((state) => ({
@@ -45,23 +46,31 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
 
   const generateFinalContent = useCallback(
     async (endResponse: RetrospectiveData) => {
+      if (!symmetricKey) {
+        return;
+      }
+
       if (!useSummaryAI) {
         return generateMarkdownFromJSON(
           endResponse,
-          onlineUsers.map((user) => user.name)
+          onlineUsers.map((user) => user.name),
+          symmetricKey
         );
       }
 
-      const aiContent = await generateAIContent(
-        endResponse,
-        onlineUsers.map((user) => user.name)
-      );
+      // const aiContent = await generateAIContent(
+      //   endResponse,
+      //   onlineUsers.map((user) => user.name)
+      // );
+
+      const aiContent = undefined;
 
       return (
         aiContent ||
         generateMarkdownFromJSON(
           endResponse,
-          onlineUsers.map((user) => user.name)
+          onlineUsers.map((user) => user.name),
+          symmetricKey
         )
       );
     },
@@ -79,6 +88,10 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
       }
 
       const finalContent = await generateFinalContent(endResponse);
+
+      if (!finalContent) {
+        throw new Error('Failed to generate final content');
+      }
 
       startTypingEffect(finalContent);
     } catch (error) {
