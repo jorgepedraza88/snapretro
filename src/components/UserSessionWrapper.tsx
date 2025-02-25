@@ -23,7 +23,7 @@ export function UserSessionWrapper({ data, children }: UserSessionWrapperProps) 
     router.replace(ROUTES.DISCONNECTED);
   }
 
-  if (hasRetroEnded) {
+  if (hasRetroEnded && isGuestUser) {
     router.replace(ROUTES.NOT_FOUND);
   }
 

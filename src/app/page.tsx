@@ -14,10 +14,10 @@ export default function Home() {
         <SwitchColorMode />
       </div> */}
       <main className="flex flex-col items-center justify-center">
-        <h1 className="text-center text-5xl font-bold dark:text-neutral-100 lg:text-left lg:text-6xl">
-          Welcome to <span className="font-black text-violet-600">FreeRetros</span>
+        <h1 className="text-center text-5xl leading-tight tracking-tight dark:text-neutral-100 lg:text-left lg:text-8xl">
+          Welcome to <span className="font-semibold text-violet-700">FreeRetros</span>
         </h1>
-        <h2 className="mt-2 text-xl dark:text-neutral-100 lg:text-2xl">
+        <h2 className="mt-2 text-xl tracking-tight dark:text-neutral-100 lg:text-5xl">
           A free tool for creating retrospectives
         </h2>
         <div className="mt-8 max-w-96 items-center justify-center gap-4 lg:flex">

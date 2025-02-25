@@ -73,6 +73,13 @@ export function useRealtimeActions() {
     [sendBroadcast]
   );
 
+  const sendSymmetricKeyBroadcast = useCallback(
+    (retroId: string, symmetricKey: string) => {
+      sendBroadcast(retroId, REALTIME_EVENT_KEYS.DISTRIBUTE_KEY, { symmetricKey });
+    },
+    [sendBroadcast]
+  );
+
   return {
     writingAction,
     revalidatePageBroadcast,
@@ -80,6 +87,7 @@ export function useRealtimeActions() {
     changeAdminBroadcast,
     removeUserBroadcast,
     handleTimerBroadcast,
-    editAdminSettingsBroadcast
+    editAdminSettingsBroadcast,
+    sendSymmetricKeyBroadcast
   };
 }

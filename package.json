@@ -49,6 +49,8 @@
     "react-markdown": "^9.0.3",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
+    "tweetnacl": "1.0.3",
+    "tweetnacl-util": "0.15.1",
     "zustand": "^5.0.3"
   },
   "devDependencies": {

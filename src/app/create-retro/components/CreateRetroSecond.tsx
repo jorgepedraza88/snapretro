@@ -99,7 +99,7 @@ export function CreateRetroSecond() {
             defaultValue={[300]}
             max={600}
             min={60}
-            step={30}
+            step={60}
             value={[timer]}
             className="mt-1"
             onValueChange={(val) => setValue('timer', val[0])}

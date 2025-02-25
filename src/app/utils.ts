@@ -1,6 +1,5 @@
-import crypto from 'crypto';
-
 import { RetrospectiveData } from '@/types/Retro';
+import { decryptMessage } from './cryptoClient';
 
 export function generateDefaultSections(numberOfSections: number) {
   function generateDefaultSection(title: string, index: number) {
@@ -22,41 +21,11 @@ export function generateDefaultSections(numberOfSections: number) {
   return defaultSections;
 }
 
-export const encryptMessage = (message: string) => {
-  const key = process.env.ENCRYPTION_KEY
-    ? Buffer.from(process.env.ENCRYPTION_KEY, 'base64')
-    : null;
-  const iv = process.env.ENCRYPTION_IV ? Buffer.from(process.env.ENCRYPTION_IV, 'base64') : null;
-
-  if (!key || !iv) {
-    throw new Error('Encryption fails');
-  }
-
-  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-  let encrypted = cipher.update(message, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-
-  return encrypted;
-};
-
-export const decryptMessage = (encryptedMessage: string) => {
-  const key = process.env.ENCRYPTION_KEY
-    ? Buffer.from(process.env.ENCRYPTION_KEY, 'base64')
-    : null;
-  const iv = process.env.ENCRYPTION_IV ? Buffer.from(process.env.ENCRYPTION_IV, 'base64') : null;
-
-  if (!key || !iv) {
-    throw new Error('Encryption fails');
-  }
-
-  const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-  let decrypted = decipher.update(encryptedMessage, 'hex', 'utf8');
-  decrypted += decipher.final('utf8');
-
-  return decrypted;
-};
-
-export function generateMarkdownFromJSON(json: RetrospectiveData, participants: string[]): string {
+export function generateMarkdownFromJSON(
+  json: RetrospectiveData,
+  participants: string[],
+  symmetricKey: string
+) {
   let markdownTemplate = `# Retrospective\n\n`;
 
   // Add header details
@@ -70,7 +39,7 @@ export function generateMarkdownFromJSON(json: RetrospectiveData, participants: 
 
     if (section.posts.length > 0) {
       section.posts.forEach((post) => {
-        const decryptedPost = decryptMessage(post.content);
+        const decryptedPost = decryptMessage(post.content, symmetricKey);
         markdownTemplate += `    - ${decryptedPost} (${post.votes.length} votes)\n`;
       });
     } else {

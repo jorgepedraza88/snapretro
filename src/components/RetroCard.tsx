@@ -20,7 +20,7 @@ import {
   editRetroSectionTitle,
   removeVoteFromPost
 } from '@/app/actions';
-import { decryptMessage, encryptMessage } from '@/app/utils';
+import { decryptMessage, encryptMessage } from '@/app/cryptoClient';
 import { cn } from '@/lib/utils';
 import { usePresenceStore } from '@/stores/usePresenceStore';
 import { supabase } from '@/supabaseClient';
@@ -36,8 +36,9 @@ interface RetroCardProps {
 }
 
 export function RetroCard({ title, description, section, retrospectiveData }: RetroCardProps) {
-  const { currentUser, adminId } = usePresenceStore(
+  const { currentUser, adminId, symmetricKey } = usePresenceStore(
     useShallow((state) => ({
+      symmetricKey: state.symmetricKey,
       adminId: state.adminId,
       currentUser: state.currentUser
     }))
@@ -94,16 +95,21 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
 
     try {
       const temporalId = nanoid(5);
-      const encryptedPostContent = encryptMessage(postContent);
+
+      if (!symmetricKey) {
+        throw new Error('Symmetric key not found');
+      }
+
+      const encryptedContent = encryptMessage(postContent, symmetricKey);
 
       const newPost = {
         id: temporalId,
         userId: currentUser.id,
-        content: encryptedPostContent,
+        content: encryptedContent,
         votes: []
       };
 
-      addOptimisticPosts((prev) => [...prev, { ...newPost, content: encryptedPostContent }]);
+      addOptimisticPosts((prev) => [...prev, { ...newPost, content: encryptedContent }]);
 
       postFormRef.current?.reset();
 
@@ -192,12 +198,12 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
                     name="title"
                     onChange={(e) => setNewSectionTitle(e.target.value)}
                     onBlur={() => setIsEditingSectionTitle(false)}
+                    autoFocus
                     onKeyDown={(e) => {
                       if (e.key === 'Escape') {
                         setIsEditingSectionTitle(false);
                       }
                     }}
-                    autoFocus
                   />
                 </form>
               ) : (
@@ -225,7 +231,7 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
                 disabled={!retrospectiveData.allowMessages}
                 name="content"
                 className="border-0 p-2 text-sm focus:outline-none focus-visible:outline-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Write something..."
+                placeholder="Share your thoughts..."
                 onChange={handleNewPostChange}
               />
               <Button type="submit" size="sm" variant="secondary" className="h-8 p-1.5 text-xs">
@@ -233,49 +239,53 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
               </Button>
             </form>
 
-            {sortedPostsByVotes.length > 0 ? (
-              sortedPostsByVotes.map((post) => {
-                const hasVoted = post.votes.includes(currentUser.id);
-                const canVote = currentUser.id !== post.userId && retrospectiveData.allowVotes;
-                const canDetroyPost = currentUser.id === post.userId;
-                const postContent = decryptMessage(post.content);
+            {sortedPostsByVotes.map((post) => {
+              const hasVoted = post.votes.includes(currentUser.id);
+              const canVote = currentUser.id !== post.userId && retrospectiveData.allowVotes;
+              const canDetroyPost =
+                currentUser.id === post.userId && retrospectiveData.allowMessages;
 
-                return (
-                  <Card key={post.id} className="group mx-2 my-2">
-                    <div className="flex items-center justify-between gap-2 p-2 text-sm">
-                      <p>{postContent}</p>
-                      <div className="flex items-center gap-2">
-                        <div className="mt-px text-xs">
-                          {post.votes.length !== 0 && `+${post.votes.length}`}
-                        </div>
-                        {canVote && (
-                          <Button
-                            variant="ghost"
-                            className={cn('invisible h-auto p-1.5 group-hover:visible', {
-                              'visible text-violet-500': hasVoted
-                            })}
-                            onClick={() => handlePostVoting(post.id, hasVoted)}
-                          >
-                            <VoteIcon className="shrink-0" />
-                          </Button>
-                        )}
-                        {canDetroyPost && (
-                          <Button
-                            variant="ghost"
-                            className="h-auto p-1.5"
-                            onClick={() => handleDestroyPost(post.id)}
-                          >
-                            <RemoveIcon className="shrink-0" />
-                          </Button>
-                        )}
+              const decryptedMessage = symmetricKey
+                ? decryptMessage(post.content, symmetricKey)
+                : null;
+
+              if (!decryptedMessage) {
+                return null;
+              }
+
+              return (
+                <Card key={post.id} className="group mx-2 my-2">
+                  <div className="flex items-center justify-between gap-2 p-2 text-sm">
+                    <p>{decryptedMessage}</p>
+                    <div className="flex items-center gap-2">
+                      <div className="mt-px text-xs">
+                        {post.votes.length !== 0 && `+${post.votes.length}`}
                       </div>
+                      {canVote && (
+                        <Button
+                          variant="ghost"
+                          className={cn('invisible h-auto p-1.5 group-hover:visible', {
+                            'visible text-violet-500': hasVoted
+                          })}
+                          onClick={() => handlePostVoting(post.id, hasVoted)}
+                        >
+                          <VoteIcon className="shrink-0" />
+                        </Button>
+                      )}
+                      {canDetroyPost && (
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-1.5"
+                          onClick={() => handleDestroyPost(post.id)}
+                        >
+                          <RemoveIcon className="shrink-0" />
+                        </Button>
+                      )}
                     </div>
-                  </Card>
-                );
-              })
-            ) : (
-              <div className="p-3 text-sm text-gray-400">Share your thoughts...</div>
-            )}
+                  </div>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </Card>

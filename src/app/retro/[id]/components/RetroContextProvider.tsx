@@ -5,9 +5,10 @@ import { ImSpinner as SpinnerIcon } from 'react-icons/im';
 import { useShallow } from 'zustand/shallow';
 
 import { RetrospectiveData } from '@/types/Retro';
+import { useRealtimeActions } from '@/hooks/useRealtimeActions';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 import { useToast } from '@/hooks/useToast';
-import { endRetrospective, generateAIContent } from '@/app/actions';
+import { endRetrospective } from '@/app/actions';
 import { generateMarkdownFromJSON } from '@/app/utils';
 import { useAdminStore } from '@/stores/useAdminStore';
 import { usePresenceStore } from '@/stores/usePresenceStore';
@@ -31,36 +32,48 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
 
   const useSummaryAI = useAdminStore((state) => state.useSummaryAI);
   const onlineUsers = usePresenceStore((state) => state.onlineUsers);
-  const { isLoadingFinalContent, startTypingEffect, setLoading } = useRetroSummaryStore(
-    useShallow((state) => ({
-      isLoadingFinalContent: state.isLoadingFinalContent,
-      startTypingEffect: state.startTypingEffect,
-      setLoading: state.setLoading
-    }))
-  );
+  const symmetricKey = usePresenceStore((state) => state.symmetricKey);
+
+  const { endRetroBroadcast } = useRealtimeActions();
+  const { isLoadingFinalContent, startTypingEffect, setIsLoadingFinalContent } =
+    useRetroSummaryStore(
+      useShallow((state) => ({
+        isLoadingFinalContent: state.isLoadingFinalContent,
+        startTypingEffect: state.startTypingEffect,
+        setIsLoadingFinalContent: state.setIsLoadingFinalContent
+      }))
+    );
 
   // Initialize realtime
   useRealtimeSubscription(data.id);
 
   const generateFinalContent = useCallback(
     async (endResponse: RetrospectiveData) => {
+      if (!symmetricKey) {
+        return;
+      }
+
       if (!useSummaryAI) {
         return generateMarkdownFromJSON(
           endResponse,
-          onlineUsers.map((user) => user.name)
+          onlineUsers.map((user) => user.name),
+          symmetricKey
         );
       }
 
-      const aiContent = await generateAIContent(
-        endResponse,
-        onlineUsers.map((user) => user.name)
-      );
+      // const aiContent = await generateAIContent(
+      //   endResponse,
+      //   onlineUsers.map((user) => user.name)
+      // );
+
+      const aiContent = undefined;
 
       return (
         aiContent ||
         generateMarkdownFromJSON(
           endResponse,
-          onlineUsers.map((user) => user.name)
+          onlineUsers.map((user) => user.name),
+          symmetricKey
         )
       );
     },
@@ -69,7 +82,7 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
   );
 
   const handleEndRetro = useCallback(async () => {
-    setLoading(true);
+    setIsLoadingFinalContent(true);
 
     try {
       const endResponse = await endRetrospective(data.id);
@@ -79,14 +92,20 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
 
       const finalContent = await generateFinalContent(endResponse);
 
+      if (!finalContent) {
+        throw new Error('Failed to generate final content');
+      }
+
       startTypingEffect(finalContent);
+      endRetroBroadcast(data.id, finalContent);
     } catch (error) {
-      toast({ title: 'Error ending retro', variant: 'destructive' });
       console.log('Error ending retro:', error);
+
+      toast({ title: 'Error ending retro', variant: 'destructive' });
     } finally {
-      setLoading(false);
+      setIsLoadingFinalContent(false);
     }
-  }, [data.id, generateFinalContent, setLoading, startTypingEffect, toast]);
+  }, [data.id, generateFinalContent, setIsLoadingFinalContent, startTypingEffect, toast]);
 
   const contextValue = useMemo(
     () => ({

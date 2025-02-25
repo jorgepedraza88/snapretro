@@ -62,7 +62,7 @@ export function EndRetroDialog() {
         </div>
         <AlertDialogFooter className="w-full sm:justify-between">
           <Label className="flex items-center gap-1">
-            <Switch checked={useSummaryAI} onCheckedChange={setUseSummaryAI} />
+            <Switch checked={useSummaryAI} onCheckedChange={setUseSummaryAI} disabled />
             <span className="mr-2">Generate Summary with AI</span>
             <AiIcon size={16} className="text-violet-700" />
           </Label>
