@@ -18,7 +18,7 @@ function ChatNotificationDot() {
   );
 }
 
-export function ChatFooter() {
+export function ChatButton() {
   const { id: retrospectiveId } = useParams<{ id: string }>();
   const currentUser = usePresenceStore((state) => state.currentUser);
 
