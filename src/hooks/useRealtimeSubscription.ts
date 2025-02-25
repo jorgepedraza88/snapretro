@@ -115,8 +115,10 @@ export const useRealtimeSubscription = (retrospectiveId: string) => {
       })
       .on('broadcast', { event: REALTIME_EVENT_KEYS.REVALIDATE }, revalidate)
       .on('broadcast', { event: REALTIME_EVENT_KEYS.END_RETRO }, ({ payload }) => {
-        setDisplayedContent(payload.finalSummary);
-        revalidate();
+        if (currentUser.id !== adminId) {
+          setDisplayedContent(payload.finalSummary);
+          revalidate();
+        }
       })
       .on('broadcast', { event: REALTIME_EVENT_KEYS.DISCONNECT_USER }, async ({ payload }) => {
         const { userId } = payload;

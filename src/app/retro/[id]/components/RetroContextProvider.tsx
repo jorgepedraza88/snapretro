@@ -5,6 +5,7 @@ import { ImSpinner as SpinnerIcon } from 'react-icons/im';
 import { useShallow } from 'zustand/shallow';
 
 import { RetrospectiveData } from '@/types/Retro';
+import { useRealtimeActions } from '@/hooks/useRealtimeActions';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 import { useToast } from '@/hooks/useToast';
 import { endRetrospective } from '@/app/actions';
@@ -32,6 +33,8 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
   const useSummaryAI = useAdminStore((state) => state.useSummaryAI);
   const onlineUsers = usePresenceStore((state) => state.onlineUsers);
   const symmetricKey = usePresenceStore((state) => state.symmetricKey);
+
+  const { endRetroBroadcast } = useRealtimeActions();
   const { isLoadingFinalContent, startTypingEffect, setIsLoadingFinalContent } =
     useRetroSummaryStore(
       useShallow((state) => ({
@@ -94,9 +97,11 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
       }
 
       startTypingEffect(finalContent);
+      endRetroBroadcast(data.id, finalContent);
     } catch (error) {
-      toast({ title: 'Error ending retro', variant: 'destructive' });
       console.log('Error ending retro:', error);
+
+      toast({ title: 'Error ending retro', variant: 'destructive' });
     } finally {
       setIsLoadingFinalContent(false);
     }
