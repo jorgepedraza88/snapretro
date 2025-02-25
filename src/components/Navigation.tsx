@@ -13,7 +13,7 @@ export function Navigation() {
       </div>
       <div className="flex items-center justify-between border-b bg-neutral-50 px-4 py-1.5 dark:border-neutral-900 dark:bg-neutral-900">
         <div>
-          <Link className="text-lg font-black text-violet-600 dark:text-neutral-100" href="/">
+          <Link className="text-xl font-bold text-violet-600 dark:text-neutral-100" href="/">
             FreeRetros
           </Link>
         </div>
