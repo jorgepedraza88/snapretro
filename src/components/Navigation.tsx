@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { EndRetroDialog } from '@/app/retro/[id]/components/EndRetroDialog';
 import { OnlineUsers } from '@/app/retro/[id]/components/OnlineUsers';
+import { ChatFooter } from './ChatFooter';
 
 // import { SwitchColorMode } from "./SwitchColorMode";
 
@@ -18,6 +19,7 @@ export function Navigation() {
           </Link>
         </div>
         <div className="flex items-center gap-2">
+          <ChatFooter />
           <OnlineUsers />
           <EndRetroDialog />
           {/* <SwitchColorMode /> */}
