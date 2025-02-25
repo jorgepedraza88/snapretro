@@ -89,7 +89,7 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
   }
 
   return (
-    <div className="fixed bottom-8 rounded-lg border p-3 shadow-md">
+    <div className="fixed bottom-8 rounded-lg border px-3 py-2 shadow-md">
       <div className="w-fit bg-neutral-50 text-sm">
         <FormProvider {...form}>
           <form className="flex items-center gap-4" onSubmit={form.handleSubmit(onSubmit)}>
