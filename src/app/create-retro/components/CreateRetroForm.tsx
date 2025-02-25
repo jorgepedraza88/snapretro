@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { createRetro, CreateRetrospectiveData } from '@/app/actions';
-import { exportKey, generateSymmetricKey } from '@/app/cryptoClient';
+import { generateSymmetricKey } from '@/app/cryptoClient';
 import { ROUTES } from '@/constants/routes';
 import { usePresenceStore } from '@/stores/usePresenceStore';
 import { CreateRetroFirst } from './CreateRetroFirst';
@@ -46,10 +46,9 @@ export function CreateRetroForm() {
 
       setAdminId(data.adminId);
 
-      const newSymmetricKey = await generateSymmetricKey();
-      const exportedSymmetricKey = await exportKey(newSymmetricKey);
+      const newSymmetricKey = generateSymmetricKey();
 
-      setSymmetricKey(exportedSymmetricKey);
+      setSymmetricKey(newSymmetricKey);
 
       setCurrentUser({
         id: data.adminId,

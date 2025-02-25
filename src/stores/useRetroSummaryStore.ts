@@ -7,7 +7,7 @@ type SummaryState = {
   isTyping: boolean;
   setFinalSummary: (content: string) => void;
   setDisplayedContent: (content: string) => void;
-  setLoading: (loading: boolean) => void;
+  setIsLoadingFinalContent: (loading: boolean) => void;
   startTypingEffect: (content: string) => void;
 };
 
@@ -19,7 +19,7 @@ export const useRetroSummaryStore = create<SummaryState>((set) => ({
 
   setFinalSummary: (content) => set({ finalSummary: content }),
   setDisplayedContent: (content) => set({ displayedContent: content }),
-  setLoading: (loading) => set({ isLoadingFinalContent: loading }),
+  setIsLoadingFinalContent: (loading) => set({ isLoadingFinalContent: loading }),
 
   startTypingEffect: (content) => {
     set({ isTyping: true, displayedContent: '' });

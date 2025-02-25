@@ -20,7 +20,7 @@ import {
   editRetroSectionTitle,
   removeVoteFromPost
 } from '@/app/actions';
-import { decryptMessage, encryptMessage, importKey } from '@/app/cryptoClient';
+import { decryptMessage, encryptMessage } from '@/app/cryptoClient';
 import { cn } from '@/lib/utils';
 import { usePresenceStore } from '@/stores/usePresenceStore';
 import { supabase } from '@/supabaseClient';
@@ -50,8 +50,6 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
   const [isWriting, setIsWriting] = useState(false);
   const [isEditingSectionTitle, setIsEditingSectionTitle] = useState(false);
   const [newSectionTitle, setNewSectionTitle] = useState(title);
-
-  // const decryptedPosts = use(getDecryptedPosts(section.posts, symmetricKey));
 
   const [optimisticTitle, addOptimisticTitle] = useOptimistic(section.title);
   const [optimisticPosts, addOptimisticPosts] = useOptimistic(section.posts);
@@ -98,9 +96,11 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
     try {
       const temporalId = nanoid(5);
 
-      const cryptoKey = await importKey(symmetricKey);
+      if (!symmetricKey) {
+        throw new Error('Symmetric key not found');
+      }
 
-      const encryptedContent = await encryptMessage(postContent, cryptoKey);
+      const encryptedContent = encryptMessage(postContent, symmetricKey);
 
       const newPost = {
         id: temporalId,
@@ -109,7 +109,7 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
         votes: []
       };
 
-      addOptimisticPosts((prev) => [...prev, { ...newPost, content: postContent }]);
+      addOptimisticPosts((prev) => [...prev, { ...newPost, content: encryptedContent }]);
 
       postFormRef.current?.reset();
 
@@ -245,10 +245,18 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
                 const canVote = currentUser.id !== post.userId && retrospectiveData.allowVotes;
                 const canDetroyPost = currentUser.id === post.userId;
 
+                const decryptedMessage = symmetricKey
+                  ? decryptMessage(post.content, symmetricKey)
+                  : null;
+
+                if (!decryptedMessage) {
+                  return null;
+                }
+
                 return (
                   <Card key={post.id} className="group mx-2 my-2">
                     <div className="flex items-center justify-between gap-2 p-2 text-sm">
-                      <p>{post.content}</p>
+                      <p>{decryptedMessage}</p>
                       <div className="flex items-center gap-2">
                         <div className="mt-px text-xs">
                           {post.votes.length !== 0 && `+${post.votes.length}`}

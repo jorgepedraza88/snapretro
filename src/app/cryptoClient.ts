@@ -1,121 +1,56 @@
+import nacl from 'tweetnacl';
+import { decodeBase64, decodeUTF8, encodeBase64, encodeUTF8 } from 'tweetnacl-util';
+
 /**
- * Generate a symmetric AES-GCM key of 256 bits
+ * Generates a random symmetric key (32 bytes) and returns it in Base64 format.
  */
-export async function generateSymmetricKey(): Promise<CryptoKey> {
-  return await window.crypto.subtle.generateKey(
-    {
-      name: 'AES-GCM',
-      length: 256
-    },
-    true,
-    ['encrypt', 'decrypt']
-  );
+export function generateSymmetricKey(): string {
+  return encodeBase64(nacl.randomBytes(32));
 }
 
 /**
- * Export the symmetric key to a Base64 string so it can be shared
+ * Encrypts a message using a Base64 key with NaCl (XChaCha20-Poly1305).
  */
-export async function exportKey(key: CryptoKey): Promise<string> {
-  const rawKey = await window.crypto.subtle.exportKey('raw', key);
-  // Convert the ArrayBuffer to a Base64 string
-  const keyArray = new Uint8Array(rawKey);
-  let binary = '';
-  keyArray.forEach((byte) => (binary += String.fromCharCode(byte)));
-  return btoa(binary);
+export function encryptMessage(message: string, keyBase64: string): string {
+  if (!message) throw new Error('Message cannot be empty');
+  if (!keyBase64) throw new Error('Encryption key is missing');
+
+  const key = decodeBase64(keyBase64);
+  const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
+  const messageUint8 = decodeUTF8(message);
+  const encrypted = nacl.secretbox(messageUint8, nonce, key);
+
+  // 🔹 Concatenate nonce + encrypted message
+  const combined = new Uint8Array([...nonce, ...encrypted]);
+  const encryptedBase64 = encodeBase64(combined);
+
+  return encryptedBase64;
 }
 
 /**
- * Import a symmetric key from a Base64 string
+ * Decrypts a Base64-encrypted message using a Base64 key.
  */
-export async function importKey(keyString?: string): Promise<CryptoKey> {
-  if (!keyString) {
-    throw new Error('No key provided');
+export function decryptMessage(encryptedMessageBase64: string, keyBase64: string): string {
+  if (!encryptedMessageBase64) throw new Error('Encrypted message is missing');
+  if (!keyBase64) throw new Error('Decryption key is missing');
+
+  const key = decodeBase64(keyBase64);
+  const encryptedMessageWithNonce = decodeBase64(encryptedMessageBase64);
+
+  // Verify that the encrypted message has the correct length
+  if (encryptedMessageWithNonce.length < nacl.secretbox.nonceLength) {
+    throw new Error('Encrypted message is too short');
   }
-  // Convert from Base64 to an ArrayBuffer
-  const binary = atob(keyString);
-  const keyArray = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    keyArray[i] = binary.charCodeAt(i);
+
+  // 🔹 Extract the nonce and the encrypted message
+  const nonce = encryptedMessageWithNonce.slice(0, nacl.secretbox.nonceLength);
+  const encryptedMessage = encryptedMessageWithNonce.slice(nacl.secretbox.nonceLength);
+
+  // 🔹 Attempt to decrypt
+  const decrypted = nacl.secretbox.open(encryptedMessage, nonce, key);
+  if (!decrypted) {
+    throw new Error('Failed to decrypt message - Possible nonce or key mismatch');
   }
-  return await window.crypto.subtle.importKey('raw', keyArray, { name: 'AES-GCM' }, true, [
-    'encrypt',
-    'decrypt'
-  ]);
-}
 
-/**
- * Descifra un mensaje cifrado en formato Base64 usando la clave proporcionada.
- * Se asume que el mensaje cifrado contiene, en los primeros 12 bytes, el IV utilizado.
- *
- * @param encryptedMessage - El mensaje cifrado en formato Base64.
- * @param key - La clave CryptoKey que se usó para cifrar (y que se usará para descifrar).
- * @returns El mensaje original en texto plano.
- */
-export async function decryptMessage(encryptedMessage: string, key: CryptoKey): Promise<string> {
-  // Convertir el mensaje cifrado de Base64 a un Uint8Array
-  const combined = Uint8Array.from(atob(encryptedMessage), (char) => char.charCodeAt(0));
-
-  // Extraer el IV (vector de inicialización) que se encuentra en los primeros 12 bytes
-  const iv = combined.slice(0, 12);
-
-  // El resto del array corresponde a los datos cifrados
-  const data = combined.slice(12);
-
-  // Usamos la API Web Crypto para descifrar
-  const decryptedBuffer = await window.crypto.subtle.decrypt(
-    {
-      name: 'AES-GCM',
-      iv
-    },
-    key,
-    data
-  );
-
-  // Convertir el resultado (ArrayBuffer) a texto usando TextDecoder
-  return new TextDecoder().decode(decryptedBuffer);
-}
-
-/**
- * Cifra un mensaje de texto utilizando la clave proporcionada y devuelve el resultado en Base64.
- * Se genera un vector de inicialización (IV) aleatorio de 12 bytes, que se concatena con el mensaje cifrado.
- *
- * @param message - El mensaje en texto plano que se desea cifrar.
- * @param key - La clave CryptoKey que se utilizará para cifrar.
- * @returns El mensaje cifrado en formato Base64.
- */
-export async function encryptMessage(message: string, key?: CryptoKey): Promise<string> {
-  if (!key) {
-    throw new Error('No key provided');
-  }
-  // Codificar el mensaje a un Uint8Array
-  const encoder = new TextEncoder();
-  const data = encoder.encode(message);
-
-  // Generar un IV (vector de inicialización) aleatorio de 12 bytes
-  const iv = window.crypto.getRandomValues(new Uint8Array(12));
-
-  // Encriptar el mensaje usando AES-GCM
-  const encryptedBuffer = await window.crypto.subtle.encrypt(
-    {
-      name: 'AES-GCM',
-      iv
-    },
-    key,
-    data
-  );
-
-  // Convertir el ArrayBuffer del mensaje cifrado a un Uint8Array
-  const encryptedArray = new Uint8Array(encryptedBuffer);
-
-  // Concatenar el IV y el contenido cifrado para poder usar el IV en el descifrado
-  const combined = new Uint8Array(iv.byteLength + encryptedArray.byteLength);
-  combined.set(iv);
-  combined.set(encryptedArray, iv.byteLength);
-
-  // Convertir el array combinado a una cadena en Base64 para facilitar el almacenamiento y envío
-  let binary = '';
-  for (let i = 0; i < combined.byteLength; i++) {
-    binary += String.fromCharCode(combined[i]);
-  }
-  return btoa(binary);
+  return encodeUTF8(decrypted);
 }

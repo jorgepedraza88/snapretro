@@ -57,23 +57,6 @@ export async function getRetrospetiveData(retrospectiveId: string) {
 export async function createPost({ sectionId, newPost }: CreatePostParams) {
   const { userId, content, votes } = newPost;
 
-  const encryptMessage = (message: string) => {
-    const key = process.env.ENCRYPTION_KEY
-      ? Buffer.from(process.env.ENCRYPTION_KEY, 'base64')
-      : null;
-    const iv = process.env.ENCRYPTION_IV ? Buffer.from(process.env.ENCRYPTION_IV, 'base64') : null;
-
-    if (!key || !iv) {
-      throw new Error('Encryption fails');
-    }
-
-    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-    let encrypted = cipher.update(message, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-
-    return encrypted;
-  };
-
   try {
     await prisma.retrospectiveSection.update({
       where: { id: sectionId },
@@ -81,7 +64,7 @@ export async function createPost({ sectionId, newPost }: CreatePostParams) {
         posts: {
           create: {
             userId,
-            content: encryptMessage(content),
+            content,
             votes
           }
         }

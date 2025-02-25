@@ -31,13 +31,14 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
 
   const useSummaryAI = useAdminStore((state) => state.useSummaryAI);
   const onlineUsers = usePresenceStore((state) => state.onlineUsers);
-  const { isLoadingFinalContent, startTypingEffect, setLoading } = useRetroSummaryStore(
-    useShallow((state) => ({
-      isLoadingFinalContent: state.isLoadingFinalContent,
-      startTypingEffect: state.startTypingEffect,
-      setLoading: state.setLoading
-    }))
-  );
+  const { isLoadingFinalContent, startTypingEffect, setIsLoadingFinalContent } =
+    useRetroSummaryStore(
+      useShallow((state) => ({
+        isLoadingFinalContent: state.isLoadingFinalContent,
+        startTypingEffect: state.startTypingEffect,
+        setIsLoadingFinalContent: state.setIsLoadingFinalContent
+      }))
+    );
 
   // Initialize realtime
   useRealtimeSubscription(data.id);
@@ -69,7 +70,7 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
   );
 
   const handleEndRetro = useCallback(async () => {
-    setLoading(true);
+    setIsLoadingFinalContent(true);
 
     try {
       const endResponse = await endRetrospective(data.id);
@@ -84,9 +85,9 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
       toast({ title: 'Error ending retro', variant: 'destructive' });
       console.log('Error ending retro:', error);
     } finally {
-      setLoading(false);
+      setIsLoadingFinalContent(false);
     }
-  }, [data.id, generateFinalContent, setLoading, startTypingEffect, toast]);
+  }, [data.id, generateFinalContent, setIsLoadingFinalContent, startTypingEffect, toast]);
 
   const contextValue = useMemo(
     () => ({
