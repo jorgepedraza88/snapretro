@@ -32,9 +32,6 @@ export function OnlineUsers() {
     return 0;
   });
 
-  console.log('adminUserId', adminUserId);
-  console.log('onlineUsers', onlineUsers);
-
   return (
     <div>
       <TooltipProvider>

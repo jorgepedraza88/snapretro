@@ -45,7 +45,7 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
     );
 
   // Initialize realtime
-  useRealtimeSubscription(data.id);
+  useRealtimeSubscription(data);
 
   const generateFinalContent = useCallback(
     async (endResponse: RetrospectiveData) => {

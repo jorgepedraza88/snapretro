@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { useShallow } from 'zustand/shallow';
 
+import { type RetrospectiveData } from '@/types/Retro';
 import { editRetroAdminId, revalidate } from '@/app/actions';
 import REALTIME_EVENT_KEYS from '@/constants/realtimeEventKeys';
 import { useAdminStore } from '@/stores/useAdminStore';
@@ -13,7 +14,7 @@ import { supabase } from '@/supabaseClient';
 import { useRealtimeActions } from './useRealtimeActions';
 import { useToast } from './useToast';
 
-export const useRealtimeSubscription = (retrospectiveId: string) => {
+export const useRealtimeSubscription = (retrospectiveData: RetrospectiveData) => {
   const { toast } = useToast();
   const { setDisplayedContent } = useRetroSummaryStore();
   const { sendSymmetricKeyBroadcast } = useRealtimeActions();
@@ -21,6 +22,7 @@ export const useRealtimeSubscription = (retrospectiveId: string) => {
     adminId,
     currentUser,
     symmetricKey,
+    setAdminId,
     setCurrentUser,
     updateOnlineUsers,
     handleAdminChange,
@@ -31,6 +33,7 @@ export const useRealtimeSubscription = (retrospectiveId: string) => {
       currentUser: state.currentUser,
       adminId: state.adminId,
       symmetricKey: state.symmetricKey,
+      setAdminId: state.setAdminId,
       setSymmetricKey: state.setSymmetricKey,
       setCurrentUser: state.setCurrentUser,
       updateOnlineUsers: state.updateOnlineUsers,
@@ -63,7 +66,7 @@ export const useRealtimeSubscription = (retrospectiveId: string) => {
   }
 
   useEffect(() => {
-    const channel = supabase.channel(`retrospective:${retrospectiveId}`, {
+    const channel = supabase.channel(`retrospective:${retrospectiveData.id}`, {
       config: { presence: { key: currentUser.id } }
     });
 
@@ -71,6 +74,10 @@ export const useRealtimeSubscription = (retrospectiveId: string) => {
       .on('presence', { event: 'sync' }, () => {
         const activeUsers = getPresenceActiveUsers(channel);
         updateOnlineUsers(activeUsers);
+
+        if (!adminId) {
+          setAdminId(retrospectiveData.adminId);
+        }
 
         const currentAdmin = activeUsers.find((user) => user.id === adminId);
 
@@ -85,7 +92,7 @@ export const useRealtimeSubscription = (retrospectiveId: string) => {
         const isCurrentUserAdmin = adminId === currentUser.id;
 
         if (symmetricKey && isCurrentUserAdmin) {
-          sendSymmetricKeyBroadcast(retrospectiveId, symmetricKey);
+          sendSymmetricKeyBroadcast(retrospectiveData.id, symmetricKey);
         }
 
         if (isCurrentUser) {
@@ -107,7 +114,7 @@ export const useRealtimeSubscription = (retrospectiveId: string) => {
         const { newAdminId } = payload;
         await handleAdminChange(newAdminId);
         await editRetroAdminId({
-          retrospectiveId,
+          retrospectiveId: retrospectiveData.id,
           newAdminId
         });
 
