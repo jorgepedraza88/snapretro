@@ -1,8 +1,9 @@
+import { PiCoffee as CoffeeIcon } from 'react-icons/pi';
 import Link from 'next/link';
 
-import { EndRetroDialog } from '@/app/retro/[id]/components/EndRetroDialog';
 import { OnlineUsers } from '@/app/retro/[id]/components/OnlineUsers';
 import { ChatButton } from './ChatButton';
+import { Button } from './ui/button';
 
 // import { SwitchColorMode } from "./SwitchColorMode";
 
@@ -19,6 +20,16 @@ export function Navigation() {
           </Link>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="secondary" size="sm" className="text-sm">
+            <a
+              href="https://www.buymeacoffee.com/jorgepedraza"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1"
+            >
+              <CoffeeIcon size={16} className="shrink-0" /> Buy me a Coffee!
+            </a>
+          </Button>
           <ChatButton />
           <OnlineUsers />
           {/* <SwitchColorMode /> */}
