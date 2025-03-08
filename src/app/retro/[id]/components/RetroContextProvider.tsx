@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { ImSpinner as SpinnerIcon } from 'react-icons/im';
 import { useShallow } from 'zustand/shallow';
 
@@ -61,21 +61,42 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
         );
       }
 
-      // const aiContent = await generateAIContent(
-      //   endResponse,
-      //   onlineUsers.map((user) => user.name)
-      // );
+      try {
+        const response = await fetch('/api/summarize/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Encrypted-Key': symmetricKey
+          },
+          body: JSON.stringify({
+            data: endResponse,
+            participants: onlineUsers.map((user) => user.name)
+          })
+        });
 
-      const aiContent = undefined;
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
 
-      return (
-        aiContent ||
-        generateMarkdownFromJSON(
+        const { summary: aiContent } = await response.json();
+
+        return (
+          aiContent ||
+          generateMarkdownFromJSON(
+            endResponse,
+            onlineUsers.map((user) => user.name),
+            symmetricKey
+          )
+        );
+      } catch (error) {
+        console.error('Error generating AI summary:', error);
+        // Fallback to non-AI summary
+        return generateMarkdownFromJSON(
           endResponse,
           onlineUsers.map((user) => user.name),
           symmetricKey
-        )
-      );
+        );
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [onlineUsers, useSummaryAI]
@@ -99,8 +120,6 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
       startTypingEffect(finalContent);
       endRetroBroadcast(data.id, finalContent);
     } catch (error) {
-      console.log('Error ending retro:', error);
-
       toast({ title: 'Error ending retro', variant: 'destructive' });
     } finally {
       setIsLoadingFinalContent(false);
