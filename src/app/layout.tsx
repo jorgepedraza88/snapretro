@@ -14,8 +14,8 @@ const clashSans = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'FreeRetros',
-  description: 'FreeRetros is a tool for running retrospectives'
+  title: 'SnapRetro',
+  description: 'SnapRetro is a tool for running retrospectives'
 };
 
 export default function RootLayout({

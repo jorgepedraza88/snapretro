@@ -1,6 +1,8 @@
+import { LiaSlideshare as LogoIcon } from 'react-icons/lia';
 import { PiCoffee as CoffeeIcon } from 'react-icons/pi';
 import Link from 'next/link';
 
+import { BetaBadge } from '@/app/retro/[id]/components/BetaBadge';
 import { OnlineUsers } from '@/app/retro/[id]/components/OnlineUsers';
 import { ChatButton } from './ChatButton';
 import { Button } from './ui/button';
@@ -14,12 +16,16 @@ export function Navigation() {
         This app is still in development - It may contain some issues
       </div>
       <div className="flex items-center justify-between border-b bg-neutral-50 px-4 py-1.5 dark:border-neutral-900 dark:bg-neutral-900">
-        <div>
-          <Link className="text-xl font-bold text-violet-600 dark:text-neutral-100" href="/">
-            FreeRetros
+        <div className="flex items-center gap-2">
+          <Link className="flex items-center gap-1" href="/">
+            <LogoIcon size={20} className="text-violet-700" />
+            <p className="text-lg font-medium">SnapRetro</p>
           </Link>
+          <BetaBadge />
         </div>
         <div className="flex items-center gap-2">
+          <OnlineUsers />
+          <ChatButton />
           <Button variant="secondary" size="sm" className="text-sm">
             <a
               href="https://www.buymeacoffee.com/jorgepedraza"
@@ -30,8 +36,7 @@ export function Navigation() {
               <CoffeeIcon size={16} className="shrink-0" /> Buy me a Coffee!
             </a>
           </Button>
-          <ChatButton />
-          <OnlineUsers />
+
           {/* <SwitchColorMode /> */}
           {/* <p className="text-sm font-semibold dark:text-neutral-100">
           Buy me a coffee!
