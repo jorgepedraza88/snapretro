@@ -16,7 +16,7 @@ export interface RetrospectiveData {
   id: string;
   adminId: string;
   adminName: string;
-  date: Date;
+  date: string; // ISO 8601
   enablePassword: boolean;
   allowMessages: boolean;
   allowVotes: boolean;

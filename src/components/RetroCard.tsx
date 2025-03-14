@@ -78,6 +78,7 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
 
   const handleNewPostChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!isWriting) {
+      setIsWriting(true);
       writingAction(retrospectiveId, section.id, currentUser.id, 'start');
     }
 
@@ -292,7 +293,7 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
       {isWriting && (
         <div className="mb-2 mt-2 flex gap-1">
           <WritingIcon className="text-gray-500" />
-          <span className="text-xs text-gray-500">Someone is writing...</span>
+          <span className="text-xs text-gray-500">Typing...</span>
         </div>
       )}
     </div>
