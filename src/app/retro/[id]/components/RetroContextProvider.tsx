@@ -111,7 +111,8 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
         throw new Error('Failed to end retrospective');
       }
 
-      const finalContent = await generateFinalContent(endResponse);
+      // TODO: Fix type
+      const finalContent = await generateFinalContent(endResponse as any);
 
       if (!finalContent) {
         throw new Error('Failed to generate final content');
