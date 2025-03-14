@@ -3,13 +3,13 @@ import { redirect } from 'next/navigation';
 import { Navigation } from '@/components/Navigation';
 import { UserSessionWrapper } from '@/components/UserSessionWrapper';
 import { getRetrospetiveData } from '@/app/actions';
-import { OnlineUsers } from './components/OnlineUsers';
 import { RetroContextProvider } from './components/RetroContextProvider';
 import { MainContent } from './MainContent';
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const retrospectiveId = (await params).id;
-  const initialData = await getRetrospetiveData(retrospectiveId);
+  // TODO: Fix type
+  const initialData = (await getRetrospetiveData(retrospectiveId)) as any;
 
   if (!initialData) {
     redirect('/not-found');
