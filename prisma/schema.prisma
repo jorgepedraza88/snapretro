@@ -18,8 +18,8 @@ model Retrospective {
   id             String                 @id @default(uuid()) // Unique ID for the retrospective
   adminId        String // ID of the admin user
   adminName      String // Name of the admin user
-  avatarUrl      String? // Optional avatar URL for the admin
-  date           DateTime // Creation or start date of the retrospective
+  avatarUrl      String? // Optional  avatar URL for the admin
+  date           DateTime               @default(now()) // Creation or start date of the retrospective
   timer          Int // Timer value in seconds
   allowVotes     Boolean                @default(true) // Whether voting is allowed
   allowMessages  Boolean                @default(true) // Whether messages are allowed

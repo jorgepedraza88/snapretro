@@ -1,10 +1,8 @@
 'use server';
 
-// import { GoogleGenerativeAI } from '@google/generative-ai';
-import { DateTime } from 'luxon';
 import { revalidatePath } from 'next/cache';
 
-// import { RetrospectiveData } from '@/types/Retro';
+import { RetrospectiveData } from '@/types/Retro';
 import { prisma } from '@/lib/prisma';
 import { generateDefaultSections } from './utils';
 
@@ -37,20 +35,27 @@ export async function revalidate() {
   revalidatePath('/retro/[id]', 'page');
 }
 
-export async function getRetrospetiveData(retrospectiveId: string) {
-  const retrospective = await prisma.retrospective.findUnique({
-    where: { id: retrospectiveId },
-    include: {
-      sections: {
-        include: {
-          posts: true // Include nested posts for each section
-        },
-        orderBy: { sortOrder: 'asc' } // Explicitly order sections by sortOrder
+export async function getRetrospetiveData(
+  retrospectiveId: string
+): Promise<RetrospectiveData | null> {
+  try {
+    const retrospective = await prisma.retrospective.findUnique({
+      where: { id: retrospectiveId },
+      include: {
+        sections: {
+          include: {
+            posts: true // Include nested posts for each section
+          },
+          orderBy: { sortOrder: 'asc' } // Explicitly order sections by sortOrder
+        }
       }
-    }
-  });
+    });
 
-  return retrospective;
+    return retrospective;
+  } catch (error) {
+    console.log(error);
+    throw new Error('Error getting retrospective data');
+  }
 }
 
 export async function createPost({ sectionId, newPost }: CreatePostParams) {
@@ -97,7 +102,6 @@ export async function createRetro(data: CreateRetrospectiveData) {
       data: {
         ...restData,
         status: 'active',
-        date: DateTime.now().toISO(),
         sections: {
           create: generateDefaultSections(sectionsNumber)
         }
@@ -114,6 +118,7 @@ export async function createRetro(data: CreateRetrospectiveData) {
 
 export async function editRetroSectionTitle(data: { sectionId: string; title: string }) {
   const { sectionId, title } = data;
+
   try {
     await prisma.retrospectiveSection.update({
       where: { id: sectionId },

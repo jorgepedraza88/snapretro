@@ -45,7 +45,7 @@ function formatBodyForSummary({ data, participants, symmetricKey }: FormatBodyFo
 
   return {
     adminName: adminName,
-    date: DateTime.fromISO(date).toFormat('MM/dd/yyyy'),
+    date: DateTime.fromJSDate(new Date(date)).toFormat('MM/dd/yyyy'),
     sections: decryptedPostsSections,
     participants
   };

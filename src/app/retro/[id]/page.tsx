@@ -8,8 +8,7 @@ import { MainContent } from './MainContent';
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const retrospectiveId = (await params).id;
-  // TODO: Fix type
-  const initialData = (await getRetrospetiveData(retrospectiveId)) as any;
+  const initialData = await getRetrospetiveData(retrospectiveId);
 
   if (!initialData) {
     redirect('/not-found');
