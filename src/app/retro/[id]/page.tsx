@@ -5,6 +5,7 @@ import { UserSessionWrapper } from '@/components/UserSessionWrapper';
 import { getRetrospetiveData } from '@/app/actions';
 import { RetroContextProvider } from './components/RetroContextProvider';
 import { MainContent } from './MainContent';
+import { MainContentWrapper } from './MainContentWrapper';
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const retrospectiveId = (await params).id;
@@ -18,9 +19,9 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     <UserSessionWrapper data={initialData}>
       <RetroContextProvider data={initialData}>
         <Navigation />
-        <div className="gap-2 bg-neutral-50 lg:flex">
+        <MainContentWrapper>
           <MainContent data={initialData} />
-        </div>
+        </MainContentWrapper>
       </RetroContextProvider>
     </UserSessionWrapper>
   );

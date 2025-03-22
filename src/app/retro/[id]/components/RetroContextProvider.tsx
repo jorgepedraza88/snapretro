@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useContext, useMemo } from 'react';
-import { ImSpinner as SpinnerIcon } from 'react-icons/im';
 import { useShallow } from 'zustand/shallow';
 
 import { RetrospectiveData } from '@/types/Retro';
@@ -111,8 +110,7 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
         throw new Error('Failed to end retrospective');
       }
 
-      // TODO: Fix type
-      const finalContent = await generateFinalContent(endResponse as any);
+      const finalContent = await generateFinalContent(endResponse);
 
       if (!finalContent) {
         throw new Error('Failed to generate final content');
@@ -135,15 +133,6 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
     }),
     [data.id, data.status, data.timer, handleEndRetro]
   );
-
-  if (isLoadingFinalContent) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center gap-2">
-        <p>Loading final summary...</p>
-        <SpinnerIcon size={50} className="animate-spin text-violet-700" />
-      </div>
-    );
-  }
 
   return <RetroContext.Provider value={contextValue}>{children}</RetroContext.Provider>;
 }
