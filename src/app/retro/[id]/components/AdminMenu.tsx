@@ -79,7 +79,7 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
     control: form.control
   }) as AdminMenuData;
 
-  // TODO: Optimizar cambio de settings - hacer llamadas independientes, quizá no usar react hook forms
+  // TODO: Optimize settings change - make independent calls, maybe not use react hook forms
   useEffect(() => {
     onSubmit(formValues);
   }, [formValues]);
@@ -89,8 +89,8 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
   }
 
   return (
-    <div className="fixed bottom-8 rounded-lg border px-3 py-2 shadow-md">
-      <div className="w-fit bg-neutral-50 text-sm">
+    <div className="fixed bottom-8 rounded-lg border bg-neutral-50 px-3 py-2 shadow-md">
+      <div className="w-fit text-sm">
         <FormProvider {...form}>
           <form className="flex items-center gap-4" onSubmit={form.handleSubmit(onSubmit)}>
             <Controller
