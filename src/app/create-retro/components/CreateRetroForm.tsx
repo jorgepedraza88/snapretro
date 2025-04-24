@@ -67,6 +67,7 @@ export function CreateRetroForm() {
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
         <div className="mt-16 space-y-4">
+          {/* //TODO: Simplify in 1 component */}
           <CreateRetroFirst />
           <CreateRetroSecond />
         </div>

@@ -81,7 +81,7 @@ export const useRealtimeSubscription = (retrospectiveData: RetrospectiveData) =>
 
         const currentAdmin = activeUsers.find((user) => user.id === adminId);
 
-        // TODO: Cambiar, porque la retro no existirá cuando no haya usuarios
+        // TODO: Change this, because the retro won't exist when there are no users
         if (!currentAdmin && activeUsers.length > 0) {
           // If there are users in the retrospective and there is no admin, assign the first user as admin
           handleAdminChange(activeUsers[0].id);

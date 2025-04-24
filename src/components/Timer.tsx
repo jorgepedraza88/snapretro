@@ -23,11 +23,17 @@ export function Timer({ defaultTime }: { defaultTime: number }) {
       currentUser: state.currentUser
     }))
   );
+
   const { timerState, timeLeft, setTimerState, setTimeLeft } = useAdminStore();
 
   const { handleTimerBroadcast } = useRealtimeActions();
 
   const isCurrentUserAdmin = adminId === currentUser.id;
+
+  // Execute once when the component mounts to set the initial state of the timer
+  useEffect(() => {
+    setTimeLeft(defaultTime);
+  }, []);
 
   useEffect(() => {
     if (timeLeft <= 0) {
