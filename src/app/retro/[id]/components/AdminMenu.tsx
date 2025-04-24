@@ -5,7 +5,8 @@ import { Controller, FormProvider, useForm, useWatch } from 'react-hook-form';
 import {
   HiAdjustmentsHorizontal as AdminSettingsIcon,
   HiBars4 as ColumnIcons,
-  HiLockClosed as PasswordIcon
+  HiLockClosed as PasswordIcon,
+  HiOutlineClock as TimerIcon
 } from 'react-icons/hi2';
 import { useShallow } from 'zustand/shallow';
 
@@ -15,14 +16,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { editRetroPassword, editRetroSectionsNumber, editRetroSettings } from '@/app/actions';
+import { formatTimer } from '@/app/utils';
 import { cn } from '@/lib/utils';
+import { useAdminStore } from '@/stores/useAdminStore';
 import { usePresenceStore } from '@/stores/usePresenceStore';
 import { EndRetroDialog } from './EndRetroDialog';
 import { useRetroContext } from './RetroContextProvider';
 
 interface AdminMenuData {
+  timer: number;
   columns: number;
   password: string;
   allowMessages: boolean;
@@ -35,6 +40,12 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
     useShallow((state) => ({
       adminId: state.adminId,
       currentUser: state.currentUser
+    }))
+  );
+  const { setTimeLeft, timeLeft } = useAdminStore(
+    useShallow((state) => ({
+      timeLeft: state.timeLeft,
+      setTimeLeft: state.setTimeLeft
     }))
   );
 
@@ -93,6 +104,41 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
       <div className="w-fit text-sm">
         <FormProvider {...form}>
           <form className="flex items-center gap-4" onSubmit={form.handleSubmit(onSubmit)}>
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="flex flex-col items-center">
+                  <Button variant="ghost" size="icon">
+                    <TimerIcon size={20} />
+                  </Button>
+                  <Label className="text-xs">Timer</Label>
+                </div>
+              </PopoverTrigger>
+              <PopoverContent
+                sideOffset={4}
+                side="top"
+                align="center"
+                className="w-60 bg-neutral-100"
+              >
+                <div>
+                  <div className="">
+                    <Label>Select time:</Label>
+                    <p className="w-full text-center text-sm dark:text-neutral-100">
+                      {formatTimer(timeLeft)} minutes
+                    </p>
+                    <Slider
+                      defaultValue={[300]}
+                      max={600}
+                      min={60}
+                      step={60}
+                      value={[timeLeft]}
+                      className="mt-1"
+                      onValueChange={(val) => setTimeLeft(val[0])}
+                    />
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+
             <Controller
               name="columns"
               control={form.control}
@@ -170,6 +216,7 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
                 <Input placeholder="Add a secret word" {...form.register('password')} />
               </PopoverContent>
             </Popover>
+
             <Popover>
               <PopoverTrigger asChild>
                 <div className="flex flex-col items-center">
@@ -209,6 +256,7 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
                 </div>
               </PopoverContent>
             </Popover>
+
             <EndRetroDialog />
           </form>
         </FormProvider>

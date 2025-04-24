@@ -1,11 +1,11 @@
 import { Controller, useFormContext } from 'react-hook-form';
 import { ErrorMessage } from '@hookform/error-message';
-import { Duration } from 'luxon';
 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
+import { formatTimer } from '@/app/utils';
 
 export function CreateRetroSecond() {
   const {
@@ -17,14 +17,6 @@ export function CreateRetroSecond() {
 
   const enablePassword = watch('enablePassword');
   const timer = watch('timer');
-
-  const formatTimer = (value: number) => {
-    const milliseconds = value * 1000;
-    const duration = Duration.fromObject({ milliseconds });
-    const minutes = duration.toFormat('mm:ss');
-
-    return minutes;
-  };
 
   return (
     <div className="mb-8">

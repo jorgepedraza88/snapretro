@@ -1,3 +1,5 @@
+import { Duration } from 'luxon';
+
 import { RetrospectiveData } from '@/types/Retro';
 import { decryptMessage } from './cryptoClient';
 
@@ -51,3 +53,11 @@ export function generateMarkdownFromJSON(
 
   return markdownTemplate;
 }
+
+export const formatTimer = (value: number) => {
+  const milliseconds = value * 1000;
+  const duration = Duration.fromObject({ milliseconds });
+  const minutes = duration.toFormat('mm:ss');
+
+  return minutes;
+};
