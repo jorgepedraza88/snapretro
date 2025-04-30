@@ -1,0 +1,86 @@
+'use client';
+
+import { BsStars as AiIcon } from 'react-icons/bs';
+import { PiFlagCheckeredFill as FinishRetroIcon } from 'react-icons/pi';
+import { useShallow } from 'zustand/shallow';
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { useAdminStore } from '@/stores/useAdminStore';
+import { usePresenceStore } from '@/stores/usePresenceStore';
+import { useRetroContext } from './RetroContextProvider';
+
+export function EndRetroDialog() {
+  const { handleEndRetro, hasRetroEnded } = useRetroContext();
+  const { currentUser, adminId } = usePresenceStore(
+    useShallow((state) => ({
+      adminId: state.adminId,
+      currentUser: state.currentUser
+    }))
+  );
+  const { useSummaryAI, setUseSummaryAI } = useAdminStore(
+    useShallow((state) => ({
+      useSummaryAI: state.useSummaryAI,
+      setUseSummaryAI: state.setUseSummaryAI
+    }))
+  );
+
+  if (currentUser.id !== adminId || hasRetroEnded) return null;
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <div className="flex flex-col items-center">
+          <Button variant="ghost" size="sm">
+            <FinishRetroIcon size={20} />
+          </Button>
+
+          <Label className="text-xs">End</Label>
+        </div>
+      </AlertDialogTrigger>
+      <AlertDialogContent className="transition-none dark:bg-neutral-800">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-lg font-semibold dark:text-neutral-100">
+            End this retrospective meeting
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-sm">
+            You will end this retro for all participants.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <div className="my-4">
+          <p className='dark:text-neutral-100'>
+            Are you sure you want to <strong>end this retro?</strong>
+          </p>
+          <p className="text-xs text-red-500">This action is not reversible</p>
+        </div>
+        <AlertDialogFooter className="w-full sm:justify-between">
+          <Label className="flex items-center gap-1">
+            <Switch checked={useSummaryAI} onCheckedChange={setUseSummaryAI} />
+            <span className="mr-2">Generate Summary with AI</span>
+            <AiIcon size={16} className="text-violet-700" />
+          </Label>
+          <div className="flex gap-2">
+            <AlertDialogCancel asChild>
+              <Button variant="secondary">Cancel</Button>
+            </AlertDialogCancel>
+            <AlertDialogAction asChild onClick={handleEndRetro}>
+              <Button>End Retro</Button>
+            </AlertDialogAction>
+          </div>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}

@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Retrospective {
+  id             String                 @id @default(uuid()) // Unique ID for the retrospective
+  adminId        String // ID of the admin user
+  adminName      String // Name of the admin user
+  avatarUrl      String? // Optional  avatar URL for the admin
+  date           DateTime               @default(now()) // Creation or start date of the retrospective
+  timer          Int // Timer value in seconds
+  allowVotes     Boolean                @default(true) // Whether voting is allowed
+  allowMessages  Boolean                @default(true) // Whether messages are allowed
+  enableChat     Boolean // Whether chat is enabled
+  enablePassword Boolean // Whether a password is required
+  password       String? // Optional password
+  sections       RetrospectiveSection[] // One-to-many relationship with sections
+  status         String // Status of the retrospective  
+}
+
+model RetrospectiveSection {
+  id              String              @id @default(uuid()) // Unique ID for the section
+  sortOrder       Int // New field for sorting
+  retrospectiveId String // Foreign key to Retrospective
+  title           String // Section title (e.g., "Start doing")
+  posts           RetrospectivePost[] // One-to-many relationship with posts
+  retrospective   Retrospective       @relation(fields: [retrospectiveId], references: [id], onDelete: Cascade)
+}
+
+model RetrospectivePost {
+  id        String               @id @default(uuid()) // Unique ID for the post
+  sectionId String // Foreign key to Section
+  userId    String // ID of the user who created the post
+  content   String // Content of the post
+  votes     String[] // Array of user IDs who voted for this post
+  section   RetrospectiveSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+}

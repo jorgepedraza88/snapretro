@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: Clash, system-ui, sans-serif;
+}
+
+.markdown {
+  @apply p-2;
+}
+
+.markdown h1 {
+  @apply my-4 text-5xl font-bold;
+}
+
+.markdown h2 {
+  @apply my-4 text-3xl font-bold;
+}
+
+.markdown h3 {
+  @apply my-4 text-2xl font-bold;
+}
+
+.markdown p {
+  @apply my-4;
+}
+
+.markdown ul {
+  list-style: disc;
+  margin-left: 2rem;
+}
