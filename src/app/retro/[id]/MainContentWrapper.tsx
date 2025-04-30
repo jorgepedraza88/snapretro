@@ -15,11 +15,11 @@ export function MainContentWrapper({ children }: { children: React.ReactNode }) 
   if (isLoadingFinalContent) {
     return (
       <div className="-mt-10 flex size-full flex-col items-center justify-center gap-2">
-        <p>Loading final summary...</p>
-        <SpinnerIcon size={50} className="animate-spin text-violet-700" />
+        <p className="dark:text-neutral-100">Loading final summary...</p>
+        <SpinnerIcon size={50} className="animate-spin text-violet-700 dark:text-neutral-100" />
       </div>
     );
   }
 
-  return <div className="gap-2 bg-neutral-50 lg:flex">{children}</div>;
+  return <div className="gap-2 bg-neutral-50 dark:bg-neutral-800 lg:flex">{children}</div>;
 }

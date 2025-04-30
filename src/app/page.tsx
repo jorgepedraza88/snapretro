@@ -1,26 +1,21 @@
 import { HiOutlineUserGroup as CreateRetroIcon } from 'react-icons/hi2';
-import { LiaSlideshare as LogoIcon } from 'react-icons/lia';
 import Image from 'next/image';
 import Link from 'next/link';
 
 import { JoinRetroButton } from '@/components/JoinRetroButton';
+import { LogoSection } from '@/components/LogoSection';
+import { SwitchColorMode } from '@/components/SwitchColorMode';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/constants/routes';
 import scrumSvg from '../../public/scrum.svg';
 import teamSvg from '../../public/team-up.svg';
-import { BetaBadge } from './retro/[id]/components/BetaBadge';
-
-// import { SwitchColorMode } from "@/components/SwitchColorMode";
 
 export default function Home() {
   return (
     <div className="relative flex h-screen flex-col justify-center overflow-hidden bg-gray-50 p-8 font-[family-name:var(--font-geist-sans)] dark:bg-neutral-800 lg:p-4">
       <div className="absolute left-6 top-4 flex items-center gap-2">
-        <div className="flex items-center gap-1">
-          <LogoIcon size={20} className="text-violet-700" />
-          <p className="text-lg font-medium">SnapRetro</p>
-        </div>
-        <BetaBadge />
+        <LogoSection />
+        <SwitchColorMode />
       </div>
       <main className="flex flex-col items-center justify-center">
         <Image

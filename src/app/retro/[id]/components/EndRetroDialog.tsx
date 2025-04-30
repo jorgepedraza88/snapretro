@@ -50,9 +50,9 @@ export function EndRetroDialog() {
           <Label className="text-xs">End</Label>
         </div>
       </AlertDialogTrigger>
-      <AlertDialogContent className="transition-none">
+      <AlertDialogContent className="transition-none dark:bg-neutral-800">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-lg font-semibold">
+          <AlertDialogTitle className="text-lg font-semibold dark:text-neutral-100">
             End this retrospective meeting
           </AlertDialogTitle>
           <AlertDialogDescription className="text-sm">
@@ -60,7 +60,7 @@ export function EndRetroDialog() {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="my-4">
-          <p>
+          <p className='dark:text-neutral-100'>
             Are you sure you want to <strong>end this retro?</strong>
           </p>
           <p className="text-xs text-red-500">This action is not reversible</p>

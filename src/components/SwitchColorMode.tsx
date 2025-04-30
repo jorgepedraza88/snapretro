@@ -20,7 +20,11 @@ export function SwitchColorMode() {
 
   return (
     <Button variant="ghost" onClick={handleChangeMode}>
-      {!isDarkMode ? <DarkIcon className="shrink-0" /> : <LightIcon className="shrink-0" />}
+      {!isDarkMode ? (
+        <DarkIcon className="shrink-0 text-neutral-900" />
+      ) : (
+        <LightIcon className="shrink-0" />
+      )}
     </Button>
   );
 }

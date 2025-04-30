@@ -187,10 +187,10 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
 
   return (
     <div className="h-full">
-      <Card className="flex h-full flex-col justify-between bg-gray-100 pb-4 dark:bg-neutral-900">
+      <Card className="flex h-full flex-col justify-between bg-gray-100 pb-4 dark:bg-neutral-600">
         <div>
           <div className="group mb-2 rounded-t-lg bg-violet-100 p-2 dark:bg-neutral-700">
-            <CardTitle className="flex items-center justify-between text-lg text-violet-900">
+            <CardTitle className="flex items-center justify-between text-lg text-violet-900 dark:text-neutral-100">
               {isEditingSectionTitle ? (
                 <form action={handleChangeSectionTitle}>
                   <Input

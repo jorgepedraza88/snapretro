@@ -100,7 +100,7 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
   }
 
   return (
-    <div className="fixed bottom-8 rounded-lg border bg-neutral-50 px-3 py-2 shadow-md">
+    <div className="fixed bottom-8 rounded-lg border bg-neutral-50 px-3 py-2 shadow-md dark:bg-neutral-900">
       <div className="w-fit text-sm">
         <FormProvider {...form}>
           <form className="flex items-center gap-4" onSubmit={form.handleSubmit(onSubmit)}>
@@ -117,7 +117,7 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
                 sideOffset={4}
                 side="top"
                 align="center"
-                className="w-60 bg-neutral-100"
+                className="w-60 bg-neutral-100 dark:bg-neutral-900"
               >
                 <div>
                   <div className="">
@@ -156,7 +156,7 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
                     sideOffset={4}
                     side="top"
                     align="center"
-                    className="w-fit bg-neutral-100"
+                    className="w-fit bg-neutral-100 dark:bg-neutral-900"
                   >
                     <div>
                       <Button
@@ -211,7 +211,7 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
                 sideOffset={4}
                 side="top"
                 align="center"
-                className="w-fit bg-neutral-100"
+                className="w-fit bg-neutral-100 dark:bg-neutral-900"
               >
                 <Input placeholder="Add a secret word" {...form.register('password')} />
               </PopoverContent>
@@ -230,7 +230,7 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
                 sideOffset={4}
                 side="top"
                 align="center"
-                className="w-fit bg-neutral-100"
+                className="w-fit bg-neutral-100 dark:bg-neutral-900"
               >
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-2">
