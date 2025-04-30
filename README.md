@@ -1,6 +1,6 @@
-# FreeRetros
+# SnapRetro
 
-FreeRetros is a free tool to create and manage retrospective meetings. It is an alternative to Parabol and is built with Next.js, Supabase, and Tailwind CSS.
+SnapRetro is a free tool to create and manage retrospective meetings. It is an alternative to Parabol and is built with Next.js, Supabase, and Tailwind CSS.
 
 ## How to Install the Project Locally
 
@@ -68,11 +68,11 @@ The project uses Supabase as the backend and database. To install it locally, fo
 
    From the dashboard, you can manage your database and other Supabase functionalities. For more details, visit the [Supabase Documentation](https://supabase.com/docs).
 
-## Cloning FreeRetros and Setting Up the Next.js Project
+## Cloning SnapRetro and Setting Up the Next.js Project
 
 1. **Clone this Repository**
 
-   Clone the FreeRetros repository to your local machine.
+   Clone the SnapRetro repository to your local machine.
 
    **Important:**
    When installing dependencies, you need to add the following due some issues with shadcn and React 19
@@ -98,3 +98,15 @@ Wait until the schema is created in the database.
    ```bash
    pnpm run dev
    ```
+
+## Project Status
+
+This project is still a Work in Progress (WIP). The following changes are planned for future updates:
+
+- **Complete Dark Mode Implementation**: Clean up CSS classes added by shadcn and handle dark mode manually with `dark:` classes
+- **Add More E2E Tests**: Improve test coverage with additional end-to-end tests
+- **Code Cleanup**: Review and refactor components where possible to improve code quality
+- **Complete Homepage**: Add documentation, GIFs, and information about data usage
+- **Improve ESLint Rules**: Enhance code consistency with better linting rules
+- **Enhance Typing Indicator**: Improve the behavior of the "Typing..." indicator during text entry
+- **Additional Export Options**: Enable more ways to export retrospective data
