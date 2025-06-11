@@ -15,12 +15,14 @@ type PresenceState = {
   channel: RealtimeChannel | null;
   adminId: string | null;
   symmetricKey?: string;
+  participantHistory: UserPresence[];
   setSymmetricKey: (key: string) => void;
   setAdminId: (adminId: string) => void;
   setChannel: (channel: RealtimeChannel | null) => void;
   setCurrentUser: (user: UserPresence) => void;
   getCurrentUser: () => UserPresence;
   updateOnlineUsers: (users: UserPresence[]) => void;
+  addToParticipantHistory: (user: UserPresence) => void;
   handleAdminChange: (newAdminId: string, oldAdminId?: string) => Promise<void>;
 };
 
@@ -30,6 +32,7 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
   channel: null,
   adminId: null,
   symmetricKey: undefined,
+  participantHistory: [],
 
   setSymmetricKey: (symmetricKey: string) => set({ symmetricKey }),
   setAdminId: (adminId) => set({ adminId }),
@@ -37,6 +40,15 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
   getCurrentUser: () => get().currentUser,
   setCurrentUser: (user) => set({ currentUser: user }),
   updateOnlineUsers: (users) => set({ onlineUsers: users }),
+
+  addToParticipantHistory: (user) => {
+    const { participantHistory } = get();
+    const userExists = participantHistory.some((participant) => participant.id === user.id);
+
+    if (!userExists) {
+      set({ participantHistory: [...participantHistory, user] });
+    }
+  },
 
   handleAdminChange: async (newAdminId) => {
     const { channel } = get();

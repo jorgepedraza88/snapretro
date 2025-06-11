@@ -30,7 +30,7 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
   const { toast } = useToast();
 
   const useSummaryAI = useAdminStore((state) => state.useSummaryAI);
-  const onlineUsers = usePresenceStore((state) => state.onlineUsers);
+  const participantHistory = usePresenceStore((state) => state.participantHistory);
   const symmetricKey = usePresenceStore((state) => state.symmetricKey);
 
   const { endRetroBroadcast } = useRealtimeActions();
@@ -54,7 +54,7 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
       if (!useSummaryAI) {
         return generateMarkdownFromJSON(
           endResponse,
-          onlineUsers.map((user) => user.name),
+          participantHistory.map((user) => user.name),
           symmetricKey
         );
       }
@@ -68,7 +68,7 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
           },
           body: JSON.stringify({
             data: endResponse,
-            participants: onlineUsers.map((user) => user.name)
+            participants: participantHistory.map((user) => user.name)
           })
         });
 
@@ -82,7 +82,7 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
           aiContent ||
           generateMarkdownFromJSON(
             endResponse,
-            onlineUsers.map((user) => user.name),
+            participantHistory.map((user) => user.name),
             symmetricKey
           )
         );
@@ -91,13 +91,13 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
         // Fallback to non-AI summary
         return generateMarkdownFromJSON(
           endResponse,
-          onlineUsers.map((user) => user.name),
+          participantHistory.map((user) => user.name),
           symmetricKey
         );
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [onlineUsers, useSummaryAI]
+    [participantHistory, useSummaryAI]
   );
 
   const handleEndRetro = useCallback(async () => {

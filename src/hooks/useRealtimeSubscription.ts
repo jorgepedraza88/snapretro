@@ -25,6 +25,7 @@ export const useRealtimeSubscription = (retrospectiveData: RetrospectiveData) =>
     setAdminId,
     setCurrentUser,
     updateOnlineUsers,
+    addToParticipantHistory,
     handleAdminChange,
     setChannel,
     setSymmetricKey
@@ -37,6 +38,7 @@ export const useRealtimeSubscription = (retrospectiveData: RetrospectiveData) =>
       setSymmetricKey: state.setSymmetricKey,
       setCurrentUser: state.setCurrentUser,
       updateOnlineUsers: state.updateOnlineUsers,
+      addToParticipantHistory: state.addToParticipantHistory,
       handleAdminChange: state.handleAdminChange,
       setChannel: state.setChannel
     }))
@@ -75,6 +77,11 @@ export const useRealtimeSubscription = (retrospectiveData: RetrospectiveData) =>
         const activeUsers = getPresenceActiveUsers(channel);
         updateOnlineUsers(activeUsers);
 
+        // Add all active users to participant history
+        activeUsers.forEach((user) => {
+          addToParticipantHistory(user);
+        });
+
         if (!adminId) {
           setAdminId(retrospectiveData.adminId);
         }
@@ -93,6 +100,11 @@ export const useRealtimeSubscription = (retrospectiveData: RetrospectiveData) =>
 
         if (symmetricKey && isCurrentUserAdmin) {
           sendSymmetricKeyBroadcast(retrospectiveData.id, symmetricKey);
+        }
+
+        // Add new user to participant history
+        if (newPresences[0]) {
+          addToParticipantHistory(newPresences[0] as unknown as UserPresence);
         }
 
         if (isCurrentUser) {
@@ -160,6 +172,9 @@ export const useRealtimeSubscription = (retrospectiveData: RetrospectiveData) =>
         // Track current user presence to the channel
         await channel.track(currentUser);
         setChannel(channel);
+
+        // Add current user to participant history when they first connect
+        addToParticipantHistory(currentUser);
       }
     });
 
