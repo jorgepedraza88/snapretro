@@ -1,3 +1,4 @@
+import { FaGithub } from 'react-icons/fa';
 import { HiOutlineUserGroup as CreateRetroIcon } from 'react-icons/hi2';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -13,6 +14,14 @@ import teamSvg from '../../public/team-up.svg';
 export default function Home() {
   return (
     <div className="relative flex h-screen flex-col justify-center overflow-hidden bg-gray-50 p-8 font-[family-name:var(--font-geist-sans)] dark:bg-neutral-800 lg:p-4">
+      <a
+        href="https://github.com/jorgepedraza88/snapretro"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed right-6 top-4"
+      >
+        <FaGithub size={24} className="text-violet-500 dark:text-violet-400" />
+      </a>
       <div className="absolute left-6 top-4 flex items-center gap-2">
         <LogoSection />
         <SwitchColorMode />

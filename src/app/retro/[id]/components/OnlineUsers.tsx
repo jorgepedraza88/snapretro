@@ -52,7 +52,7 @@ export function OnlineUsers() {
                   <TooltipTrigger>
                     <Avatar>
                       <AvatarImage src="" />
-                      <AvatarFallback className="cursor-pointer border-2 border-violet-200 bg-violet-100 text-violet-900 dark:text-neutral-100">
+                      <AvatarFallback className="cursor-pointer border-2 border-violet-200 bg-violet-100 text-violet-900 dark:border-violet-800 dark:bg-violet-900 dark:text-violet-100">
                         {user.name.slice(0, 1).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>

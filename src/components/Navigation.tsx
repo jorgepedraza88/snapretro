@@ -1,3 +1,4 @@
+import { FaGithub } from 'react-icons/fa';
 import { PiCoffee as CoffeeIcon } from 'react-icons/pi';
 
 import { OnlineUsers } from '@/app/retro/[id]/components/OnlineUsers';
@@ -26,6 +27,13 @@ export function Navigation() {
           </Button>
 
           <SwitchColorMode />
+          <a
+            href="https://github.com/jorgepedraza88/snapretro"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <FaGithub size={20} className="text-violet-500 dark:text-violet-400" />
+          </a>
         </div>
       </div>
     </div>

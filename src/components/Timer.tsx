@@ -85,7 +85,7 @@ export function Timer({ defaultTime }: { defaultTime: number }) {
             <Button
               size="sm"
               variant="ghost"
-              className="size-8 rounded-full p-0"
+              className="size-8 rounded-full p-0 text-violet-900 dark:text-violet-200"
               onClick={startTimer}
             >
               <PlayIcon size={16} />
@@ -104,11 +104,14 @@ export function Timer({ defaultTime }: { defaultTime: number }) {
         </div>
       )}
       <div
-        className={cn('flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm font-medium', {
-          'rounded-lg bg-violet-200 text-violet-900 dark:bg-violet-900 dark:text-violet-200':
-            timerState === 'on',
-          'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': timerState === 'finished'
-        })}
+        className={cn(
+          'flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm font-medium text-violet-900 dark:text-violet-200',
+          {
+            'rounded-lg bg-violet-200 text-violet-900 dark:bg-violet-900 dark:text-violet-200':
+              timerState === 'on',
+            'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': timerState === 'finished'
+          }
+        )}
       >
         <TimerIcon size={16} className={timerState === 'on' ? 'animate-pulse' : ''} />{' '}
         {formatTime(timeLeft)}
@@ -117,7 +120,7 @@ export function Timer({ defaultTime }: { defaultTime: number }) {
         <Button
           size="sm"
           variant="ghost"
-          className="size-8 rounded-full p-0"
+          className="size-8 rounded-full p-0 text-violet-900 dark:text-violet-200"
           onClick={handleResetTimer}
           title="Reset timer"
         >
