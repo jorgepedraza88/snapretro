@@ -34,6 +34,7 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
   const symmetricKey = usePresenceStore((state) => state.symmetricKey);
 
   const { endRetroBroadcast } = useRealtimeActions();
+  // TODO: Use real streaming instead of typing effect with useChat hook and AI SDK Vercel
   const { startTypingEffect, setIsLoadingFinalContent } = useRetroSummaryStore(
     useShallow((state) => ({
       isLoadingFinalContent: state.isLoadingFinalContent,
@@ -60,6 +61,7 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
       }
 
       try {
+        // TODO: Use axios instead of fetch
         const response = await fetch('/api/summarize/', {
           method: 'POST',
           headers: {
