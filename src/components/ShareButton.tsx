@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { HiDocumentDuplicate as CopyIcon, HiShare as ShareIcon } from 'react-icons/hi2';
+import { HiShare as ShareIcon } from 'react-icons/hi2';
 import { usePathname } from 'next/navigation';
 
 import { useToast } from '@/hooks/useToast';
