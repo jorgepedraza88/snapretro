@@ -37,7 +37,7 @@ export async function revalidate() {
 
 export async function getRetrospetiveData(
   retrospectiveId: string
-): Promise<RetrospectiveData | null> {
+) {
   try {
     const retrospective = await prisma.retrospective.findUnique({
       where: { id: retrospectiveId },
@@ -46,7 +46,7 @@ export async function getRetrospetiveData(
           include: {
             posts: true // Include nested posts for each section
           },
-          orderBy: { sortOrder: 'asc' } // Explicitly order sections by sortOrder
+          orderBy: { sort_order: 'asc' } // Explicitly order sections by sort order
         }
       }
     });
