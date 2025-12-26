@@ -49,3 +49,5 @@ node_modules/
 /playwright/.cache/
 
 .env
+
+/src/generated/prisma
