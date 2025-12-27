@@ -44,7 +44,6 @@ export async function POST(request: NextRequest) {
       name,
       adminId,
       avatarUrl,
-      userName,
       timer,
       allowVotes,
       enableChat,
@@ -55,7 +54,6 @@ export async function POST(request: NextRequest) {
 
     const settings = {
       avatarUrl,
-      adminName: userName,
       timer,
       allowVotes,
       enableChat,

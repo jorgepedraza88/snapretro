@@ -70,7 +70,6 @@ export function CreateRetroForm() {
       const payload = {
         name: data.name,
         adminId,
-        userName: data.userName,
         timer: data.timer,
         allowVotes: false,
         enableChat: data.enableChat,
