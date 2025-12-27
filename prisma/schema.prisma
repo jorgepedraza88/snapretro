@@ -14,6 +14,7 @@ datasource db {
 
 model Retrospective {
   id          String    @id @default(uuid())
+  name        String
   admin_id    String
   created_at  DateTime  @default(now())
   end_date    DateTime?
@@ -30,7 +31,7 @@ model RetrospectiveSection {
   id               String @id @default(uuid())
   sort_order       Int
   retrospective_id String
-  title            String
+  name            String
   retrospective Retrospective       @relation(fields: [retrospective_id], references: [id], onDelete: Cascade)
   posts         RetrospectivePost[]
 
