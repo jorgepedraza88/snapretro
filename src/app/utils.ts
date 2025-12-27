@@ -8,8 +8,8 @@ export function generateDefaultSections(numberOfSections: number) {
     const defaultNames = ['What went well?', 'What could be improved?', 'Action items'];
 
     return {
-      title: defaultNames[index] || title,
-      sortOrder: index, // Set the order explicitly
+      name: defaultNames[index] || title,
+      sort_order: index, // Set the order explicitly
       posts: {
         create: []
       }

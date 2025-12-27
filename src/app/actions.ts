@@ -35,9 +35,7 @@ export async function revalidate() {
   revalidatePath('/retro/[id]', 'page');
 }
 
-export async function getRetrospetiveData(
-  retrospectiveId: string
-) {
+export async function getRetrospetiveData(retrospectiveId: string) {
   try {
     const retrospective = await prisma.retrospective.findUnique({
       where: { id: retrospectiveId },
@@ -51,7 +49,36 @@ export async function getRetrospetiveData(
       }
     });
 
-    return retrospective;
+    if (!retrospective) return null;
+
+    const settings = (retrospective.settings as any) || {};
+
+    // Transform sections to match legacy naming (title -> name handling)
+    const sections = retrospective.sections.map((section) => ({
+      ...section,
+      title: section.name,
+      retrospectiveId: section.retrospective_id,
+      posts: section.posts.map((post) => ({
+        ...post,
+        userId: post.user_id,
+        sectionId: post.section_id
+      }))
+    }));
+
+    return {
+      id: retrospective.id,
+      adminId: retrospective.admin_id,
+      adminName: settings.adminName || '',
+      date: retrospective.created_at,
+      enablePassword: settings.enablePassword || false,
+      allowMessages: settings.allowMessages || false,
+      allowVotes: settings.allowVotes || false,
+      password: retrospective.secret_word,
+      timer: settings.timer || 0,
+      enableChat: settings.enableChat || false,
+      sections,
+      status: retrospective.status
+    };
   } catch (error) {
     console.log(error);
     throw new Error('Error getting retrospective data');
@@ -67,7 +94,7 @@ export async function createPost({ sectionId, newPost }: CreatePostParams) {
       data: {
         posts: {
           create: {
-            userId,
+            user_id: userId,
             content,
             votes
           }
@@ -94,35 +121,13 @@ export async function destroyPost({ postId }: DestroyPostParams) {
   }
 }
 
-export async function createRetro(data: CreateRetrospectiveData) {
-  const { sectionsNumber, ...restData } = data;
-
-  try {
-    const retrospective = await prisma.retrospective.create({
-      data: {
-        ...restData,
-        status: 'active',
-        sections: {
-          create: generateDefaultSections(sectionsNumber)
-        }
-      },
-      include: { sections: { include: { posts: true } } }
-    });
-
-    return retrospective;
-  } catch (error) {
-    console.log(error);
-    throw new Error(`Failed to create retrospective, ${error}`);
-  }
-}
-
 export async function editRetroSectionTitle(data: { sectionId: string; title: string }) {
   const { sectionId, title } = data;
 
   try {
     await prisma.retrospectiveSection.update({
       where: { id: sectionId },
-      data: { title }
+      data: { name: title } // Map title to name
     });
   } catch (error) {
     console.log(error);
@@ -138,7 +143,7 @@ export async function editRetroAdminId(data: { retrospectiveId: string; newAdmin
   try {
     await prisma.retrospective.update({
       where: { id: retrospectiveId },
-      data: { adminId: newAdminId }
+      data: { admin_id: newAdminId } // Map to admin_id
     });
   } catch (error) {
     console.log(error);
@@ -151,8 +156,8 @@ export async function editRetroAdminId(data: { retrospectiveId: string; newAdmin
 export async function editRetroSectionsNumber(retrospectiveId: string, newNumber: number) {
   try {
     const sections = await prisma.retrospectiveSection.findMany({
-      where: { retrospectiveId },
-      orderBy: { sortOrder: 'asc' }
+      where: { retrospective_id: retrospectiveId },
+      orderBy: { sort_order: 'asc' }
     });
 
     const currentNumber = sections.length;
@@ -192,9 +197,17 @@ export async function editRetroSettings(
   newSettings: { allowVotes: boolean; allowMessages: boolean }
 ) {
   try {
+    const retro = await prisma.retrospective.findUnique({ where: { id: retrospectiveId } });
+    const currentSettings = (retro?.settings as any) || {};
+
     await prisma.retrospective.update({
       where: { id: retrospectiveId },
-      data: newSettings
+      data: {
+        settings: {
+          ...currentSettings,
+          ...newSettings
+        }
+      }
     });
   } catch (error) {
     console.log(error);
@@ -206,11 +219,17 @@ export async function editRetroSettings(
 
 export async function editRetroPassword(retrospectiveId: string, newPassword: string) {
   try {
+    const retro = await prisma.retrospective.findUnique({ where: { id: retrospectiveId } });
+    const currentSettings = (retro?.settings as any) || {};
+
     await prisma.retrospective.update({
       where: { id: retrospectiveId },
       data: {
-        password: newPassword,
-        enablePassword: newPassword ? true : false
+        secret_word: newPassword,
+        settings: {
+          ...currentSettings,
+          enablePassword: newPassword ? true : false
+        }
       }
     });
   } catch (error) {
@@ -282,7 +301,7 @@ export async function endRetrospective(retrospectiveId: string) {
           include: {
             posts: true // Include nested posts for each section
           },
-          orderBy: { sortOrder: 'asc' } // Explicitly order sections by sortOrder
+          orderBy: { sort_order: 'asc' } // Explicitly order sections by sort order
         }
       }
     });

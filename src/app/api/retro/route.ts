@@ -41,9 +41,10 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
+      name,
       adminId,
       avatarUrl,
-      adminName,
+      userName,
       timer,
       allowVotes,
       enableChat,
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     const settings = {
       avatarUrl,
-      adminName,
+      adminName: userName,
       timer,
       allowVotes,
       enableChat,
@@ -63,14 +64,15 @@ export async function POST(request: NextRequest) {
 
     const retrospective = await prisma.retrospective.create({
       data: {
+        name,
         admin_id: adminId,
         secret_word: password,
         status: 'active',
         settings,
         sections: {
           create: generateDefaultSections(sectionsNumber).map((section) => ({
-            title: section.title,
-            sort_order: section.sortOrder
+            name: section.name,
+            sort_order: section.sort_order
           }))
         }
       },
