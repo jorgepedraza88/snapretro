@@ -1,26 +1,43 @@
-import { redirect } from 'next/navigation';
+'use client';
 
+import { ImSpinner as SpinnerIcon } from 'react-icons/im';
+import { useParams, useRouter } from 'next/navigation';
+
+import { useRetrospectiveQuery } from '@/hooks/api/query/useRetrospectiveQuery';
 import { Navigation } from '@/components/Navigation';
 import { UserSessionWrapper } from '@/components/UserSessionWrapper';
-import { getRetrospetiveData } from '@/app/actions';
 import { RetroContextProvider } from './components/RetroContextProvider';
 import { MainContent } from './MainContent';
 import { MainContentWrapper } from './MainContentWrapper';
 
-export default async function Page({ params }: { params: Promise<{ id: string }> }) {
-  const retrospectiveId = (await params).id;
-  const initialData = await getRetrospetiveData(retrospectiveId);
+export default function Page() {
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
 
-  if (!initialData) {
-    redirect('/not-found');
+  const { data, isLoading, isError } = useRetrospectiveQuery(id);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <SpinnerIcon className="animate-spin text-4xl text-violet-700" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    router.push('/not-found');
+  }
+
+  if (!data) {
+    return null;
   }
 
   return (
-    <UserSessionWrapper data={initialData}>
-      <RetroContextProvider data={initialData}>
+    <UserSessionWrapper data={data}>
+      <RetroContextProvider data={data}>
         <Navigation />
         <MainContentWrapper>
-          <MainContent data={initialData} />
+          <MainContent data={data} />
         </MainContentWrapper>
       </RetroContextProvider>
     </UserSessionWrapper>
