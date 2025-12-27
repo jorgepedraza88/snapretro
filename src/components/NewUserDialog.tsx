@@ -28,8 +28,8 @@ export function NewUserDialog({ data }: Readonly<{ data: RetrospectiveData }>) {
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    setError
+    setError,
+    formState: { errors }
   } = useForm<UserFormData>({
     defaultValues: {
       userName: '',
