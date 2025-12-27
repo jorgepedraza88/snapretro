@@ -1,5 +1,6 @@
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 export type UserPresence = {
   id: string;
@@ -26,38 +27,47 @@ type PresenceState = {
   handleAdminChange: (newAdminId: string, oldAdminId?: string) => Promise<void>;
 };
 
-export const usePresenceStore = create<PresenceState>((set, get) => ({
-  onlineUsers: [],
-  currentUser: { id: 'guest', name: 'Guest', isAdmin: false },
-  channel: null,
-  adminId: null,
-  symmetricKey: undefined,
-  participantHistory: [],
+export const usePresenceStore = create<PresenceState>()(
+  persist(
+    (set, get) => ({
+      onlineUsers: [],
+      currentUser: { id: 'guest', name: 'Guest', isAdmin: false },
+      channel: null,
+      adminId: null,
+      symmetricKey: undefined,
+      participantHistory: [],
 
-  setSymmetricKey: (symmetricKey: string) => set({ symmetricKey }),
-  setAdminId: (adminId) => set({ adminId }),
-  setChannel: (channel) => set({ channel }),
-  getCurrentUser: () => get().currentUser,
-  setCurrentUser: (user) => set({ currentUser: user }),
-  updateOnlineUsers: (users) => set({ onlineUsers: users }),
+      setSymmetricKey: (symmetricKey: string) => set({ symmetricKey }),
+      setAdminId: (adminId) => set({ adminId }),
+      setChannel: (channel) => set({ channel }),
+      getCurrentUser: () => get().currentUser,
+      setCurrentUser: (user) => set({ currentUser: user }),
+      updateOnlineUsers: (users) => set({ onlineUsers: users }),
 
-  addToParticipantHistory: (user) => {
-    const { participantHistory } = get();
-    const userExists = participantHistory.some((participant) => participant.id === user.id);
+      addToParticipantHistory: (user) => {
+        const { participantHistory } = get();
+        const userExists = participantHistory.some((participant) => participant.id === user.id);
 
-    if (!userExists) {
-      set({ participantHistory: [...participantHistory, user] });
+        if (!userExists) {
+          set({ participantHistory: [...participantHistory, user] });
+        }
+      },
+
+      handleAdminChange: async (newAdminId) => {
+        const { channel } = get();
+
+        // If there is not supabase channel subscription yet, we can't execute this
+        if (!channel) {
+          return;
+        }
+
+        set({ adminId: newAdminId });
+      }
+    }),
+    {
+      name: 'snapretro-session',
+      storage: createJSONStorage(() => sessionStorage),
+      partialize: (state) => ({ currentUser: state.currentUser })
     }
-  },
-
-  handleAdminChange: async (newAdminId) => {
-    const { channel } = get();
-
-    // If there is not supabase channel subscription yet, we can't execute this
-    if (!channel) {
-      return;
-    }
-
-    set({ adminId: newAdminId });
-  }
-}));
+  )
+);
