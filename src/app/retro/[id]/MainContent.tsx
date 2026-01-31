@@ -9,7 +9,7 @@ import { EndRetroContainer } from './components/EndRetroContainer';
 export function MainContent({ data }: { data: RetrospectiveData }) {
   const { timer, status } = data;
 
-  const shouldDisplayTimer = timer && status === 'active';
+  const shouldDisplayTimer = !!timer && status === 'active';
   const shouldDiplayRetroCards = status === 'active';
 
   return (

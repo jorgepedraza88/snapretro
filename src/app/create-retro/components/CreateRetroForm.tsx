@@ -29,10 +29,12 @@ interface CreateRetroFormData {
   sectionsNumber: number;
 }
 
+const DEFAULT_TIMER_VALUE = 300;
+
 const defaultFormValues: CreateRetroFormData = {
   name: '',
   userName: '',
-  timer: 300,
+  timer: DEFAULT_TIMER_VALUE,
   enableChat: true,
   enablePassword: false,
   secretWord: null,
@@ -56,12 +58,10 @@ export function CreateRetroForm() {
     register,
     handleSubmit,
     watch,
-    setValue,
     formState: { errors, isSubmitting }
   } = form;
 
   const enablePassword = watch('enablePassword');
-  const timer = watch('timer');
 
   const onSubmit = async (data: CreateRetroFormData) => {
     try {
@@ -77,8 +77,7 @@ export function CreateRetroForm() {
         sectionsNumber: data.sectionsNumber
       };
 
-      const response = await axios.post('/api/retro', payload);
-      const retrospective = response.data;
+      const { data: retrospective } = await axios.post('/api/retro', payload);
 
       setAdminId(adminId);
 
@@ -157,24 +156,46 @@ export function CreateRetroForm() {
               <Controller
                 control={control}
                 name="timer"
-                render={({ field }) => (
-                  <div className="w-full">
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        id="enable-timer"
-                        checked={!!field.value}
-                        onCheckedChange={() => {
-                          if (field.value) {
-                            field.onChange(null);
-                          } else {
-                            field.onChange(300);
-                          }
-                        }}
-                      />
-                      <Label htmlFor="enable-timer">Enable timer</Label>
+                render={({ field }) => {
+                  const isTimerEnabled = !!field.value;
+                  const timerValue = field.value;
+
+                  return (
+                    <div className="w-full">
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          id="enable-timer"
+                          checked={!!field.value}
+                          onCheckedChange={() => {
+                            if (timerValue) {
+                              field.onChange(null);
+                            } else {
+                              field.onChange(DEFAULT_TIMER_VALUE);
+                            }
+                          }}
+                        />
+                        <Label htmlFor="enable-timer">Enable timer</Label>
+                      </div>
+                      {isTimerEnabled && timerValue && (
+                        <div className="my-4 ml-12">
+                          <Label>Select time:</Label>
+                          <p className="w-full text-center text-sm dark:text-neutral-100">
+                            {formatTimer(timerValue)} minutes
+                          </p>
+                          <Slider
+                            defaultValue={[DEFAULT_TIMER_VALUE]}
+                            max={600}
+                            min={60}
+                            step={60}
+                            value={[timerValue]}
+                            className="mt-1"
+                            onValueChange={(val) => field.onChange(val[0])}
+                          />
+                        </div>
+                      )}
                     </div>
-                  </div>
-                )}
+                  );
+                }}
               />
             </div>
 
@@ -213,24 +234,6 @@ export function CreateRetroForm() {
               </div>
             )}
           </div>
-
-          {!!timer && (
-            <div className="my-4 ml-12">
-              <Label>Select time:</Label>
-              <p className="w-full text-center text-sm dark:text-neutral-100">
-                {formatTimer(timer)} minutes
-              </p>
-              <Slider
-                defaultValue={[300]}
-                max={600}
-                min={60}
-                step={60}
-                value={[timer]}
-                className="mt-1"
-                onValueChange={(val) => setValue('timer', val[0])}
-              />
-            </div>
-          )}
         </div>
       </div>
 

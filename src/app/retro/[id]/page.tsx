@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useRetrospectiveQuery } from '@/hooks/api/query/useRetrospectiveQuery';
 import { Navigation } from '@/components/Navigation';
 import { UserSessionWrapper } from '@/components/UserSessionWrapper';
+import { ROUTES } from '@/constants/routes';
 import { RetroContextProvider } from './components/RetroContextProvider';
 import { MainContent } from './MainContent';
 import { MainContentWrapper } from './MainContentWrapper';
@@ -25,11 +26,12 @@ export default function Page() {
   }
 
   if (isError) {
-    router.push('/not-found');
+    router.push(ROUTES.NOT_FOUND);
   }
 
   if (!data) {
-    return null;
+    router.push(ROUTES.NOT_FOUND);
+    return;
   }
 
   return (

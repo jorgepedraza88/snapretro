@@ -7,6 +7,7 @@ import { RetrospectiveData } from '@/types/Retro';
 // TODO: Eliminar cuando refactorizemos todo
 const mapToRetrospectiveData = (apiData: any): RetrospectiveData => {
   const settings = apiData.settings || {};
+
   return {
     id: apiData.id,
     adminId: apiData.admin_id,
@@ -16,7 +17,7 @@ const mapToRetrospectiveData = (apiData: any): RetrospectiveData => {
     allowMessages: settings.allowMessages || false,
     allowVotes: settings.allowVotes || false,
     password: apiData.secret_word || null,
-    timer: apiData.timer || 0,
+    timer: settings.timer || 300,
     enableChat: settings.enableChat || false,
     status: apiData.status,
     sections: (apiData.sections || []).map((s: any) => ({

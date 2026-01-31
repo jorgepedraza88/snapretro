@@ -34,7 +34,7 @@ export function Timer({ defaultTime }: { defaultTime: number }) {
   // Execute once when the component mounts to set the initial state of the timer
   useEffect(() => {
     setTimeLeft(defaultTime);
-  }, []);
+  }, [defaultTime, setTimeLeft]);
 
   useEffect(() => {
     if (timeLeft <= 0) {
