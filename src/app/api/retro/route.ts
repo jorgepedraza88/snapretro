@@ -3,15 +3,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateDefaultSections } from '@/app/utils';
 import { prisma } from '@/lib/prisma';
 
+interface CreateRetroRequestBody {
+  name: string;
+  adminId: string;
+  avatarUrl?: string;
+  timer: number;
+  enableChat: boolean;
+  enablePassword: boolean;
+  password?: string;
+  sectionsNumber: number;
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body: CreateRetroRequestBody = await request.json();
     const {
       name,
       adminId,
       avatarUrl,
       timer,
-      allowVotes,
       enableChat,
       enablePassword,
       password,
@@ -21,9 +31,10 @@ export async function POST(request: NextRequest) {
     const settings = {
       avatarUrl,
       timer,
-      allowVotes,
       enableChat,
-      enablePassword
+      enablePassword,
+      allowVotes: true,
+      allowMessages: true
     };
 
     const retrospective = await prisma.retrospective.create({

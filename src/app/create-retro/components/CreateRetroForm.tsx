@@ -52,10 +52,10 @@ export function CreateRetroForm() {
   });
 
   const {
+    control,
     register,
     handleSubmit,
     watch,
-    control,
     setValue,
     formState: { errors, isSubmitting }
   } = form;
@@ -71,7 +71,6 @@ export function CreateRetroForm() {
         name: data.name,
         adminId,
         timer: data.timer,
-        allowVotes: false,
         enableChat: data.enableChat,
         enablePassword: data.enablePassword,
         password: data.secretWord,
