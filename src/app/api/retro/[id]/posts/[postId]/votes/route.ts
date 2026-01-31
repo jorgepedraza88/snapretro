@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
     postId: string;
-  };
+  }>;
 }
 
 async function getPostVotes(postId: string) {
@@ -23,7 +23,7 @@ async function getPostVotes(postId: string) {
 }
 
 export async function POST(request: NextRequest, { params }: RouteParams) {
-  const { postId } = params;
+  const { postId } = await params;
 
   try {
     const body = await request.json();
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
-  const { postId } = params;
+  const { postId } = await params;
 
   try {
     const body = await request.json();

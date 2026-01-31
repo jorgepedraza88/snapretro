@@ -1,3 +1,5 @@
+'use client';
+
 import { FaGithub } from 'react-icons/fa';
 import { PiCoffee as CoffeeIcon } from 'react-icons/pi';
 

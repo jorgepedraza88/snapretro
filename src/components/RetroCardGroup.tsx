@@ -1,8 +1,10 @@
+'use client';
+
 import { RetrospectiveData } from '@/types/Retro';
 import { cn } from '@/lib/utils';
 import { RetroCard } from './RetroCard';
 
-export async function RetroCardGroup({
+export function RetroCardGroup({
   retrospectiveData: retrospectiveData
 }: {
   retrospectiveData: RetrospectiveData;

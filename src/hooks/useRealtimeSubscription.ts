@@ -2,10 +2,11 @@
 
 import { useEffect } from 'react';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import { useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 import { useShallow } from 'zustand/shallow';
 
 import { type RetrospectiveData } from '@/types/Retro';
-import { editRetroAdminId, revalidate } from '@/app/actions';
 import REALTIME_EVENT_KEYS from '@/constants/realtimeEventKeys';
 import { useAdminStore } from '@/stores/useAdminStore';
 import { usePresenceStore, UserPresence } from '@/stores/usePresenceStore';
@@ -16,6 +17,7 @@ import { useToast } from './useToast';
 
 export const useRealtimeSubscription = (retrospectiveData: RetrospectiveData) => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { setDisplayedContent } = useRetroSummaryStore();
   const { sendSymmetricKeyBroadcast } = useRealtimeActions();
   const {
@@ -125,18 +127,17 @@ export const useRealtimeSubscription = (retrospectiveData: RetrospectiveData) =>
       .on('broadcast', { event: REALTIME_EVENT_KEYS.ASSIGN_NEW_ADMIN }, async ({ payload }) => {
         const { newAdminId } = payload;
         await handleAdminChange(newAdminId);
-        await editRetroAdminId({
-          retrospectiveId: retrospectiveData.id,
-          newAdminId
-        });
+        await axios.patch(`/api/retro/${retrospectiveData.id}`, { adminId: newAdminId });
 
         displayNewAdminToast(channel, newAdminId);
       })
-      .on('broadcast', { event: REALTIME_EVENT_KEYS.REVALIDATE }, revalidate)
+      .on('broadcast', { event: REALTIME_EVENT_KEYS.REVALIDATE }, () => {
+        queryClient.invalidateQueries({ queryKey: ['retrospective', retrospectiveData.id] });
+      })
       .on('broadcast', { event: REALTIME_EVENT_KEYS.END_RETRO }, ({ payload }) => {
         if (currentUser.id !== adminId) {
           setDisplayedContent(payload.finalSummary);
-          revalidate();
+          queryClient.invalidateQueries({ queryKey: ['retrospective', retrospectiveData.id] });
         }
       })
       .on('broadcast', { event: REALTIME_EVENT_KEYS.DISCONNECT_USER }, async ({ payload }) => {

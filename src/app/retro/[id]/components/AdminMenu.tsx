@@ -11,6 +11,7 @@ import {
 import { useShallow } from 'zustand/shallow';
 
 import { RetrospectiveData } from '@/types/Retro';
+import { useUpdateSettingsMutation } from '@/hooks/api/mutation/useRetroMutations';
 import { useRealtimeActions } from '@/hooks/useRealtimeActions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +19,6 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { editRetroPassword, editRetroSectionsNumber, editRetroSettings } from '@/app/actions';
 import { formatTimer } from '@/app/utils';
 import { cn } from '@/lib/utils';
 import { useAdminStore } from '@/stores/useAdminStore';
@@ -50,6 +50,7 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
   );
 
   const { revalidatePageBroadcast } = useRealtimeActions();
+  const updateSettingsMutation = useUpdateSettingsMutation();
 
   const currentPassword = retrospectiveData.password || '';
   const isCurrentUserAdmin = adminId === currentUser.id;
@@ -68,19 +69,34 @@ export function AdminMenu({ retrospectiveData }: { retrospectiveData: Retrospect
 
     const { columns, password: newPassword, ...restData } = data;
 
+    const settingsPayload: {
+      retrospectiveId: string;
+      settings?: { allowVotes?: boolean; allowMessages?: boolean };
+      password?: string;
+      sectionsNumber?: number;
+    } = { retrospectiveId: retrospectiveData.id };
+
     if (columns !== retrospectiveData.sections.length) {
-      await editRetroSectionsNumber(retrospectiveData.id, data.columns);
+      settingsPayload.sectionsNumber = columns;
     }
 
     if (newPassword !== currentPassword) {
-      await editRetroPassword(retrospectiveData.id, newPassword);
+      settingsPayload.password = newPassword;
     }
 
     if (
       retrospectiveData.allowMessages !== restData.allowMessages ||
       retrospectiveData.allowVotes !== restData.allowVotes
     ) {
-      await editRetroSettings(retrospectiveData.id, restData);
+      settingsPayload.settings = restData;
+    }
+
+    if (
+      settingsPayload.sectionsNumber !== undefined ||
+      settingsPayload.password !== undefined ||
+      settingsPayload.settings
+    ) {
+      await updateSettingsMutation.mutateAsync(settingsPayload);
     }
 
     revalidatePageBroadcast(retrospectiveData.id);

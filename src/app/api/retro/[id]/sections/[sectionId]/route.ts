@@ -3,14 +3,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string; // retrospectiveId
     sectionId: string;
-  };
+  }>;
 }
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
-  const { sectionId } = params;
+  const { sectionId } = await params;
 
   try {
     const body = await request.json();
@@ -22,7 +22,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     const updatedSection = await prisma.retrospectiveSection.update({
       where: { id: sectionId },
-      data: { title }
+      data: { name: title }
     });
 
     return NextResponse.json(updatedSection);

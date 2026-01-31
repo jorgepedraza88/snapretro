@@ -12,14 +12,13 @@ import { nanoid } from 'nanoid';
 import { useShallow } from 'zustand/shallow';
 
 import { RetrospectiveData, RetrospectiveSection } from '@/types/Retro';
-import { useRealtimeActions } from '@/hooks/useRealtimeActions';
 import {
-  addVoteToPost,
-  createPost,
-  destroyPost,
-  editRetroSectionTitle,
-  removeVoteFromPost
-} from '@/app/actions';
+  useCreatePostMutation,
+  useDeletePostMutation
+} from '@/hooks/api/mutation/usePostMutations';
+import { useUpdateSectionTitleMutation } from '@/hooks/api/mutation/useSectionMutations';
+import { useAddVoteMutation, useRemoveVoteMutation } from '@/hooks/api/mutation/useVoteMutations';
+import { useRealtimeActions } from '@/hooks/useRealtimeActions';
 import { decryptMessage, encryptMessage } from '@/app/cryptoClient';
 import { cn } from '@/lib/utils';
 import { usePresenceStore } from '@/stores/usePresenceStore';
@@ -46,6 +45,12 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
 
   const { writingAction, revalidatePageBroadcast } = useRealtimeActions();
   const postFormRef = useRef<HTMLFormElement>(null);
+
+  const createPostMutation = useCreatePostMutation();
+  const deletePostMutation = useDeletePostMutation();
+  const addVoteMutation = useAddVoteMutation();
+  const removeVoteMutation = useRemoveVoteMutation();
+  const updateSectionTitleMutation = useUpdateSectionTitleMutation();
 
   const [isWriting, setIsWriting] = useState(false);
   const [isEditingSectionTitle, setIsEditingSectionTitle] = useState(false);
@@ -114,9 +119,12 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
 
       postFormRef.current?.reset();
 
-      await createPost({
+      await createPostMutation.mutateAsync({
+        retrospectiveId,
         sectionId: section.id,
-        newPost
+        userId: newPost.userId,
+        content: newPost.content,
+        votes: newPost.votes
       });
 
       revalidatePageBroadcast(retrospectiveId);
@@ -130,7 +138,7 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
       addOptimisticPosts((prev) => prev.filter((post) => post.id !== postId));
     });
 
-    await destroyPost({ postId });
+    await deletePostMutation.mutateAsync({ retrospectiveId, postId });
 
     revalidatePageBroadcast(retrospectiveId);
   };
@@ -138,9 +146,10 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
   const handleChangeSectionTitle = async () => {
     addOptimisticTitle(newSectionTitle);
 
-    await editRetroSectionTitle({
-      title: newSectionTitle,
-      sectionId: section.id
+    await updateSectionTitleMutation.mutateAsync({
+      retrospectiveId,
+      sectionId: section.id,
+      title: newSectionTitle
     });
 
     revalidatePageBroadcast(retrospectiveId);
@@ -163,7 +172,7 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
           })
         );
       });
-      await removeVoteFromPost(postId, currentUser.id);
+      await removeVoteMutation.mutateAsync({ retrospectiveId, postId, userId: currentUser.id });
 
       revalidatePageBroadcast(retrospectiveId);
     } else {
@@ -180,7 +189,7 @@ export function RetroCard({ title, description, section, retrospectiveData }: Re
           })
         );
       });
-      await addVoteToPost(postId, currentUser.id);
+      await addVoteMutation.mutateAsync({ retrospectiveId, postId, userId: currentUser.id });
       revalidatePageBroadcast(retrospectiveId);
     }
   };

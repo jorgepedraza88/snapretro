@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 
 import { Toaster } from '@/components/ui/toaster';
+import QueryProvider from '@/providers/QueryProvider';
 
 import './globals.css';
 
@@ -28,7 +29,7 @@ export default function RootLayout({
       <body
         className={`${clashSans.variable} ${clashSans.variable} subpixel-antialiased lg:overflow-auto`}
       >
-        {children}
+        <QueryProvider>{children}</QueryProvider>
         <Toaster />
       </body>
     </html>

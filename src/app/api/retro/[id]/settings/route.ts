@@ -14,13 +14,13 @@ interface RetrospectiveSettings {
 }
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string; // retrospectiveId
-  };
+  }>;
 }
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
-  const { id } = params;
+  const { id } = await params;
 
   try {
     const body = await request.json();
@@ -38,7 +38,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       if (sectionsNumber > currentNumber) {
         const newSectionsCount = sectionsNumber - currentNumber;
         const newSections = generateDefaultSections(newSectionsCount).map((section, index) => ({
-          title: section.title,
+          name: section.name,
           sort_order: currentNumber + index,
           retrospective_id: id
         }));
@@ -52,7 +52,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           newSections.map((section) =>
             prisma.retrospectiveSection.create({
               data: {
-                title: section.title,
+                name: section.name,
                 sort_order: section.sort_order,
                 retrospective_id: id
               }

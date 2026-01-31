@@ -3,14 +3,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
     postId: string;
-  };
+  }>;
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
-  const { postId } = params;
+  const { postId } = await params;
 
   try {
     await prisma.retrospectivePost.delete({

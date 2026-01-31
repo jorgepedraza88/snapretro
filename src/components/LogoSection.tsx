@@ -1,3 +1,5 @@
+'use client';
+
 import { LiaSlideshare as LogoIcon } from 'react-icons/lia';
 import Link from 'next/link';
 

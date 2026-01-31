@@ -1,3 +1,5 @@
+'use client';
+
 import { type RetrospectiveData } from '@/types/Retro';
 import { RetroCardGroup } from '@/components/RetroCardGroup';
 import { Timer } from '@/components/Timer';

@@ -1,3 +1,5 @@
+'use client';
+
 import { FaGithub } from 'react-icons/fa';
 import { HiOutlineUserGroup as CreateRetroIcon } from 'react-icons/hi2';
 import Image from 'next/image';

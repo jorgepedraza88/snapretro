@@ -4,10 +4,10 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import { useShallow } from 'zustand/shallow';
 
 import { RetrospectiveData } from '@/types/Retro';
+import { useEndRetroMutation } from '@/hooks/api/mutation/useRetroMutations';
 import { useRealtimeActions } from '@/hooks/useRealtimeActions';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 import { useToast } from '@/hooks/useToast';
-import { endRetrospective } from '@/app/actions';
 import { generateMarkdownFromJSON } from '@/app/utils';
 import { useAdminStore } from '@/stores/useAdminStore';
 import { usePresenceStore } from '@/stores/usePresenceStore';
@@ -34,6 +34,7 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
   const symmetricKey = usePresenceStore((state) => state.symmetricKey);
 
   const { endRetroBroadcast } = useRealtimeActions();
+  const endRetroMutation = useEndRetroMutation();
   // TODO: Use real streaming instead of typing effect with useChat hook and AI SDK Vercel
   const { startTypingEffect, setIsLoadingFinalContent } = useRetroSummaryStore(
     useShallow((state) => ({
@@ -106,12 +107,38 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
     setIsLoadingFinalContent(true);
 
     try {
-      const endResponse = await endRetrospective(data.id);
+      const endResponse = await endRetroMutation.mutateAsync({ retrospectiveId: data.id });
       if (!endResponse) {
         throw new Error('Failed to end retrospective');
       }
 
-      const finalContent = await generateFinalContent(endResponse);
+      // Map API response to RetrospectiveData format for generateFinalContent
+      const mappedResponse: RetrospectiveData = {
+        id: endResponse.id,
+        adminId: endResponse.admin_id,
+        adminName: endResponse.settings?.adminName || '',
+        date: new Date(endResponse.created_at),
+        enablePassword: endResponse.settings?.enablePassword || false,
+        allowMessages: endResponse.settings?.allowMessages || false,
+        allowVotes: endResponse.settings?.allowVotes || false,
+        password: endResponse.secret_word || null,
+        timer: endResponse.settings?.timer || 0,
+        enableChat: endResponse.settings?.enableChat || false,
+        status: endResponse.status,
+        sections: (endResponse.sections || []).map((s: any) => ({
+          id: s.id,
+          title: s.name || s.title,
+          retrospectiveId: s.retrospective_id,
+          posts: (s.posts || []).map((p: any) => ({
+            id: p.id,
+            userId: p.user_id,
+            content: p.content,
+            votes: p.votes || []
+          }))
+        }))
+      };
+
+      const finalContent = await generateFinalContent(mappedResponse);
 
       if (!finalContent) {
         throw new Error('Failed to generate final content');
