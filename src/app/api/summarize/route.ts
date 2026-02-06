@@ -1,5 +1,5 @@
 import { google } from '@ai-sdk/google';
-import { generateText } from 'ai';
+import { streamText } from 'ai';
 import { DateTime } from 'luxon';
 import { NextResponse } from 'next/server';
 
@@ -9,7 +9,6 @@ import { decryptMessage } from '@/app/cryptoClient';
 interface RequestObject {
   data: RetrospectiveData;
   participants: string[];
-  symmetricKey: string;
 }
 
 interface FormatBodyForSummaryParams {
@@ -20,7 +19,7 @@ interface FormatBodyForSummaryParams {
 
 function formatBodyForSummary({ data, participants, symmetricKey }: FormatBodyForSummaryParams) {
   if (!symmetricKey) {
-    return NextResponse.json({ error: 'Missing encryption key' }, { status: 400 });
+    throw new Error('Missing encryption key');
   }
 
   const { sections, adminName, date } = data;
@@ -46,6 +45,10 @@ export async function POST(request: Request) {
     const { data, participants } = (await request.json()) as RequestObject;
 
     const symmetricKey = request.headers.get('x-encrypted-key');
+
+    if (!symmetricKey) {
+      return NextResponse.json({ error: 'Missing encryption key' }, { status: 400 });
+    }
 
     const formattedBody = formatBodyForSummary({
       data,
@@ -86,16 +89,14 @@ The summary must follow this exact structure:
 * DO NOT use the word "summary" in the content
 * Focus on the actual content and insights, not metadata`;
 
-    const { text: finalSummary } = await generateText({
+    const result = streamText({
       model: google('gemini-2.5-flash-lite'),
       system: systemPrompt,
       prompt: `Generate a structured summary for the following retrospective meeting data:\n\n${JSON.stringify(formattedBody, null, 2)}`,
       temperature: 0.7
     });
 
-    return NextResponse.json({
-      summary: finalSummary
-    });
+    return result.toUIMessageStreamResponse();
   } catch (error) {
     if (error instanceof Error) {
       console.log(error);

@@ -7,6 +7,7 @@ import { RetrospectiveData } from '@/types/Retro';
 import { useEndRetroMutation } from '@/hooks/api/mutation/useRetroMutations';
 import { useRealtimeActions } from '@/hooks/useRealtimeActions';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
+import { useSummarize } from '@/hooks/useSummarize';
 import { useToast } from '@/hooks/useToast';
 import { generateMarkdownFromJSON } from '@/app/utils';
 import { useAdminStore } from '@/stores/useAdminStore';
@@ -35,73 +36,18 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
 
   const { endRetroBroadcast } = useRealtimeActions();
   const endRetroMutation = useEndRetroMutation();
-  // TODO: Use real streaming instead of typing effect with useChat hook and AI SDK Vercel
-  const { startTypingEffect, setIsLoadingFinalContent } = useRetroSummaryStore(
+
+  const { setIsLoadingFinalContent, setDisplayedContent } = useRetroSummaryStore(
     useShallow((state) => ({
-      isLoadingFinalContent: state.isLoadingFinalContent,
-      startTypingEffect: state.startTypingEffect,
-      setIsLoadingFinalContent: state.setIsLoadingFinalContent
+      setIsLoadingFinalContent: state.setIsLoadingFinalContent,
+      setDisplayedContent: state.setDisplayedContent
     }))
   );
 
   // Initialize realtime
   useRealtimeSubscription(data);
 
-  const generateFinalContent = useCallback(
-    async (endResponse: RetrospectiveData) => {
-      if (!symmetricKey) {
-        return;
-      }
-
-      if (!useSummaryAI) {
-        return generateMarkdownFromJSON(
-          endResponse,
-          participantHistory.map((user) => user.name),
-          symmetricKey
-        );
-      }
-
-      try {
-        // TODO: Use axios instead of fetch
-        const response = await fetch('/api/summarize/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Encrypted-Key': symmetricKey
-          },
-          body: JSON.stringify({
-            data: endResponse,
-            participants: participantHistory.map((user) => user.name)
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const { summary: aiContent } = await response.json();
-
-        return (
-          aiContent ||
-          generateMarkdownFromJSON(
-            endResponse,
-            participantHistory.map((user) => user.name),
-            symmetricKey
-          )
-        );
-      } catch (error) {
-        console.error('Error generating AI summary:', error);
-        // Fallback to non-AI summary
-        return generateMarkdownFromJSON(
-          endResponse,
-          participantHistory.map((user) => user.name),
-          symmetricKey
-        );
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [participantHistory, useSummaryAI]
-  );
+  const { generateSummary } = useSummarize(data);
 
   const handleEndRetro = useCallback(async () => {
     setIsLoadingFinalContent(true);
@@ -112,46 +58,39 @@ export function RetroContextProvider({ data, children }: RetroContextProviderPro
         throw new Error('Failed to end retrospective');
       }
 
-      // Map API response to RetrospectiveData format for generateFinalContent
-      const mappedResponse: RetrospectiveData = {
-        id: endResponse.id,
-        adminId: endResponse.admin_id,
-        adminName: endResponse.settings?.adminName || '',
-        date: new Date(endResponse.created_at),
-        enablePassword: endResponse.settings?.enablePassword || false,
-        allowMessages: endResponse.settings?.allowMessages || false,
-        allowVotes: endResponse.settings?.allowVotes || false,
-        password: endResponse.secret_word || null,
-        timer: endResponse.settings?.timer || 0,
-        enableChat: endResponse.settings?.enableChat || false,
-        status: endResponse.status,
-        sections: (endResponse.sections || []).map((s: any) => ({
-          id: s.id,
-          title: s.name || s.title,
-          retrospectiveId: s.retrospective_id,
-          posts: (s.posts || []).map((p: any) => ({
-            id: p.id,
-            userId: p.user_id,
-            content: p.content,
-            votes: p.votes || []
-          }))
-        }))
-      };
+      if (useSummaryAI) {
+        await generateSummary();
+      } else {
+        if (!symmetricKey) {
+          throw new Error('Missing encryption key');
+        }
 
-      const finalContent = await generateFinalContent(mappedResponse);
+        const nonAiContent = generateMarkdownFromJSON(
+          data,
+          participantHistory.map((user) => user.name),
+          symmetricKey
+        );
 
-      if (!finalContent) {
-        throw new Error('Failed to generate final content');
+        setDisplayedContent(nonAiContent);
+        endRetroBroadcast(data.id, nonAiContent);
+        setIsLoadingFinalContent(false);
       }
-
-      startTypingEffect(finalContent);
-      endRetroBroadcast(data.id, finalContent);
     } catch (error) {
       toast({ title: 'Error ending retro', variant: 'destructive' });
-    } finally {
       setIsLoadingFinalContent(false);
     }
-  }, [data.id, generateFinalContent, setIsLoadingFinalContent, startTypingEffect, toast]);
+  }, [
+    data,
+    endRetroMutation,
+    generateSummary,
+    setIsLoadingFinalContent,
+    useSummaryAI,
+    participantHistory,
+    symmetricKey,
+    toast,
+    setDisplayedContent,
+    endRetroBroadcast
+  ]);
 
   const contextValue = useMemo(
     () => ({
